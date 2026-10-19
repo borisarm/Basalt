@@ -24,3 +24,4 @@ Formato de cada ADR (`NNNN-titulo-en-kebab-case.md`):
 | [0008](0008-sdk-11-con-tfm-net10.md) | SDK .NET 11 con TFM `net10.0` | Aceptado |
 | [0009](0009-snapshots-propios-sin-verify.md) | Snapshots propios en lugar de Verify | Aceptado |
 | [0010](0010-modulo-metadata.md) | Módulo de dominio `Metadata` para `NoteMetadata` | Aceptado |
+| [0011](0011-almacenes-de-documentos.md) | Almacenes JSON con `IDocumentStore<T>` | Aceptado |

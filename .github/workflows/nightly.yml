@@ -26,8 +26,8 @@ jobs:
             project: Basalt.Application.csproj
             break: 70
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
           dotnet-version: 10.0.x
@@ -35,7 +35,7 @@ jobs:
       - name: Stryker
         working-directory: ${{ matrix.tests }}
         run: dotnet tool run dotnet-stryker   # stryker-config.json: MTP runner, thresholds
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: stryker-${{ matrix.project }}
@@ -47,8 +47,8 @@ jobs:
       BASALT_SIM_SCENARIOS: 10000
       BASALT_PROPERTY_RUNS: 10000
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
           dotnet-version: 10.0.x
@@ -67,9 +67,9 @@ jobs:
       BASALT_LIVE_GITHUB_TOKEN: ${{ secrets.BASALT_LIVE_GITHUB_TOKEN }}
       BASALT_LIVE_GITHUB_OWNER: ${{ secrets.BASALT_LIVE_GITHUB_OWNER }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         if: env.BASALT_LIVE_GITHUB_TOKEN != ''
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         if: env.BASALT_LIVE_GITHUB_TOKEN != ''
         with:
           global-json-file: global.json
@@ -80,8 +80,8 @@ jobs:
   benchmarks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
           dotnet-version: 10.0.x

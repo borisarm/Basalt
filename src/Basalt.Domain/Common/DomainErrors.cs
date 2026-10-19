@@ -4,4 +4,7 @@ namespace Basalt.Domain.Common;
 public static class DomainErrors
 {
     public const string ResultUninitialized = "result.uninitialized";
+
+    public const string PathOutsideVault = "path.outside_vault";
+    public const string PathInvalidSegment = "path.invalid_segment";
 }

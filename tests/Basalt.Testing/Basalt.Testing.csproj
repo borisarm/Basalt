@@ -11,6 +11,7 @@
     <PackageReference Include="AwesomeAssertions" />
     <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
     <PackageReference Include="FsCheck" />
+    <PackageReference Include="FsCheck.Xunit.v3" />
   </ItemGroup>
   <ItemGroup>
     <Using Include="Xunit" />

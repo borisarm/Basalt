@@ -1,0 +1,2 @@
+Paragraph @0: שלום <link int=עולם>עולם</link> <tag תגית/>
+Paragraph @2: مرحبا <link int=عالم>عالم</link>

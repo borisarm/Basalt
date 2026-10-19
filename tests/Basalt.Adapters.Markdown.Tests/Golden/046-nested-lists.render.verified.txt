@@ -1,0 +1,12 @@
+List @0
+  Item @0
+    Paragraph @0: level 1 <link int=L1>L1</link>
+    List @1
+      Item @1
+        Paragraph @1: level 2 <tag l2/>
+        List @2
+          Item @2
+            Paragraph @2: level 3 <link int=L3>three</link>
+            List @3
+              Item @3 task[ ]
+                Paragraph @3: deep task

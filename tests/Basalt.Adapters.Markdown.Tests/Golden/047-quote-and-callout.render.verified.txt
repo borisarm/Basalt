@@ -1,0 +1,6 @@
+Quote @0
+  Paragraph @0: quoted <link int=Q>Q</link>
+Callout[note] None @2: Callout title
+  Paragraph @3: callout body <link int=C>C</link> <tag callout/>
+Callout[warning] Collapsed @5: Folded
+  Paragraph @6: hidden

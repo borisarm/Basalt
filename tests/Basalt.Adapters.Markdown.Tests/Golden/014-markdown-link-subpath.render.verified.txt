@@ -1,0 +1,1 @@
+Paragraph @0: See <link int=B.md#Heading>this</link> and <link int=C.md#^blk>that</link>.

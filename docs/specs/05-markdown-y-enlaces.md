@@ -80,8 +80,10 @@ Y `VaultSettings.LinkFormat`: `Wikilink` (`[[...]]`) o `Markdown` (`[alias](ruta
 Expresión regular de referencia (aplicada solo a texto fuera de exclusiones):
 
 ```
-(?<=^|\s|[(\[{,;])#(?<tag>[\p{L}\p{N}_/\-]*[\p{L}_/\-][\p{L}\p{N}_/\-]*)
+(?<=^|\s|[(\[{,;])#(?<tag>[\p{L}\p{M}\p{N}_/\-]*[\p{L}_/\-][\p{L}\p{M}\p{N}_/\-]*)
 ```
+
+(`\p{M}`: las marcas combinantes de letras escritas en NFD forman parte de la letra.)
 
 - Debe contener al menos un carácter no numérico.
 - No se reconoce si el `#` va precedido de un carácter de palabra (`C#`, `a#b`).

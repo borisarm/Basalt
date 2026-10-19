@@ -1,0 +1,1 @@
+Paragraph @0: First <link int=A>A</link><soft/>Second <tag b/><soft/>Third <link int=C>C</link>

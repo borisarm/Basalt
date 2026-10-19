@@ -1,0 +1,12 @@
+List @0
+  Item @0 task[ ]
+    Paragraph @0: open task
+  Item @1 task[x]
+    Paragraph @1: done task
+  Item @2 task[x]
+    Paragraph @2: DONE upper
+  Item @3
+    Paragraph @3: plain item
+List ordered from 1 @4
+  Item @4 task[ ]
+    Paragraph @4: numbered task

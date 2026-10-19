@@ -1,0 +1,4 @@
+Paragraph @0: Text with note<fn 1/>.
+Footnotes @0
+  [1]
+    Paragraph @2: Footnote with <link int=F>F</link> and <tag fn/>

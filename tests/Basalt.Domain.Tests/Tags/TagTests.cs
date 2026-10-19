@@ -17,6 +17,7 @@ public sealed class TagTests
     [InlineData("日本", "日本")]
     [InlineData("a/b/c", "a/b/c")]
     [InlineData("1/a", "1/a")]
+    [InlineData("café", "café")]
     [Trait("Spec", "F-006.2")]
     public void Create_Valid(string input, string expected)
     {

@@ -1,7 +1,6 @@
 using System.Text.RegularExpressions;
 using Basalt.Adapters.Markdown.Syntax;
 using Basalt.Adapters.Markdown.Yaml;
-using Basalt.Application.Ports.Markdown;
 using Basalt.Domain.Common;
 using Basalt.Domain.Links;
 using Basalt.Domain.Metadata;
@@ -13,6 +12,7 @@ using Markdig.Extensions.Yaml;
 using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
 using DomainSpan = Basalt.Domain.Notes.SourceSpan;
+using IMarkdownAnalyzer = Basalt.Application.Ports.Markdown.IMarkdownAnalyzer;
 
 namespace Basalt.Adapters.Markdown;
 
@@ -22,9 +22,13 @@ internal sealed partial class MarkdigAnalyzer : IMarkdownAnalyzer
     public NoteMetadata Analyze(string content)
     {
         ArgumentNullException.ThrowIfNull(content);
-        var document = Markdig.Markdown.Parse(content, MarkdownPipelineFactory.Pipeline);
+        var document = Markdig.Markdown.Parse(EmptyFrontmatter.Mask(content, out var emptyFrontmatterLength), MarkdownPipelineFactory.Pipeline);
         var lines = new LineIndex(content);
         var state = new State(content, lines);
+        if (emptyFrontmatterLength > 0)
+        {
+            state.Frontmatter = new Frontmatter(StructuredValue.MapValue.Of(), new DomainSpan(0, emptyFrontmatterLength, 0, 0));
+        }
 
         foreach (var node in document.Descendants())
         {

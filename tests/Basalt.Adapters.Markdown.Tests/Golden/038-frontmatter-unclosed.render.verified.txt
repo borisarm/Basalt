@@ -1,0 +1,3 @@
+---- @0
+Paragraph @1: title: Never closed
+Paragraph @3: Body <link int=link>link</link>

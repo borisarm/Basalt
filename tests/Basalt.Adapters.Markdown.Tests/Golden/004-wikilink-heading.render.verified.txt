@@ -1,0 +1,1 @@
+Paragraph @0: Go to <link int=Nota#Encabezado>Nota > Encabezado</link>.

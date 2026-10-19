@@ -1,0 +1,1 @@
+Paragraph @0: Visit <link ext=https://example.com>site</link> and <link ext=https://auto.link>https://auto.link</link> and mail <link ext=mailto:a@b.c>me</link>.

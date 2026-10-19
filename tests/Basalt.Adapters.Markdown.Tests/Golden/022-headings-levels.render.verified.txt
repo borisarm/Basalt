@@ -1,0 +1,7 @@
+Heading1 @0: H1
+Heading2 @1: H2
+Heading3 @2: H3
+Heading4 @3: H4
+Heading5 @4: H5
+Heading6 @5: H6
+Paragraph @6: ####### not a heading

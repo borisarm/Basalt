@@ -1,0 +1,1 @@
+Paragraph @0: Empty [[]] and [[|alias]] and [[   ]] but <link int=x>x</link>

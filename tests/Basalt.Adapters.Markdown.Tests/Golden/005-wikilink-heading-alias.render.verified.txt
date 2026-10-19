@@ -1,0 +1,1 @@
+Paragraph @0: Go to <link int=B#Sección>alias</link>.

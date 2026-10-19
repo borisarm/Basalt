@@ -65,6 +65,7 @@ public sealed partial class Tag : IEquatable<Tag>
 
     public override string ToString() => "#" + Name;
 
-    [GeneratedRegex(@"^[\p{L}\p{N}_\-]+(/[\p{L}\p{N}_\-]+)*$")]
+    // \p{M}: combining marks of decomposed (NFD) letters belong to the letter.
+    [GeneratedRegex(@"^[\p{L}\p{M}\p{N}_\-]+(/[\p{L}\p{M}\p{N}_\-]+)*$")]
     private static partial Regex TagRegex();
 }

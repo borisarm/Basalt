@@ -1,0 +1,7 @@
+Paragraph @0 ^para-1: Paragraph with id
+List @2
+  Item @2
+    Paragraph @2 ^item1: item one
+  Item @3
+    Paragraph @3: item two
+Paragraph @5 ^multi: Another paragraph<soft/>second line

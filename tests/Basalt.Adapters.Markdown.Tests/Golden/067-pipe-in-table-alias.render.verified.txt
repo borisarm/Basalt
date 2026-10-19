@@ -1,0 +1,3 @@
+Table @0 [None]
+  H: link
+  R: <link int=Nota>alias in table</link>

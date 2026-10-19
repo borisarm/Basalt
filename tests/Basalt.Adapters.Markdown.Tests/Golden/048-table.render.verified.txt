@@ -1,0 +1,3 @@
+Table @0 [None,None]
+  H: Col <link int=A>A</link> | <tag tag/>
+  R: <link int=B>bee</link> | text

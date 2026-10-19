@@ -1,0 +1,1 @@
+EmbedBlock @0: <embed images/photo.jpg alias=alt text size=x/>

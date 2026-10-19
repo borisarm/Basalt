@@ -1,0 +1,2 @@
+Code(html) @0: <div>[[in html]] #html</div>
+Paragraph @2: Text <span><link int=inline html>inline html</link></span> <link int=after>after</link>

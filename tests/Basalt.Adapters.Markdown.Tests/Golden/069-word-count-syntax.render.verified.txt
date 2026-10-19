@@ -1,0 +1,1 @@
+Paragraph @0: <strong>Bold</strong> <em>italic</em> <code>code</code> <link int=x.md>label</link> <embed y.png alias=img size=x/> word's here.

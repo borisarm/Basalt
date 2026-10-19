@@ -46,6 +46,9 @@ public static class Snapshot
     public static void MatchFile(object? value, string pathWithoutExtension) =>
         MatchFile(value as string ?? JsonSerializer.Serialize(value, value?.GetType() ?? typeof(object), Options), pathWithoutExtension, "json");
 
+    /// <summary>Compares text with <c>{pathWithoutExtension}.verified.txt</c>.</summary>
+    public static void MatchTextFile(string text, string pathWithoutExtension) => MatchFile(text, pathWithoutExtension, "txt");
+
     private static void MatchFile(string text, string pathWithoutExtension, string extension)
     {
         var normalized = text.Replace("\r\n", "\n", StringComparison.Ordinal);

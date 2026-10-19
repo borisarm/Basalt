@@ -1,0 +1,1 @@
+Paragraph @0: 😀 Emoji <link int=😀 Note>smile 😀</link> then <tag tag-/>😀 and <link int=After>After</link>

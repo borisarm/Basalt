@@ -1,0 +1,1 @@
+Paragraph @0: <link ext=https://example.com/[[x]]>https://example.com/[[x]]</link> <link ext=http://www.example.com>www.example.com</link>

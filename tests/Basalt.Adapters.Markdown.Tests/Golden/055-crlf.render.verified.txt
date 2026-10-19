@@ -1,0 +1,5 @@
+Paragraph @0: Line one <link int=A>A</link><soft/>Line two <tag tag/>
+Heading1 @2: Heading
+List @3
+  Item @3 task[ ]
+    Paragraph @3: task

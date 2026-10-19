@@ -59,8 +59,9 @@ internal sealed class TagInlineParser : InlineParser
             return true;
         }
 
-        return char.IsSurrogatePair(text, index)
-            ? char.IsLetterOrDigit(text, index)
-            : char.IsLetterOrDigit(c);
+        // Letters include their combining marks, so decomposed (NFD) letters do not split a tag.
+        var category = char.GetUnicodeCategory(text, index);
+        return char.IsLetterOrDigit(text, index)
+            || category is System.Globalization.UnicodeCategory.NonSpacingMark or System.Globalization.UnicodeCategory.SpacingCombiningMark;
     }
 }

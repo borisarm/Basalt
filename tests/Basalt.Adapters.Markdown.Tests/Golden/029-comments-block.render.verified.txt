@@ -1,0 +1,2 @@
+Paragraph @0: Before
+Paragraph @7: After <link int=Link>Link</link>

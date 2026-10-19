@@ -10,6 +10,7 @@ public static class MarkdownServiceCollectionExtensions
     {
         services.AddSingleton<IMarkdownAnalyzer, MarkdigAnalyzer>();
         services.AddSingleton<IFrontmatterEditor, YamlFrontmatterEditor>();
+        services.AddSingleton<IMarkdownRenderer, MarkdigRenderer>();
         return services;
     }
 }

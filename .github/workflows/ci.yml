@@ -1,0 +1,135 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  CONFIGURATION: Release
+
+jobs:
+  build-test-core:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+          dotnet-version: 10.0.x
+      - run: dotnet tool restore
+      - run: dotnet build Basalt.slnx -c Release
+      - name: Test (all but UI, sync simulation and live)
+        shell: bash
+        run: build/test.sh --coverage Basalt.UI.Tests Basalt.Sync.IntegrationTests Basalt.Adapters.GitHub.LiveTests
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ matrix.os }}
+          path: artifacts/test-results
+
+  ui-tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+          dotnet-version: 10.0.x
+      - run: dotnet build tests/Basalt.UI.Tests -c Release
+      - run: dotnet test --project tests/Basalt.UI.Tests --no-build -c Release
+
+  sync-simulation:
+    runs-on: ubuntu-latest
+    env:
+      BASALT_SIM_SCENARIOS: 1000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+          dotnet-version: 10.0.x
+      - run: dotnet build tests/Basalt.Sync.IntegrationTests -c Release
+      - run: dotnet test --project tests/Basalt.Sync.IntegrationTests --no-build -c Release
+
+  coverage-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+          dotnet-version: 10.0.x
+      - run: dotnet tool restore
+      - run: dotnet build Basalt.slnx -c Release
+      - name: Test with coverage
+        shell: bash
+        run: build/test.sh --coverage Basalt.UI.Tests Basalt.Adapters.GitHub.LiveTests
+      - name: Merge coverage
+        run: dotnet tool run reportgenerator -reports:"artifacts/test-results/**/*.cobertura.xml" -targetdir:artifacts/coverage -reporttypes:"Cobertura;TextSummary;MarkdownSummaryGithub"
+      - run: cat artifacts/coverage/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
+      - run: python3 build/coverage-gate.py artifacts/coverage/Cobertura.xml
+
+  architecture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+          dotnet-version: 10.0.x
+      - run: dotnet build tests/Basalt.Architecture.Tests -c Release
+      - run: dotnet test --project tests/Basalt.Architecture.Tests --no-build -c Release
+
+  build-ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+          dotnet-version: 10.0.x
+      - name: Build iOS head
+        shell: bash
+        run: |
+          if [ ! -f src/Basalt.iOS/Basalt.iOS.csproj ]; then echo "iOS head not created yet (T10.1)"; exit 0; fi
+          dotnet workload restore src/Basalt.iOS/Basalt.iOS.csproj
+          dotnet build src/Basalt.iOS/Basalt.iOS.csproj -c Release -p:RuntimeIdentifier=iossimulator-arm64
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+          dotnet-version: 10.0.x
+      - run: dotnet restore Basalt.slnx
+      - name: Vulnerable packages (fail on high/critical)
+        shell: bash
+        run: |
+          dotnet list Basalt.slnx package --vulnerable --include-transitive | tee vulnerable.txt
+          if grep -Eq "\b(High|Critical)\b" vulnerable.txt; then exit 1; fi
+
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+          dotnet-version: 10.0.x
+      - run: dotnet format Basalt.slnx --verify-no-changes

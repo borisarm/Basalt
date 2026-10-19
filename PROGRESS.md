@@ -7,7 +7,7 @@ Registro de avance del plan (`docs/specs/10-plan-de-implementacion.md`). Platafo
 
 - [x] T0.1 Estructura de la solución — 2026-10-19. SDK 11 RC + TFM net10.0 (ADR-0008); Verify sustituido por snapshots propios (ADR-0009); ADRs movidos a docs/specs/adr; proyecto extra `Basalt.Adapters.Platform.Tests`; `Basalt.iOS` se crea en T0.4/T10.1. Verificado solo en Windows (macOS en CI).
 - [x] T0.2 Tests de arquitectura — 2026-10-19. R1–R7, matriz de módulos (ArchUnitNET), escáner IL de APIs prohibidas y convenciones, con tests canario por regla. El test DI y "puerto sin fake/contrato" se añaden cuando existan (T6.1 / Fase 2).
-- [ ] T0.3 CI
+- [x] T0.3 CI — 2026-10-19. ci.yml (matriz Windows/macOS/Linux, UI, simulación, coverage-gate con build/coverage-gate.py, arquitectura, iOS condicionado a T10.1, seguridad, formato) y nightly.yml (Stryker, simulación 10 000, Live gated, benchmarks).
 - [ ] T0.4 Spike de plataforma (iOS + AvaloniaEdit)
 - [ ] T0.5 Basalt.Testing base
 - [ ] T0.6 Trazabilidad

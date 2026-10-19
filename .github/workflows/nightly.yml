@@ -1,0 +1,92 @@
+name: nightly
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  mutation:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - tests: tests/Basalt.Domain.Tests
+            project: Basalt.Domain.csproj
+            break: 80
+          - tests: tests/Basalt.Application.Tests
+            project: Basalt.Application.csproj
+            break: 70
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+          dotnet-version: 10.0.x
+      - run: dotnet tool restore
+      - name: Stryker
+        working-directory: ${{ matrix.tests }}
+        run: dotnet tool run dotnet-stryker --project ${{ matrix.project }} --break-at ${{ matrix.break }} --reporter html --reporter progress
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stryker-${{ matrix.project }}
+          path: ${{ matrix.tests }}/StrykerOutput
+
+  sync-simulation:
+    runs-on: ubuntu-latest
+    env:
+      BASALT_SIM_SCENARIOS: 10000
+      BASALT_PROPERTY_RUNS: 10000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+          dotnet-version: 10.0.x
+      - run: dotnet build Basalt.slnx -c Release
+      - name: Simulation and properties with random seeds
+        shell: bash
+        run: |
+          export BASALT_SIM_SEED=$RANDOM$RANDOM
+          echo "Seed: $BASALT_SIM_SEED" >> "$GITHUB_STEP_SUMMARY"
+          dotnet test --project tests/Basalt.Sync.IntegrationTests --no-build -c Release
+          dotnet test --project tests/Basalt.Domain.Tests --no-build -c Release
+
+  live-github:
+    runs-on: ubuntu-latest
+    env:
+      BASALT_LIVE_GITHUB_TOKEN: ${{ secrets.BASALT_LIVE_GITHUB_TOKEN }}
+      BASALT_LIVE_GITHUB_OWNER: ${{ secrets.BASALT_LIVE_GITHUB_OWNER }}
+    steps:
+      - uses: actions/checkout@v4
+        if: env.BASALT_LIVE_GITHUB_TOKEN != ''
+      - uses: actions/setup-dotnet@v4
+        if: env.BASALT_LIVE_GITHUB_TOKEN != ''
+        with:
+          global-json-file: global.json
+          dotnet-version: 10.0.x
+      - if: env.BASALT_LIVE_GITHUB_TOKEN != ''
+        run: dotnet test --project tests/Basalt.Adapters.GitHub.LiveTests -c Release
+
+  benchmarks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+          dotnet-version: 10.0.x
+      - name: Run benchmarks
+        shell: bash
+        run: |
+          if [ ! -f tests/Basalt.Benchmarks/Basalt.Benchmarks.csproj ]; then echo "Benchmarks not created yet (T11.1)"; exit 0; fi
+          dotnet run --project tests/Basalt.Benchmarks -c Release -- --filter '*' --exporters json

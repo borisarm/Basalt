@@ -14,4 +14,6 @@ public static class DomainErrors
     public const string HeadingInvalidLevel = "heading.invalid_level";
     public const string BlockInvalidId = "block.invalid_id";
     public const string TagInvalid = "tag.invalid";
+
+    public const string DailyNoteInvalidFormat = "daily_note.invalid_format";
 }

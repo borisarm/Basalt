@@ -231,9 +231,11 @@ public static class LineDiff
     {
         public static readonly LineEndingInsensitiveComparer Instance = new();
 
-        public bool Equals(string? x, string? y) =>
-            string.Equals(TextLines.WithoutTerminator(x!), TextLines.WithoutTerminator(y!), StringComparison.Ordinal);
+        // CRLF and LF compare equal; a missing terminator (last line without newline) is still a difference.
+        public bool Equals(string? x, string? y) => string.Equals(Key(x!), Key(y!), StringComparison.Ordinal);
 
-        public int GetHashCode(string obj) => StringComparer.Ordinal.GetHashCode(TextLines.WithoutTerminator(obj));
+        public int GetHashCode(string obj) => StringComparer.Ordinal.GetHashCode(Key(obj));
+
+        private static string Key(string line) => line.EndsWith("\r\n", StringComparison.Ordinal) ? line[..^2] + "\n" : line;
     }
 }

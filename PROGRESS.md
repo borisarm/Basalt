@@ -21,7 +21,7 @@ Registro de avance del plan (`docs/specs/10-plan-de-implementacion.md`). Platafo
 - [x] T1.5 Generación de enlaces — 2026-10-19. LinkFormatter: Shortest (nombre si único, si no el sufijo más corto que resuelve de vuelta — usa LinkResolver como oráculo), Relative (./ y ../ en wikilinks), Absolute × Wikilink/Markdown (%20, .md). Test de ida y vuelta. Mutación 92 %. Spec 09 §8: Links puede depender de Vaults (VaultSettings).
 - [x] T1.6 LinkRewriter — 2026-10-19. LinkRewriter: reescribe solo TargetSpan de enlaces cuya resolución tras la operación ya no apunta al destino (renombrado), cubre ambigüedades nuevas y enlaces relativos de notas movidas; preserva sintaxis, estilo relativo/ruta completa y .md explícito. F-004.4/.5/.7 a nivel de dominio; propiedades: texto fuera de enlaces intacto, idempotencia, destinos correctos. Mutación 88,6 %.
 - [x] T1.7 LineDiff (Myers) — 2026-10-19. LineDiff (Myers O(ND) en espacio lineal por bisección, ids enteros por línea, opción de ignorar fin de línea), DiffHunk, TextLines (split con terminadores). Propiedades: Apply(a, Diff(a,b)) == b y minimalidad frente a LCS por programación dinámica. Mutación 100 %.
-- [ ] T1.8 ThreeWayTextMerger (diff3)
+- [x] T1.8 ThreeWayTextMerger (diff3) — 2026-10-19. ThreeWayTextMerger diff3 por líneas: un lado → ese lado, cambios idénticos una vez, solapes/inserciones en el mismo punto → conflicto con marcadores configurables; zonas estables desde ours, CRLF/LF ignorado al comparar y fin de línea predominante de ours. 30+ casos + propiedades (identidades, inserciones conservadas). Mutación 100 %. El caso especial de frontmatter se conecta en T1.9.
 - [ ] T1.9 Fusión estructural
 - [ ] T1.10 Plantillas y notas diarias
 - [ ] T1.11 FuzzyMatcher

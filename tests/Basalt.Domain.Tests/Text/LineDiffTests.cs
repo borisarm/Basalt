@@ -71,7 +71,7 @@ public sealed class LineDiffTests
 
         LineDiff.Diff(a, b).Should().ContainSingle();
         LineDiff.Diff(a, b, ignoreLineEndings: true).Should().BeEmpty();
-        LineDiff.Diff(["a"], ["a\n"], ignoreLineEndings: true).Should().BeEmpty();
+        LineDiff.Diff(["a"], ["a\n"], ignoreLineEndings: true).Should().ContainSingle();
     }
 
     [Fact]

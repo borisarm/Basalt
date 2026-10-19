@@ -24,7 +24,7 @@ Registro de avance del plan (`docs/specs/10-plan-de-implementacion.md`). Platafo
 - [x] T1.8 ThreeWayTextMerger (diff3) — 2026-10-19. ThreeWayTextMerger diff3 por líneas: un lado → ese lado, cambios idénticos una vez, solapes/inserciones en el mismo punto → conflicto con marcadores configurables; zonas estables desde ours, CRLF/LF ignorado al comparar y fin de línea predominante de ours. 30+ casos + propiedades (identidades, inserciones conservadas). Mutación 100 %. El caso especial de frontmatter se conecta en T1.9.
 - [x] T1.9 Fusión estructural — 2026-10-19. StructuredValue (Common; valores YAML/JSON ya analizados, igualdad profunda, orden de claves), FrontmatterMerger (nivel de clave: conflicto si la misma clave cambia distinto en ambos lados) y JsonStructuralMerger (recursivo por clave y por elemento de lista). La conexión con ThreeWayTextMerger se hace en Aplicación (PlanMaterializer, T9.3) porque el análisis YAML vive en el adaptador. Mutación 100 %.
 - [x] T1.10 Plantillas y notas diarias — 2026-10-19. MomentFormat (formateador propio + ToDotNet; YYYY…ss, Do, Q, A/a, [literal]), TemplateRenderer ({{title}}, {{date[:F]}}, {{time[:F]}}), DailyNotePolicy (carpeta/formato con subcarpetas). Tablas en-US y es-ES (F-009.1 'lunes 19 octubre 2026'). DailyNotePolicy recibe carpeta y formato (no VaultSettings) para respetar la matriz de módulos. Mutación 100 %.
-- [ ] T1.11 FuzzyMatcher
+- [x] T1.11 FuzzyMatcher — 2026-10-19. FuzzyMatcher estilo fzy (alineación óptima por DP, bonificaciones de inicio de palabra/consecutivos/mayúsculas, plegado de mayúsculas y diacríticos, posiciones) + Rank con desempates. Propiedades: exacta ≥ parcial, posiciones crecientes, coincide ⇔ subsecuencia. Mutación 100 %.
 
 ## Fase 2 — Markdown y sistema de ficheros
 

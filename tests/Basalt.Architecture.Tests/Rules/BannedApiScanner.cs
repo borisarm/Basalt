@@ -45,7 +45,7 @@ internal static class BannedApiScanner
         {
             var type = md.GetTypeDefinition(typeHandle);
             var typeName = FullName(md, type);
-            if (namespacePrefix is not null && !typeName.StartsWith(namespacePrefix, StringComparison.Ordinal))
+            if ((namespacePrefix is not null && !typeName.StartsWith(namespacePrefix, StringComparison.Ordinal)) || IsInjectedByCoverage(typeName))
             {
                 continue;
             }
@@ -75,6 +75,11 @@ internal static class BannedApiScanner
 
     // Emitted by the compiler for iterators/async state machines; not an environment dependency.
     private static readonly HashSet<string> AllowedMembers = ["System.Environment::get_CurrentManagedThreadId"];
+
+    // Coverage runs instrument the assemblies on disk and inject tracker types that write files.
+    private static bool IsInjectedByCoverage(string typeName) =>
+        typeName.StartsWith("Microsoft.CodeCoverage.", StringComparison.Ordinal)
+        || typeName.StartsWith("Coverlet.", StringComparison.Ordinal);
 
     private static bool IsBanned(string target)
     {

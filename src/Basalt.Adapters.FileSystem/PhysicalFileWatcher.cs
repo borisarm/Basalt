@@ -92,6 +92,17 @@ internal sealed class PhysicalFileWatcher : IFileWatcher
         }
     }
 
-    private string? Relative(string? fullPath) =>
-        fullPath is null ? null : Path.GetRelativePath(_root, fullPath).Replace('\\', '/');
+    private string? Relative(string? fullPath)
+    {
+        if (fullPath is null)
+        {
+            return null;
+        }
+
+        // macOS reports /var and /tmp through their real location (/private/var, /private/tmp).
+        var root = !_root.StartsWith("/private/", StringComparison.Ordinal) && fullPath.StartsWith("/private" + _root, StringComparison.Ordinal)
+            ? "/private" + _root
+            : _root;
+        return Path.GetRelativePath(root, fullPath).Replace('\\', '/');
+    }
 }

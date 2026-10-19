@@ -17,7 +17,7 @@ for project in tests/*/*.csproj; do
   for e in "${excluded[@]}"; do [[ "$name" == "$e" ]] && skip=true; done
   $skip && continue
   echo "::group::$name"
-  dotnet test --project "$project" --no-build -c "${CONFIGURATION:-Release}" -- "${coverage[@]}" --results-directory "$(pwd)/artifacts/test-results/$name" || status=1
+  dotnet test --project "$project" --no-build -c "${CONFIGURATION:-Release}" -- "${coverage[@]}" ${TEST_FILTER:---filter-not-trait Category=Performance} --ignore-exit-code 8 --results-directory "$(pwd)/artifacts/test-results/$name" || status=1
   echo "::endgroup::"
 done
 exit $status

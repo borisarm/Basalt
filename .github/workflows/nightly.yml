@@ -77,6 +77,19 @@ jobs:
       - if: env.BASALT_LIVE_GITHUB_TOKEN != ''
         run: dotnet test --project tests/Basalt.Adapters.GitHub.LiveTests -c Release
 
+  performance-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+          dotnet-version: 10.0.x
+      - run: dotnet build Basalt.slnx -c Release
+      - name: Wall-clock performance tests (excluded from PR CI)
+        shell: bash
+        run: TEST_FILTER="--filter-trait Category=Performance" build/test.sh Basalt.UI.Tests Basalt.Adapters.GitHub.LiveTests
+
   benchmarks:
     runs-on: ubuntu-latest
     steps:

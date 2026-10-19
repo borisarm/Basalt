@@ -73,8 +73,16 @@ internal static class BannedApiScanner
         return [.. violations];
     }
 
+    // Emitted by the compiler for iterators/async state machines; not an environment dependency.
+    private static readonly HashSet<string> AllowedMembers = ["System.Environment::get_CurrentManagedThreadId"];
+
     private static bool IsBanned(string target)
     {
+        if (AllowedMembers.Contains(target))
+        {
+            return false;
+        }
+
         var separator = target.IndexOf("::", StringComparison.Ordinal);
         var typeName = separator < 0 ? target : target[..separator];
         return BannedTypes.Contains(typeName) || BannedMembers.Contains(target);

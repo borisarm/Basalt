@@ -15,7 +15,7 @@ Registro de avance del plan (`docs/specs/10-plan-de-implementacion.md`). Platafo
 ## Fase 1 — Dominio núcleo
 
 - [x] T1.1 VaultPath y clasificación de ficheros — 2026-10-19. VaultPath canónica (NFC, separadores, '..', nombres reservados de Windows, 255 bytes UTF-8), CaseFoldKey, FileClassifier; ~110 casos de tabla + propiedades FsCheck (Arb.VaultPath, BasaltProperty). Cobertura 100 % líneas, mutación 96,8 %.
-- [ ] T1.2 Value objects de vault y nota
+- [x] T1.2 Value objects de vault y nota — 2026-10-19. VaultId, VaultName, VaultSettings (+LinkFormat/LinkPathStyle), NoteTitle, NoteContent (fin de línea/BOM, WithText preserva convención), SourceSpan, Heading (slug 05 §3.2), BlockId, Tag (insensible a mayúsculas) y TagHierarchy (conteo agregado, F-006.1). Mutación ~94 %.
 - [ ] T1.3 Modelo de enlaces
 - [ ] T1.4 LinkResolver
 - [ ] T1.5 Generación de enlaces

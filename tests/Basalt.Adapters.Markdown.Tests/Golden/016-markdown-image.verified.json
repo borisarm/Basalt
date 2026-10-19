@@ -1,0 +1,21 @@
+{
+  "Headings": [],
+  "Links": [],
+  "Embeds": [
+    {
+      "Kind": "MarkdownEmbed",
+      "RawTarget": "images/photo.jpg",
+      "SubpathKind": "None",
+      "Alias": "alt text",
+      "Span": "0+29 @0:0",
+      "Text": "![alt text](images/photo.jpg)",
+      "TargetSpan": "12+16 @0:12",
+      "TargetText": "images/photo.jpg"
+    }
+  ],
+  "Tags": [],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 0
+}

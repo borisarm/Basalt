@@ -1,0 +1,50 @@
+{
+  "Frontmatter": {
+    "Values": {
+      "related": "[[Other note]]",
+      "more": [
+        "[[A]]",
+        "[[B|bee]]"
+      ],
+      "plain": "not [[a link]] here"
+    },
+    "Span": "0+94 @0:0"
+  },
+  "Headings": [],
+  "Links": [
+    {
+      "Kind": "FrontmatterLink",
+      "RawTarget": "Other note",
+      "SubpathKind": "None",
+      "Span": "14+14 @1:10",
+      "Text": "[[Other note]]",
+      "TargetSpan": "16+10 @1:12",
+      "TargetText": "Other note"
+    },
+    {
+      "Kind": "FrontmatterLink",
+      "RawTarget": "A",
+      "SubpathKind": "None",
+      "Span": "41+5 @3:5",
+      "Text": "[[A]]",
+      "TargetSpan": "43+1 @3:7",
+      "TargetText": "A"
+    },
+    {
+      "Kind": "FrontmatterLink",
+      "RawTarget": "B",
+      "SubpathKind": "None",
+      "Alias": "bee",
+      "Span": "53+9 @4:5",
+      "Text": "[[B|bee]]",
+      "TargetSpan": "55+1 @4:7",
+      "TargetText": "B"
+    }
+  ],
+  "Embeds": [],
+  "Tags": [],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 1
+}

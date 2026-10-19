@@ -1,0 +1,41 @@
+{
+  "Frontmatter": {
+    "Values": {
+      "tags": [
+        "a",
+        "b/c",
+        "#d"
+      ]
+    },
+    "Span": "0+36 @0:0"
+  },
+  "Headings": [],
+  "Links": [],
+  "Embeds": [],
+  "Tags": [
+    {
+      "Name": "a",
+      "Source": "Frontmatter",
+      "Line": 1
+    },
+    {
+      "Name": "b/c",
+      "Source": "Frontmatter",
+      "Line": 1
+    },
+    {
+      "Name": "d",
+      "Source": "Frontmatter",
+      "Line": 1
+    },
+    {
+      "Name": "e",
+      "Source": "Text",
+      "Line": 6
+    }
+  ],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 2
+}

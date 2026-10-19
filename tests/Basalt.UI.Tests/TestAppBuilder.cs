@@ -10,7 +10,7 @@ public sealed class TestAppBuilder
         AppBuilder.Configure<TestApp>().UseHeadless(new AvaloniaHeadlessPlatformOptions());
 }
 
-public sealed class TestApp : Application
+public sealed class TestApp : Avalonia.Application
 {
     public override void Initialize() => Styles.Add(new FluentTheme());
 }

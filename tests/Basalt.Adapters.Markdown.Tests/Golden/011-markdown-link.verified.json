@@ -1,0 +1,21 @@
+{
+  "Headings": [],
+  "Links": [
+    {
+      "Kind": "MarkdownLink",
+      "RawTarget": "B.md",
+      "SubpathKind": "None",
+      "Alias": "texto",
+      "Span": "2+13 @0:2",
+      "Text": "[texto](B.md)",
+      "TargetSpan": "10+4 @0:10",
+      "TargetText": "B.md"
+    }
+  ],
+  "Embeds": [],
+  "Tags": [],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 3
+}

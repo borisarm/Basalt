@@ -1,0 +1,39 @@
+{
+  "Headings": [
+    {
+      "Level": 1,
+      "Text": "Heading",
+      "Line": 2,
+      "Slug": "heading"
+    }
+  ],
+  "Links": [
+    {
+      "Kind": "WikiLink",
+      "RawTarget": "A",
+      "SubpathKind": "None",
+      "Span": "9+5 @0:9",
+      "Text": "[[A]]",
+      "TargetSpan": "11+1 @0:11",
+      "TargetText": "A"
+    }
+  ],
+  "Embeds": [],
+  "Tags": [
+    {
+      "Name": "tag",
+      "Source": "Text",
+      "Line": 1
+    }
+  ],
+  "Blocks": [],
+  "Tasks": [
+    {
+      "Line": 3,
+      "Status": " ",
+      "Text": "task"
+    }
+  ],
+  "Aliases": [],
+  "WordCount": 8
+}

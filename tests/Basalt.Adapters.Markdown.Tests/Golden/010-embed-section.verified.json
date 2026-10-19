@@ -1,0 +1,21 @@
+{
+  "Headings": [],
+  "Links": [],
+  "Embeds": [
+    {
+      "Kind": "Embed",
+      "RawTarget": "nota",
+      "Subpath": "Sección",
+      "SubpathKind": "Heading",
+      "Span": "0+17 @0:0",
+      "Text": "![[nota#Sección]]",
+      "TargetSpan": "3+4 @0:3",
+      "TargetText": "nota"
+    }
+  ],
+  "Tags": [],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 1
+}

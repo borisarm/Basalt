@@ -1,0 +1,25 @@
+{
+  "Frontmatter": {
+    "Values": {
+      "aliases": [
+        "Alias One",
+        "Alias Two"
+      ],
+      "alias": "Single, Other"
+    },
+    "Span": "0+65 @0:0"
+  },
+  "Headings": [],
+  "Links": [],
+  "Embeds": [],
+  "Tags": [],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [
+    "Alias One",
+    "Alias Two",
+    "Single",
+    "Other"
+  ],
+  "WordCount": 0
+}

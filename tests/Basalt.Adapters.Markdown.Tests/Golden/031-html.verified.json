@@ -1,0 +1,29 @@
+{
+  "Headings": [],
+  "Links": [
+    {
+      "Kind": "WikiLink",
+      "RawTarget": "inline html",
+      "SubpathKind": "None",
+      "Span": "41+15 @2:11",
+      "Text": "[[inline html]]",
+      "TargetSpan": "43+11 @2:13",
+      "TargetText": "inline html"
+    },
+    {
+      "Kind": "WikiLink",
+      "RawTarget": "after",
+      "SubpathKind": "None",
+      "Span": "64+9 @2:34",
+      "Text": "[[after]]",
+      "TargetSpan": "66+5 @2:36",
+      "TargetText": "after"
+    }
+  ],
+  "Embeds": [],
+  "Tags": [],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 4
+}

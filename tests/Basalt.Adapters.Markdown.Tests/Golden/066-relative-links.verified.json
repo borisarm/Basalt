@@ -1,0 +1,39 @@
+{
+  "Headings": [],
+  "Links": [
+    {
+      "Kind": "WikiLink",
+      "RawTarget": "./Sibling",
+      "SubpathKind": "None",
+      "Span": "0+13 @0:0",
+      "Text": "[[./Sibling]]",
+      "TargetSpan": "2+9 @0:2",
+      "TargetText": "./Sibling"
+    },
+    {
+      "Kind": "WikiLink",
+      "RawTarget": "../Parent/Note",
+      "SubpathKind": "None",
+      "Span": "14+18 @0:14",
+      "Text": "[[../Parent/Note]]",
+      "TargetSpan": "16+14 @0:16",
+      "TargetText": "../Parent/Note"
+    },
+    {
+      "Kind": "MarkdownLink",
+      "RawTarget": "../x/y.md",
+      "SubpathKind": "None",
+      "Alias": "rel",
+      "Span": "33+16 @0:33",
+      "Text": "[rel](../x/y.md)",
+      "TargetSpan": "39+9 @0:39",
+      "TargetText": "../x/y.md"
+    }
+  ],
+  "Embeds": [],
+  "Tags": [],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 3
+}

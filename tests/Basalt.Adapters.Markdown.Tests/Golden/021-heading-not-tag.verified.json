@@ -1,0 +1,29 @@
+{
+  "Headings": [
+    {
+      "Level": 1,
+      "Text": "Title",
+      "Line": 0,
+      "Slug": "title"
+    },
+    {
+      "Level": 2,
+      "Text": "Sub #tagged heading",
+      "Line": 2,
+      "Slug": "sub tagged heading"
+    }
+  ],
+  "Links": [],
+  "Embeds": [],
+  "Tags": [
+    {
+      "Name": "tagged",
+      "Source": "Text",
+      "Line": 2
+    }
+  ],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 5
+}

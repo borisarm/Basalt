@@ -1,0 +1,33 @@
+{
+  "Headings": [],
+  "Links": [
+    {
+      "Kind": "MarkdownLink",
+      "RawTarget": "B.md",
+      "Subpath": "Heading",
+      "SubpathKind": "Heading",
+      "Alias": "this",
+      "Span": "4+20 @0:4",
+      "Text": "[this](B.md#Heading)",
+      "TargetSpan": "11+4 @0:11",
+      "TargetText": "B.md"
+    },
+    {
+      "Kind": "MarkdownLink",
+      "RawTarget": "C.md",
+      "Subpath": "^blk",
+      "SubpathKind": "Block",
+      "Alias": "that",
+      "Span": "29+17 @0:29",
+      "Text": "[that](C.md#^blk)",
+      "TargetSpan": "36+4 @0:36",
+      "TargetText": "C.md"
+    }
+  ],
+  "Embeds": [],
+  "Tags": [],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 4
+}

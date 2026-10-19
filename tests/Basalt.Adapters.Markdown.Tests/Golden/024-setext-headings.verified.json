@@ -1,0 +1,23 @@
+{
+  "Headings": [
+    {
+      "Level": 1,
+      "Text": "Setext One",
+      "Line": 1,
+      "Slug": "setext one"
+    },
+    {
+      "Level": 2,
+      "Text": "Setext Two",
+      "Line": 4,
+      "Slug": "setext two"
+    }
+  ],
+  "Links": [],
+  "Embeds": [],
+  "Tags": [],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 4
+}

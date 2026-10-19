@@ -1,0 +1,36 @@
+{
+  "Headings": [],
+  "Links": [
+    {
+      "Kind": "WikiLink",
+      "RawTarget": "\uD83D\uDE00 Note",
+      "SubpathKind": "None",
+      "Alias": "smile \uD83D\uDE00",
+      "Span": "9+20 @0:9",
+      "Text": "[[\uD83D\uDE00 Note|smile \uD83D\uDE00]]",
+      "TargetSpan": "11+7 @0:11",
+      "TargetText": "\uD83D\uDE00 Note"
+    },
+    {
+      "Kind": "WikiLink",
+      "RawTarget": "After",
+      "SubpathKind": "None",
+      "Span": "47+9 @0:47",
+      "Text": "[[After]]",
+      "TargetSpan": "49+5 @0:49",
+      "TargetText": "After"
+    }
+  ],
+  "Embeds": [],
+  "Tags": [
+    {
+      "Name": "tag-",
+      "Source": "Text",
+      "Line": 0
+    }
+  ],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 6
+}

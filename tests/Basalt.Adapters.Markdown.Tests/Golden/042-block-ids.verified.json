@@ -1,0 +1,23 @@
+{
+  "Headings": [],
+  "Links": [],
+  "Embeds": [],
+  "Tags": [],
+  "Blocks": [
+    {
+      "Id": "para-1",
+      "Line": 0
+    },
+    {
+      "Id": "item1",
+      "Line": 2
+    },
+    {
+      "Id": "multi",
+      "Line": 6
+    }
+  ],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 15
+}

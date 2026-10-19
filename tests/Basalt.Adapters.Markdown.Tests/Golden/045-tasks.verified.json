@@ -1,0 +1,31 @@
+{
+  "Headings": [],
+  "Links": [],
+  "Embeds": [],
+  "Tags": [],
+  "Blocks": [],
+  "Tasks": [
+    {
+      "Line": 0,
+      "Status": " ",
+      "Text": "open task"
+    },
+    {
+      "Line": 1,
+      "Status": "x",
+      "Text": "done task"
+    },
+    {
+      "Line": 2,
+      "Status": "x",
+      "Text": "DONE upper"
+    },
+    {
+      "Line": 4,
+      "Status": " ",
+      "Text": "numbered task"
+    }
+  ],
+  "Aliases": [],
+  "WordCount": 10
+}

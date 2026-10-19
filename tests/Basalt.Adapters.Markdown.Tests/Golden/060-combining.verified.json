@@ -1,0 +1,26 @@
+{
+  "Headings": [],
+  "Links": [
+    {
+      "Kind": "WikiLink",
+      "RawTarget": "Reunión",
+      "SubpathKind": "None",
+      "Span": "6+12 @0:6",
+      "Text": "[[Reunión]]",
+      "TargetSpan": "8+8 @0:8",
+      "TargetText": "Reunión"
+    }
+  ],
+  "Embeds": [],
+  "Tags": [
+    {
+      "Name": "cafe",
+      "Source": "Text",
+      "Line": 0
+    }
+  ],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 3
+}

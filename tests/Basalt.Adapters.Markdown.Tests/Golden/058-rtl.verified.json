@@ -1,0 +1,35 @@
+{
+  "Headings": [],
+  "Links": [
+    {
+      "Kind": "WikiLink",
+      "RawTarget": "עולם",
+      "SubpathKind": "None",
+      "Span": "5+8 @0:5",
+      "Text": "[[עולם]]",
+      "TargetSpan": "7+4 @0:7",
+      "TargetText": "עולם"
+    },
+    {
+      "Kind": "WikiLink",
+      "RawTarget": "عالم",
+      "SubpathKind": "None",
+      "Span": "27+8 @2:6",
+      "Text": "[[عالم]]",
+      "TargetSpan": "29+4 @2:8",
+      "TargetText": "عالم"
+    }
+  ],
+  "Embeds": [],
+  "Tags": [
+    {
+      "Name": "תגית",
+      "Source": "Text",
+      "Line": 0
+    }
+  ],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 5
+}

@@ -1,0 +1,28 @@
+{
+  "Headings": [
+    {
+      "Level": 1,
+      "Text": "Local heading",
+      "Line": 2,
+      "Slug": "local heading"
+    }
+  ],
+  "Links": [
+    {
+      "Kind": "WikiLink",
+      "RawTarget": "",
+      "Subpath": "Local heading",
+      "SubpathKind": "Heading",
+      "Span": "8+18 @0:8",
+      "Text": "[[#Local heading]]",
+      "TargetSpan": "10+0 @0:10",
+      "TargetText": ""
+    }
+  ],
+  "Embeds": [],
+  "Tags": [],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 4
+}

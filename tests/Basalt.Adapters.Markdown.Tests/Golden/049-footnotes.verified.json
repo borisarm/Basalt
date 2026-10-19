@@ -1,0 +1,26 @@
+{
+  "Headings": [],
+  "Links": [
+    {
+      "Kind": "WikiLink",
+      "RawTarget": "F",
+      "SubpathKind": "None",
+      "Span": "41+5 @2:20",
+      "Text": "[[F]]",
+      "TargetSpan": "43+1 @2:22",
+      "TargetText": "F"
+    }
+  ],
+  "Embeds": [],
+  "Tags": [
+    {
+      "Name": "fn",
+      "Source": "Text",
+      "Line": 2
+    }
+  ],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 8
+}

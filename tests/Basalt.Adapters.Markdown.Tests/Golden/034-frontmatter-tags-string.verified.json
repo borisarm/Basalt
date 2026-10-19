@@ -1,0 +1,38 @@
+{
+  "Frontmatter": {
+    "Values": {
+      "tags": "one, two three",
+      "tag": "four"
+    },
+    "Span": "0+38 @0:0"
+  },
+  "Headings": [],
+  "Links": [],
+  "Embeds": [],
+  "Tags": [
+    {
+      "Name": "one",
+      "Source": "Frontmatter",
+      "Line": 1
+    },
+    {
+      "Name": "two",
+      "Source": "Frontmatter",
+      "Line": 1
+    },
+    {
+      "Name": "three",
+      "Source": "Frontmatter",
+      "Line": 1
+    },
+    {
+      "Name": "four",
+      "Source": "Frontmatter",
+      "Line": 2
+    }
+  ],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 0
+}

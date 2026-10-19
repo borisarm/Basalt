@@ -37,11 +37,20 @@ public static class Snapshot
         [CallerFilePath] string sourceFile = "",
         [CallerMemberName] string member = "")
     {
-        var normalized = text.Replace("\r\n", "\n", StringComparison.Ordinal);
         var directory = Path.GetDirectoryName(sourceFile)!;
         var stem = $"{Path.GetFileNameWithoutExtension(sourceFile)}.{member}{(caseName is null ? string.Empty : "." + Sanitize(caseName))}";
-        var verified = Path.Combine(directory, $"{stem}.verified.{extension}");
-        var received = Path.Combine(directory, $"{stem}.received.{extension}");
+        MatchFile(text, Path.Combine(directory, stem), extension);
+    }
+
+    /// <summary>Compares JSON for <paramref name="value"/> with <c>{pathWithoutExtension}.verified.json</c>.</summary>
+    public static void MatchFile(object? value, string pathWithoutExtension) =>
+        MatchFile(value as string ?? JsonSerializer.Serialize(value, value?.GetType() ?? typeof(object), Options), pathWithoutExtension, "json");
+
+    private static void MatchFile(string text, string pathWithoutExtension, string extension)
+    {
+        var normalized = text.Replace("\r\n", "\n", StringComparison.Ordinal);
+        var verified = $"{pathWithoutExtension}.verified.{extension}";
+        var received = $"{pathWithoutExtension}.received.{extension}";
 
         var expected = File.Exists(verified) ? File.ReadAllText(verified).Replace("\r\n", "\n", StringComparison.Ordinal) : null;
         if (expected == normalized)

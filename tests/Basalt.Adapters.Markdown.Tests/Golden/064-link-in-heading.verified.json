@@ -1,0 +1,28 @@
+{
+  "Headings": [
+    {
+      "Level": 2,
+      "Text": "See [[Target|the target]] here",
+      "Line": 0,
+      "Slug": "see targetthe target here"
+    }
+  ],
+  "Links": [
+    {
+      "Kind": "WikiLink",
+      "RawTarget": "Target",
+      "SubpathKind": "None",
+      "Alias": "the target",
+      "Span": "7+21 @0:7",
+      "Text": "[[Target|the target]]",
+      "TargetSpan": "9+6 @0:9",
+      "TargetText": "Target"
+    }
+  ],
+  "Embeds": [],
+  "Tags": [],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 5
+}

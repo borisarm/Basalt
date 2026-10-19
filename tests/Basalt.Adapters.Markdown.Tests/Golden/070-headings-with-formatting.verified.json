@@ -1,0 +1,27 @@
+{
+  "Headings": [
+    {
+      "Level": 1,
+      "Text": "**Bold** title with `code` and [[Link]]",
+      "Line": 0,
+      "Slug": "**bold** title with `code` and link"
+    }
+  ],
+  "Links": [
+    {
+      "Kind": "WikiLink",
+      "RawTarget": "Link",
+      "SubpathKind": "None",
+      "Span": "33+8 @0:33",
+      "Text": "[[Link]]",
+      "TargetSpan": "35+4 @0:35",
+      "TargetText": "Link"
+    }
+  ],
+  "Embeds": [],
+  "Tags": [],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 5
+}

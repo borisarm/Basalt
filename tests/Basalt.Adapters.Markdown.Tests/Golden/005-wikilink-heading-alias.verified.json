@@ -1,0 +1,22 @@
+{
+  "Headings": [],
+  "Links": [
+    {
+      "Kind": "WikiLink",
+      "RawTarget": "B",
+      "Subpath": "Sección",
+      "SubpathKind": "Heading",
+      "Alias": "alias",
+      "Span": "6+19 @0:6",
+      "Text": "[[B#Sección|alias]]",
+      "TargetSpan": "8+1 @0:8",
+      "TargetText": "B"
+    }
+  ],
+  "Embeds": [],
+  "Tags": [],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 3
+}

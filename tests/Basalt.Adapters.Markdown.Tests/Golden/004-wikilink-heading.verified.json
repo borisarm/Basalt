@@ -1,0 +1,21 @@
+{
+  "Headings": [],
+  "Links": [
+    {
+      "Kind": "WikiLink",
+      "RawTarget": "Nota",
+      "Subpath": "Encabezado",
+      "SubpathKind": "Heading",
+      "Span": "6+19 @0:6",
+      "Text": "[[Nota#Encabezado]]",
+      "TargetSpan": "8+4 @0:8",
+      "TargetText": "Nota"
+    }
+  ],
+  "Embeds": [],
+  "Tags": [],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 3
+}

@@ -1,0 +1,29 @@
+{
+  "Frontmatter": {
+    "Values": {
+      "title": "Idea",
+      "status": "draft",
+      "rating": "number:5",
+      "done": true,
+      "due": "date:2026-10-19",
+      "when": "datetime:2026-10-19T10:30:00",
+      "empty": null
+    },
+    "Span": "0+103 @0:0"
+  },
+  "Headings": [
+    {
+      "Level": 1,
+      "Text": "Body",
+      "Line": 9,
+      "Slug": "body"
+    }
+  ],
+  "Links": [],
+  "Embeds": [],
+  "Tags": [],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 1
+}

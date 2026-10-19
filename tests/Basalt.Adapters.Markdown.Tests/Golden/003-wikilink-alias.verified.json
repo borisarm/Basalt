@@ -1,0 +1,21 @@
+{
+  "Headings": [],
+  "Links": [
+    {
+      "Kind": "WikiLink",
+      "RawTarget": "Nota",
+      "SubpathKind": "None",
+      "Alias": "the note",
+      "Span": "4+17 @0:4",
+      "Text": "[[Nota|the note]]",
+      "TargetSpan": "6+4 @0:6",
+      "TargetText": "Nota"
+    }
+  ],
+  "Embeds": [],
+  "Tags": [],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 4
+}

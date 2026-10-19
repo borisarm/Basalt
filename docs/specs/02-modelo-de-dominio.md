@@ -64,7 +64,7 @@ Ruta **relativa a la raíz del vault**, canónica:
 | `NoteTitle` | Nombre visible = `NameWithoutExtension` de la ruta. |
 | `Note` | `Path: VaultPath`, `Content: NoteContent`, `Metadata: NoteMetadata`. |
 | `NoteContent` | Texto completo (string) + `LineEnding` detectado (`LF`/`CRLF`/`Mixed`) + `HasBom`. Al guardar se preserva el final de línea original y la BOM. |
-| `NoteMetadata` | Resultado del análisis: `Frontmatter`, `Headings[]`, `Links[]`, `Embeds[]`, `Tags[]`, `Blocks[]`, `Tasks[]`, `WordCount`, `Aliases[]`. Es un **valor** recalculable a partir de `NoteContent` mediante el puerto `IMarkdownAnalyzer`. |
+| `NoteMetadata` | (Módulo `Domain.Metadata`, ver ADR-0010.) Resultado del análisis: `Frontmatter`, `Headings[]`, `Links[]`, `Embeds[]`, `Tags[]`, `Blocks[]`, `Tasks[]`, `WordCount`, `Aliases[]`. Es un **valor** recalculable a partir de `NoteContent` mediante el puerto `IMarkdownAnalyzer`. |
 | `Frontmatter` | Mapa ordenado `string → FrontmatterValue` (string, number, bool, date, list, null) + rango de texto original (`SourceSpan`) para poder reescribirlo preservando formato. Claves especiales: `aliases`/`alias`, `tags`/`tag`, `cssclasses` (se conserva, no se usa). |
 | `Heading` | `Level` 1–6, `Text`, `Line`, `Slug` (para anclas, ver [05](05-markdown-y-enlaces.md)). |
 | `BlockId` | `^[A-Za-z0-9-]+` al final de un párrafo/línea. |

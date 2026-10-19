@@ -1,0 +1,26 @@
+{
+  "Headings": [],
+  "Links": [
+    {
+      "Kind": "WikiLink",
+      "RawTarget": "H",
+      "SubpathKind": "None",
+      "Span": "14+5 @0:14",
+      "Text": "[[H]]",
+      "TargetSpan": "16+1 @0:16",
+      "TargetText": "H"
+    }
+  ],
+  "Embeds": [],
+  "Tags": [
+    {
+      "Name": "s",
+      "Source": "Text",
+      "Line": 0
+    }
+  ],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 5
+}

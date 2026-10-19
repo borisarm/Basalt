@@ -1,0 +1,46 @@
+{
+  "Headings": [],
+  "Links": [],
+  "Embeds": [],
+  "Tags": [
+    {
+      "Name": "paren",
+      "Source": "Text",
+      "Line": 0
+    },
+    {
+      "Name": "bracket",
+      "Source": "Text",
+      "Line": 0
+    },
+    {
+      "Name": "brace",
+      "Source": "Text",
+      "Line": 0
+    },
+    {
+      "Name": "comma",
+      "Source": "Text",
+      "Line": 0
+    },
+    {
+      "Name": "semi",
+      "Source": "Text",
+      "Line": 0
+    },
+    {
+      "Name": "trailing",
+      "Source": "Text",
+      "Line": 0
+    },
+    {
+      "Name": "tag",
+      "Source": "Text",
+      "Line": 0
+    }
+  ],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 9
+}

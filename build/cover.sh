@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Local helper: runs the given test projects with coverage, merges the reports and applies the gate.
-# Usage: build/cover.sh tests/Basalt.Domain.Tests [tests/...]
+# Usage: [GATE="Basalt.Domain Basalt.Application"] build/cover.sh tests/Basalt.Domain.Tests [tests/...]
 set -uo pipefail
 cd "$(dirname "$0")/.."
 rm -rf artifacts/test-results artifacts/coverage
@@ -12,4 +12,4 @@ for project in "$@"; do
 done
 dotnet tool run reportgenerator -reports:"artifacts/test-results/**/*.cobertura.xml" \
   -targetdir:"artifacts/coverage" -reporttypes:"Cobertura;TextSummary" > /dev/null
-python build/coverage-gate.py artifacts/coverage/Cobertura.xml
+python build/coverage-gate.py artifacts/coverage/Cobertura.xml ${GATE:-}

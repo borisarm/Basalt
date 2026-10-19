@@ -1,0 +1,21 @@
+{
+  "Headings": [],
+  "Links": [
+    {
+      "Kind": "MarkdownLink",
+      "RawTarget": "Proyecto X.md",
+      "SubpathKind": "None",
+      "Alias": "link",
+      "Span": "2+23 @0:2",
+      "Text": "[link](<Proyecto X.md>)",
+      "TargetSpan": "10+13 @0:10",
+      "TargetText": "Proyecto X.md"
+    }
+  ],
+  "Embeds": [],
+  "Tags": [],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 3
+}

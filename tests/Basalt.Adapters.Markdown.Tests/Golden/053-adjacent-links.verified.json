@@ -1,0 +1,39 @@
+{
+  "Headings": [],
+  "Links": [
+    {
+      "Kind": "WikiLink",
+      "RawTarget": "A",
+      "SubpathKind": "None",
+      "Span": "0+5 @0:0",
+      "Text": "[[A]]",
+      "TargetSpan": "2+1 @0:2",
+      "TargetText": "A"
+    },
+    {
+      "Kind": "WikiLink",
+      "RawTarget": "B",
+      "SubpathKind": "None",
+      "Span": "5+5 @0:5",
+      "Text": "[[B]]",
+      "TargetSpan": "7+1 @0:7",
+      "TargetText": "B"
+    }
+  ],
+  "Embeds": [
+    {
+      "Kind": "Embed",
+      "RawTarget": "C",
+      "SubpathKind": "None",
+      "Span": "10+6 @0:10",
+      "Text": "![[C]]",
+      "TargetSpan": "13+1 @0:13",
+      "TargetText": "C"
+    }
+  ],
+  "Tags": [],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 4
+}

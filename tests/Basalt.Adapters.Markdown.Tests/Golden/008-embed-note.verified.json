@@ -1,0 +1,20 @@
+{
+  "Headings": [],
+  "Links": [],
+  "Embeds": [
+    {
+      "Kind": "Embed",
+      "RawTarget": "Otra nota",
+      "SubpathKind": "None",
+      "Span": "0+14 @0:0",
+      "Text": "![[Otra nota]]",
+      "TargetSpan": "3+9 @0:3",
+      "TargetText": "Otra nota"
+    }
+  ],
+  "Tags": [],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 2
+}

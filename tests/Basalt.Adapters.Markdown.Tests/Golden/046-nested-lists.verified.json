@@ -1,0 +1,42 @@
+{
+  "Headings": [],
+  "Links": [
+    {
+      "Kind": "WikiLink",
+      "RawTarget": "L1",
+      "SubpathKind": "None",
+      "Span": "10+6 @0:10",
+      "Text": "[[L1]]",
+      "TargetSpan": "12+2 @0:12",
+      "TargetText": "L1"
+    },
+    {
+      "Kind": "WikiLink",
+      "RawTarget": "L3",
+      "SubpathKind": "None",
+      "Alias": "three",
+      "Span": "47+12 @2:14",
+      "Text": "[[L3|three]]",
+      "TargetSpan": "49+2 @2:16",
+      "TargetText": "L3"
+    }
+  ],
+  "Embeds": [],
+  "Tags": [
+    {
+      "Name": "l2",
+      "Source": "Text",
+      "Line": 1
+    }
+  ],
+  "Blocks": [],
+  "Tasks": [
+    {
+      "Line": 3,
+      "Status": " ",
+      "Text": "deep task"
+    }
+  ],
+  "Aliases": [],
+  "WordCount": 11
+}

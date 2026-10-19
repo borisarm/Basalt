@@ -1,0 +1,33 @@
+{
+  "Headings": [
+    {
+      "Level": 1,
+      "Text": "Title with BOM",
+      "Line": 0,
+      "Slug": "title with bom"
+    }
+  ],
+  "Links": [
+    {
+      "Kind": "WikiLink",
+      "RawTarget": "Link",
+      "SubpathKind": "None",
+      "Span": "23+8 @2:5",
+      "Text": "[[Link]]",
+      "TargetSpan": "25+4 @2:7",
+      "TargetText": "Link"
+    }
+  ],
+  "Embeds": [],
+  "Tags": [
+    {
+      "Name": "tag",
+      "Source": "Text",
+      "Line": 2
+    }
+  ],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 6
+}

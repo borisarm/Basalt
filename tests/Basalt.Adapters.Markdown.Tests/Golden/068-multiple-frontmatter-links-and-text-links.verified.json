@@ -1,0 +1,44 @@
+{
+  "Frontmatter": {
+    "Values": {
+      "up": "[[Index]]"
+    },
+    "Span": "0+23 @0:0"
+  },
+  "Headings": [],
+  "Links": [
+    {
+      "Kind": "FrontmatterLink",
+      "RawTarget": "Index",
+      "SubpathKind": "None",
+      "Span": "9+9 @1:5",
+      "Text": "[[Index]]",
+      "TargetSpan": "11+5 @1:7",
+      "TargetText": "Index"
+    },
+    {
+      "Kind": "WikiLink",
+      "RawTarget": "Index",
+      "SubpathKind": "None",
+      "Span": "35+9 @3:11",
+      "Text": "[[Index]]",
+      "TargetSpan": "37+5 @3:13",
+      "TargetText": "Index"
+    },
+    {
+      "Kind": "WikiLink",
+      "RawTarget": "Other",
+      "SubpathKind": "None",
+      "Span": "49+9 @3:25",
+      "Text": "[[Other]]",
+      "TargetSpan": "51+5 @3:27",
+      "TargetText": "Other"
+    }
+  ],
+  "Embeds": [],
+  "Tags": [],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 5
+}

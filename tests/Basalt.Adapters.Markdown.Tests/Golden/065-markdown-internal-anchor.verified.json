@@ -1,0 +1,33 @@
+{
+  "Headings": [],
+  "Links": [
+    {
+      "Kind": "MarkdownLink",
+      "RawTarget": "",
+      "Subpath": "Top",
+      "SubpathKind": "Heading",
+      "Alias": "Up",
+      "Span": "0+10 @0:0",
+      "Text": "[Up](#Top)",
+      "TargetSpan": "5+0 @0:5",
+      "TargetText": ""
+    },
+    {
+      "Kind": "MarkdownLink",
+      "RawTarget": "",
+      "Subpath": "^blk",
+      "SubpathKind": "Block",
+      "Alias": "Self",
+      "Span": "15+13 @0:15",
+      "Text": "[Self](#^blk)",
+      "TargetSpan": "22+0 @0:22",
+      "TargetText": ""
+    }
+  ],
+  "Embeds": [],
+  "Tags": [],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 3
+}

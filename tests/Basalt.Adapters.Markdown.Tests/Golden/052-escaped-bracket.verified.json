@@ -1,0 +1,20 @@
+{
+  "Headings": [],
+  "Links": [
+    {
+      "Kind": "WikiLink",
+      "RawTarget": "yes",
+      "SubpathKind": "None",
+      "Span": "32+7 @0:32",
+      "Text": "[[yes]]",
+      "TargetSpan": "34+3 @0:34",
+      "TargetText": "yes"
+    }
+  ],
+  "Embeds": [],
+  "Tags": [],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 6
+}

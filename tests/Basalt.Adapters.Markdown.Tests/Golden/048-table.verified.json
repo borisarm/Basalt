@@ -1,0 +1,36 @@
+{
+  "Headings": [],
+  "Links": [
+    {
+      "Kind": "WikiLink",
+      "RawTarget": "A",
+      "SubpathKind": "None",
+      "Span": "6+5 @0:6",
+      "Text": "[[A]]",
+      "TargetSpan": "8+1 @0:8",
+      "TargetText": "A"
+    },
+    {
+      "Kind": "WikiLink",
+      "RawTarget": "B",
+      "SubpathKind": "None",
+      "Alias": "bee",
+      "Span": "33+10 @2:2",
+      "Text": "[[B\\|bee]]",
+      "TargetSpan": "35+1 @2:4",
+      "TargetText": "B"
+    }
+  ],
+  "Embeds": [],
+  "Tags": [
+    {
+      "Name": "tag",
+      "Source": "Text",
+      "Line": 0
+    }
+  ],
+  "Blocks": [],
+  "Tasks": [],
+  "Aliases": [],
+  "WordCount": 5
+}

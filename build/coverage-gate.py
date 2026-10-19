@@ -15,13 +15,13 @@ THRESHOLDS = [
 ]
 
 
-def main(path: str) -> int:
+def main(path: str, only: list[str]) -> int:
     root = ET.parse(path).getroot()
     failures = []
     for package in root.iter("package"):
         name = package.get("name", "")
         for prefix, min_line, min_branch in THRESHOLDS:
-            if name != prefix:
+            if name != prefix or (only and name not in only):
                 continue
             lines = [l for l in package.iter("line")]
             if not lines:
@@ -42,4 +42,5 @@ def main(path: str) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1] if len(sys.argv) > 1 else "artifacts/coverage/Cobertura.xml"))
+    # Optional extra arguments restrict the gate to those assemblies (local runs of a single test project).
+    sys.exit(main(sys.argv[1] if len(sys.argv) > 1 else "artifacts/coverage/Cobertura.xml", sys.argv[2:]))

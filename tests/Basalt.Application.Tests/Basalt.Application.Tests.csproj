@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../../src/Basalt.Application/Basalt.Application.csproj" />
+    <ProjectReference Include="../../src/Basalt.Domain/Basalt.Domain.csproj" />
+    <ProjectReference Include="../Basalt.Testing/Basalt.Testing.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="NSubstitute" />
+    <PackageReference Include="FsCheck.Xunit.v3" />
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+  </ItemGroup>
+</Project>

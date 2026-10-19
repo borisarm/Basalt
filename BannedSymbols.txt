@@ -1,0 +1,19 @@
+P:System.DateTime.Now;Use IClock / TimeProvider
+P:System.DateTime.UtcNow;Use IClock / TimeProvider
+P:System.DateTimeOffset.Now;Use IClock / TimeProvider
+P:System.DateTimeOffset.UtcNow;Use IClock / TimeProvider
+M:System.Guid.NewGuid;Use IIdGenerator
+T:System.Random;Use IRandom
+T:System.IO.File;Use the file system ports
+T:System.IO.Directory;Use the file system ports
+T:System.IO.FileStream;Use the file system ports
+T:System.Environment;Use IPlatformPaths / IDeviceInfo
+M:System.Threading.Thread.Sleep(System.Int32);Never block threads
+M:System.Threading.Thread.Sleep(System.TimeSpan);Never block threads
+M:System.Threading.Tasks.Task.Wait;Never block on tasks
+M:System.Threading.Tasks.Task.Wait(System.Int32);Never block on tasks
+M:System.Threading.Tasks.Task.Wait(System.TimeSpan);Never block on tasks
+M:System.Threading.Tasks.Task.Wait(System.Threading.CancellationToken);Never block on tasks
+M:System.Threading.Tasks.Task.Wait(System.Int32,System.Threading.CancellationToken);Never block on tasks
+P:System.Threading.Tasks.Task`1.Result;Never block on tasks
+T:System.Console;Use ILogger

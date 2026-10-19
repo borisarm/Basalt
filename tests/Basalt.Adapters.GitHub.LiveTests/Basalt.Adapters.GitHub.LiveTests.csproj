@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../../src/Basalt.Adapters.GitHub/Basalt.Adapters.GitHub.csproj" />
+    <ProjectReference Include="../Basalt.Testing/Basalt.Testing.csproj" />
+  </ItemGroup>
+</Project>

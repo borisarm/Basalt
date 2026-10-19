@@ -1,0 +1,33 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Basalt.Adapters.FileSystem/Basalt.Adapters.FileSystem.csproj" />
+    <Project Path="src/Basalt.Adapters.GitHub/Basalt.Adapters.GitHub.csproj" />
+    <Project Path="src/Basalt.Adapters.Index/Basalt.Adapters.Index.csproj" />
+    <Project Path="src/Basalt.Adapters.Markdown/Basalt.Adapters.Markdown.csproj" />
+    <Project Path="src/Basalt.Adapters.Platform.Apple/Basalt.Adapters.Platform.Apple.csproj" />
+    <Project Path="src/Basalt.Adapters.Platform.Windows/Basalt.Adapters.Platform.Windows.csproj" />
+    <Project Path="src/Basalt.Adapters.Platform/Basalt.Adapters.Platform.csproj" />
+    <Project Path="src/Basalt.Application/Basalt.Application.csproj" />
+    <Project Path="src/Basalt.Composition/Basalt.Composition.csproj" />
+    <Project Path="src/Basalt.Desktop/Basalt.Desktop.csproj" />
+    <Project Path="src/Basalt.Domain/Basalt.Domain.csproj" />
+    <Project Path="src/Basalt.Presentation/Basalt.Presentation.csproj" />
+    <Project Path="src/Basalt.UI/Basalt.UI.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Basalt.Adapters.FileSystem.Tests/Basalt.Adapters.FileSystem.Tests.csproj" />
+    <Project Path="tests/Basalt.Adapters.GitHub.LiveTests/Basalt.Adapters.GitHub.LiveTests.csproj" />
+    <Project Path="tests/Basalt.Adapters.GitHub.Tests/Basalt.Adapters.GitHub.Tests.csproj" />
+    <Project Path="tests/Basalt.Adapters.Index.Tests/Basalt.Adapters.Index.Tests.csproj" />
+    <Project Path="tests/Basalt.Adapters.Markdown.Tests/Basalt.Adapters.Markdown.Tests.csproj" />
+    <Project Path="tests/Basalt.Adapters.Platform.Tests/Basalt.Adapters.Platform.Tests.csproj" />
+    <Project Path="tests/Basalt.Application.Tests/Basalt.Application.Tests.csproj" />
+    <Project Path="tests/Basalt.Architecture.Tests/Basalt.Architecture.Tests.csproj" />
+    <Project Path="tests/Basalt.Domain.Tests/Basalt.Domain.Tests.csproj" />
+    <Project Path="tests/Basalt.Presentation.Tests/Basalt.Presentation.Tests.csproj" />
+    <Project Path="tests/Basalt.Sync.IntegrationTests/Basalt.Sync.IntegrationTests.csproj" />
+    <Project Path="tests/Basalt.Testing.FakeGitHub/Basalt.Testing.FakeGitHub.csproj" />
+    <Project Path="tests/Basalt.Testing/Basalt.Testing.csproj" />
+    <Project Path="tests/Basalt.UI.Tests/Basalt.UI.Tests.csproj" />
+  </Folder>
+</Solution>

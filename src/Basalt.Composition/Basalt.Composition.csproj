@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../Basalt.Application/Basalt.Application.csproj" />
+    <ProjectReference Include="../Basalt.Domain/Basalt.Domain.csproj" />
+    <ProjectReference Include="../Basalt.Adapters.FileSystem/Basalt.Adapters.FileSystem.csproj" />
+    <ProjectReference Include="../Basalt.Adapters.Markdown/Basalt.Adapters.Markdown.csproj" />
+    <ProjectReference Include="../Basalt.Adapters.Index/Basalt.Adapters.Index.csproj" />
+    <ProjectReference Include="../Basalt.Adapters.GitHub/Basalt.Adapters.GitHub.csproj" />
+    <ProjectReference Include="../Basalt.Adapters.Platform/Basalt.Adapters.Platform.csproj" />
+    <ProjectReference Include="../Basalt.Presentation/Basalt.Presentation.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+  </ItemGroup>
+</Project>

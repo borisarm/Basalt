@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework Condition="$([MSBuild]::IsOSPlatform('Windows'))">net10.0-windows</TargetFramework>
+    <OutputType>WinExe</OutputType>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <AssemblyName>Basalt</AssemblyName>
+    <RootNamespace>Basalt.Desktop</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Basalt.Composition/Basalt.Composition.csproj" />
+    <ProjectReference Include="../Basalt.UI/Basalt.UI.csproj" />
+    <ProjectReference Include="../Basalt.Adapters.Platform/Basalt.Adapters.Platform.csproj" />
+    <ProjectReference Include="../Basalt.Adapters.Platform.Apple/Basalt.Adapters.Platform.Apple.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+    <ProjectReference Include="../Basalt.Adapters.Platform.Windows/Basalt.Adapters.Platform.Windows.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia.Desktop" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="Serilog.Extensions.Logging" />
+    <PackageReference Include="Serilog.Sinks.File" />
+  </ItemGroup>
+</Project>

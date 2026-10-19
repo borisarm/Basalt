@@ -19,7 +19,7 @@ Formato de cada ADR (`NNNN-titulo-en-kebab-case.md`):
 | [0003](0003-cliente-http-propio.md) | Cliente HTTP propio en lugar de Octokit | Aceptado |
 | [0004](0004-monolito-hexagonal.md) | Monolito hexagonal modular | Aceptado |
 | [0005](0005-cifrado-e2e-diferido.md) | Cifrado de extremo a extremo diferido | Aceptado |
-| 0006 | Editor en iOS | Pendiente (T0.4) |
-| 0007 | Framework de tests de UI headless | Pendiente (T0.4) |
+| [0006](0006-editor-ios.md) | Editor en iOS | Propuesto (validación en simulador pendiente) |
+| [0007](0007-ui-tests.md) | Tests de UI con Avalonia.Headless + xUnit v3 | Aceptado |
 | [0008](0008-sdk-11-con-tfm-net10.md) | SDK .NET 11 con TFM `net10.0` | Aceptado |
 | [0009](0009-snapshots-propios-sin-verify.md) | Snapshots propios en lugar de Verify | Aceptado |

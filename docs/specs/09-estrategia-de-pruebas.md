@@ -39,7 +39,7 @@ Los tests se escriben **contra el contrato** (puerto o API pública del componen
 - Snapshots con el helper propio `Snapshot.Match` de `Basalt.Testing` (`*.verified.*` versionados; ver ADR-0009, sustituye a Verify.XunitV3).
 - **Bogus** para datos realistas (con semilla fija).
 - **Microsoft.Extensions.TimeProvider.Testing** (`FakeTimeProvider`) para tiempo.
-- **Avalonia.Headless.XUnit** para UI (si no es compatible con xUnit v3 en la versión elegida → `Avalonia.Headless.NUnit` solo en ese proyecto; ADR).
+- **Avalonia.Headless** para UI con el helper `Headless.RunAsync` sobre xUnit v3 (ADR-0007: `Avalonia.Headless.XUnit` no es compatible con xUnit v3 4.x).
 - **ArchUnitNET** (o NetArchTest) para arquitectura.
 - **Cobertura**: `Microsoft.Testing.Extensions.CodeCoverage` (formato Cobertura) + ReportGenerator.
 - **Stryker.NET** para mutación.

@@ -9,6 +9,7 @@ public static class MarkdownServiceCollectionExtensions
     public static IServiceCollection AddBasaltMarkdownAdapter(this IServiceCollection services)
     {
         services.AddSingleton<IMarkdownAnalyzer, MarkdigAnalyzer>();
+        services.AddSingleton<IFrontmatterEditor, YamlFrontmatterEditor>();
         return services;
     }
 }

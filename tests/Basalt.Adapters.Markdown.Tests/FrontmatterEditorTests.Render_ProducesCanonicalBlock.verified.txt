@@ -1,0 +1,11 @@
+---
+title: "Idea: one"
+tags:
+  - a
+  - b
+meta:
+  year: 2026
+  list:
+    - x
+empty:
+---

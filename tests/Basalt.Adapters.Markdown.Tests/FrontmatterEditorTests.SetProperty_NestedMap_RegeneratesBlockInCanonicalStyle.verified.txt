@@ -1,0 +1,13 @@
+---
+title: Idea
+status: draft
+tags:
+  - a
+  - b
+meta:
+  author: Ana
+  year: 2026
+---
+# Body
+
+status: not frontmatter

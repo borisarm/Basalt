@@ -29,7 +29,7 @@ Registro de avance del plan (`docs/specs/10-plan-de-implementacion.md`). Platafo
 ## Fase 2 — Markdown y sistema de ficheros
 
 - [x] T2.1 IMarkdownAnalyzer con Markdig — 2026-10-19. MarkdigAnalyzer: parsers propios de wikilinks/embeds (gramática del dominio), etiquetas, comentarios %% en línea y en bloque; frontmatter seguro con YamlDotNet (≤64 KB, sin tipos, inferencia de tipos), enlaces de frontmatter, enlaces Markdown con %-encoding/<>, ids de bloque (párrafo, lista, tabla, línea propia), tareas, alias, recuento de palabras (CJK). 70 golden files revisados uno a uno (Snapshot.MatchFile). Rendimiento 1 MB comprobado. Nuevo módulo de dominio Metadata (ADR-0010). Cobertura del adaptador 92 %.
-- [ ] T2.2 IFrontmatterEditor
+- [x] T2.2 IFrontmatterEditor — 2026-10-19. YamlFrontmatterEditor: edición quirúrgica por rango de líneas de la clave (escalares y listas, conserva estilo flow/compacto/indentado y CRLF), regeneración canónica para mapas anidados, alta antes del cierre, creación de frontmatter, YAML inválido nunca se reescribe; YamlEmitter decide comillas por ida y vuelta con el parser seguro. F-010.1 + snapshots.
 - [ ] T2.3 IMarkdownRenderer → RenderDocument
 - [ ] T2.4 Puerto IVaultFileSystem + InMemoryVaultFileSystem + VaultFileSystemContract
 - [ ] T2.5 PhysicalVaultFileSystem

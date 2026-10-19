@@ -20,7 +20,7 @@ Registro de avance del plan (`docs/specs/10-plan-de-implementacion.md`). Platafo
 - [x] T1.4 LinkResolver — 2026-10-19. LinkResolver (05 §3: nombre insensible a mayúsculas, absoluta, sufijo, relativa ./ ../, enlaces Markdown relativa→absoluta→nombre con %-decoding, esquemas externos, desempates exacto/misma carpeta/más corta/ordinal, Ambiguous) + IVaultFileCatalog e InMemoryFileCatalog. ~75 casos LINK-3.x; mutación 93 %.
 - [x] T1.5 Generación de enlaces — 2026-10-19. LinkFormatter: Shortest (nombre si único, si no el sufijo más corto que resuelve de vuelta — usa LinkResolver como oráculo), Relative (./ y ../ en wikilinks), Absolute × Wikilink/Markdown (%20, .md). Test de ida y vuelta. Mutación 92 %. Spec 09 §8: Links puede depender de Vaults (VaultSettings).
 - [x] T1.6 LinkRewriter — 2026-10-19. LinkRewriter: reescribe solo TargetSpan de enlaces cuya resolución tras la operación ya no apunta al destino (renombrado), cubre ambigüedades nuevas y enlaces relativos de notas movidas; preserva sintaxis, estilo relativo/ruta completa y .md explícito. F-004.4/.5/.7 a nivel de dominio; propiedades: texto fuera de enlaces intacto, idempotencia, destinos correctos. Mutación 88,6 %.
-- [ ] T1.7 LineDiff (Myers)
+- [x] T1.7 LineDiff (Myers) — 2026-10-19. LineDiff (Myers O(ND) en espacio lineal por bisección, ids enteros por línea, opción de ignorar fin de línea), DiffHunk, TextLines (split con terminadores). Propiedades: Apply(a, Diff(a,b)) == b y minimalidad frente a LCS por programación dinámica. Mutación 100 %.
 - [ ] T1.8 ThreeWayTextMerger (diff3)
 - [ ] T1.9 Fusión estructural
 - [ ] T1.10 Plantillas y notas diarias

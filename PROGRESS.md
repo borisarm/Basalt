@@ -17,7 +17,7 @@ Registro de avance del plan (`docs/specs/10-plan-de-implementacion.md`). Platafo
 - [x] T1.1 VaultPath y clasificación de ficheros — 2026-10-19. VaultPath canónica (NFC, separadores, '..', nombres reservados de Windows, 255 bytes UTF-8), CaseFoldKey, FileClassifier; ~110 casos de tabla + propiedades FsCheck (Arb.VaultPath, BasaltProperty). Cobertura 100 % líneas, mutación 96,8 %.
 - [x] T1.2 Value objects de vault y nota — 2026-10-19. VaultId, VaultName, VaultSettings (+LinkFormat/LinkPathStyle), NoteTitle, NoteContent (fin de línea/BOM, WithText preserva convención), SourceSpan, Heading (slug 05 §3.2), BlockId, Tag (insensible a mayúsculas) y TagHierarchy (conteo agregado, F-006.1). Mutación ~94 %.
 - [x] T1.3 Modelo de enlaces — 2026-10-19. Link, LinkKind, SubpathKind + WikiLinkSyntax (gramática 05 §2: subpath encabezado/bloque, alias, '\|' en tablas, spans de destino para reescritura). Mutación 93 % (supervivientes equivalentes).
-- [ ] T1.4 LinkResolver
+- [x] T1.4 LinkResolver — 2026-10-19. LinkResolver (05 §3: nombre insensible a mayúsculas, absoluta, sufijo, relativa ./ ../, enlaces Markdown relativa→absoluta→nombre con %-decoding, esquemas externos, desempates exacto/misma carpeta/más corta/ordinal, Ambiguous) + IVaultFileCatalog e InMemoryFileCatalog. ~75 casos LINK-3.x; mutación 93 %.
 - [ ] T1.5 Generación de enlaces
 - [ ] T1.6 LinkRewriter
 - [ ] T1.7 LineDiff (Myers)

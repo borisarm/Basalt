@@ -182,7 +182,8 @@ Para que 1 000 escenarios quepan en el tiempo de PR, la simulación usa `TestHos
 |--------|-------------------|
 | Common | — |
 | Notes | Common |
-| Links, Tags | Common, Notes |
+| Links | Common, Notes, Vaults (ajustes de formato de enlaces) |
+| Tags | Common, Notes |
 | Search | Common, Notes, Tags |
 | Graph | Common, Notes, Links, Tags |
 | Templates | Common, Notes |

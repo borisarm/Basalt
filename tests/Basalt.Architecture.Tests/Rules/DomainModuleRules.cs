@@ -10,7 +10,7 @@ internal static class DomainModuleRules
     {
         ["Common"] = [],
         ["Notes"] = ["Common"],
-        ["Links"] = ["Common", "Notes"],
+        ["Links"] = ["Common", "Notes", "Vaults"],
         ["Tags"] = ["Common", "Notes"],
         ["Search"] = ["Common", "Notes", "Tags"],
         ["Graph"] = ["Common", "Notes", "Links", "Tags"],

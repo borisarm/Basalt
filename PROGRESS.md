@@ -18,7 +18,7 @@ Registro de avance del plan (`docs/specs/10-plan-de-implementacion.md`). Platafo
 - [x] T1.2 Value objects de vault y nota — 2026-10-19. VaultId, VaultName, VaultSettings (+LinkFormat/LinkPathStyle), NoteTitle, NoteContent (fin de línea/BOM, WithText preserva convención), SourceSpan, Heading (slug 05 §3.2), BlockId, Tag (insensible a mayúsculas) y TagHierarchy (conteo agregado, F-006.1). Mutación ~94 %.
 - [x] T1.3 Modelo de enlaces — 2026-10-19. Link, LinkKind, SubpathKind + WikiLinkSyntax (gramática 05 §2: subpath encabezado/bloque, alias, '\|' en tablas, spans de destino para reescritura). Mutación 93 % (supervivientes equivalentes).
 - [x] T1.4 LinkResolver — 2026-10-19. LinkResolver (05 §3: nombre insensible a mayúsculas, absoluta, sufijo, relativa ./ ../, enlaces Markdown relativa→absoluta→nombre con %-decoding, esquemas externos, desempates exacto/misma carpeta/más corta/ordinal, Ambiguous) + IVaultFileCatalog e InMemoryFileCatalog. ~75 casos LINK-3.x; mutación 93 %.
-- [ ] T1.5 Generación de enlaces
+- [x] T1.5 Generación de enlaces — 2026-10-19. LinkFormatter: Shortest (nombre si único, si no el sufijo más corto que resuelve de vuelta — usa LinkResolver como oráculo), Relative (./ y ../ en wikilinks), Absolute × Wikilink/Markdown (%20, .md). Test de ida y vuelta. Mutación 92 %. Spec 09 §8: Links puede depender de Vaults (VaultSettings).
 - [ ] T1.6 LinkRewriter
 - [ ] T1.7 LineDiff (Myers)
 - [ ] T1.8 ThreeWayTextMerger (diff3)

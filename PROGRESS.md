@@ -9,7 +9,7 @@ Registro de avance del plan (`docs/specs/10-plan-de-implementacion.md`). Platafo
 - [x] T0.2 Tests de arquitectura — 2026-10-19. R1–R7, matriz de módulos (ArchUnitNET), escáner IL de APIs prohibidas y convenciones, con tests canario por regla. El test DI y "puerto sin fake/contrato" se añaden cuando existan (T6.1 / Fase 2).
 - [x] T0.3 CI — 2026-10-19. ci.yml (matriz Windows/macOS/Linux, UI, simulación, coverage-gate con build/coverage-gate.py, arquitectura, iOS condicionado a T10.1, seguridad, formato) y nightly.yml (Stryker, simulación 10 000, Live gated, benchmarks).
 - [ ] T0.4 Spike de plataforma (iOS + AvaloniaEdit) — **PARCIAL / BLOQUEADO (requiere macOS)**: ADR-0007 aceptado (headless OK con xUnit v3 vía `Avalonia.Headless`); AvaloniaEdit 12 verificado en headless; validación en simulador iOS pendiente → ADR-0006 provisional (TextBox en iOS). El head iOS se crea en T10.1.
-- [ ] T0.5 Basalt.Testing base
+- [x] T0.5 Basalt.Testing base — 2026-10-19. Result/Result<T>/Error/Unit en Domain.Common (cobertura 100 %, mutación 100 %); Basalt.Testing con TempDirectory, Snapshot (ADR-0009), A, ContractTest<T>. Stryker funciona con el runner `mtp` (stryker-config.json). FakeClock se crea con el puerto IClock (T3.1).
 - [ ] T0.6 Trazabilidad
 
 ## Fase 1 — Dominio núcleo

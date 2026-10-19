@@ -12,3 +12,4 @@ StrykerOutput/
 Thumbs.db
 *.cobertura.xml
 *.coverage
+StrykerOutput/

@@ -34,7 +34,7 @@ jobs:
       - run: dotnet tool restore
       - name: Stryker
         working-directory: ${{ matrix.tests }}
-        run: dotnet tool run dotnet-stryker --project ${{ matrix.project }} --break-at ${{ matrix.break }} --reporter html --reporter progress
+        run: dotnet tool run dotnet-stryker   # stryker-config.json: MTP runner, thresholds
       - uses: actions/upload-artifact@v4
         if: always()
         with:

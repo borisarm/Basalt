@@ -25,7 +25,8 @@ dotnet test --project tests/Basalt.Domain.Tests
 dotnet test --project tests/Basalt.Domain.Tests -- --filter-trait "Spec=SYNC-ROW-10"
 dotnet test --solution Basalt.slnx --coverage --coverage-output-format cobertura
 dotnet tool run reportgenerator -reports:**/*.cobertura.xml -targetdir:artifacts/coverage -reporttypes:TextSummary
-dotnet tool run dotnet-stryker --project Basalt.Domain.csproj   # desde tests/Basalt.Domain.Tests
+dotnet tool run dotnet-stryker   # desde tests/Basalt.Domain.Tests (stryker-config.json, runner mtp)
+bash build/cover.sh tests/Basalt.Domain.Tests   # cobertura + puerta de umbrales
 dotnet format --verify-no-changes
 dotnet run --project src/Basalt.Desktop
 ```

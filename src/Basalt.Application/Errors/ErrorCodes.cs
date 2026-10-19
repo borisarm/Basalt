@@ -6,6 +6,14 @@ namespace Basalt.Application.Errors;
 /// </summary>
 public static class ErrorCodes
 {
+    public const string FsNotFound = "fs.not_found";
+    public const string FsAlreadyExists = "fs.already_exists";
+    public const string FsIsDirectory = "fs.is_directory";
+    public const string FsNotADirectory = "fs.not_a_directory";
+    public const string FsConcurrentModification = "fs.concurrent_modification";
+    public const string FsAccessDenied = "fs.access_denied";
+    public const string FsIo = "fs.io";
+
     public const string FrontmatterTooLarge = "frontmatter.too_large";
     public const string FrontmatterInvalidYaml = "frontmatter.invalid_yaml";
     public const string FrontmatterNotAMapping = "frontmatter.not_a_mapping";

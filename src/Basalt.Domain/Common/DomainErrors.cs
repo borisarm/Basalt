@@ -16,4 +16,6 @@ public static class DomainErrors
     public const string TagInvalid = "tag.invalid";
 
     public const string DailyNoteInvalidFormat = "daily_note.invalid_format";
+
+    public const string ShaInvalid = "sha.invalid";
 }

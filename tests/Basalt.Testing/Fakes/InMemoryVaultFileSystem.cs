@@ -66,6 +66,12 @@ public sealed class InMemoryVaultFileSystem : IVaultFileSystem
         Notify(new FileSystemChange(FileSystemChangeKind.Deleted, path));
     }
 
+    public void SimulateExternalRename(VaultPath from, VaultPath to)
+    {
+        MoveAsync(from, to, CancellationToken.None).GetAwaiter().GetResult();
+        Notify(new FileSystemChange(FileSystemChangeKind.Renamed, to, from));
+    }
+
     public IFileWatcher CreateWatcher()
     {
         var watcher = new ManualFileWatcher();

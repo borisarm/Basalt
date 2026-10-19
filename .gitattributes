@@ -1,0 +1,8 @@
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.zip binary
+*.bin binary
+# Test data that must keep its exact bytes (CRLF, BOM, ...)
+tests/**/TestData/** -text
+tests/**/Golden/** -text

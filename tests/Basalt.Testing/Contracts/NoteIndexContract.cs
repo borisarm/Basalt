@@ -148,4 +148,129 @@ public abstract class NoteIndexContract : ContractTest<INoteIndex>
 
         (await Sut.GetAsync(P("Reunión 😀/Café.md"), Ct))!.Text.Should().Be("日本語 ñ 😀");
     }
+
+    private static NoteMetadata Tagged(params string[] tags) =>
+        NoteMetadata.Empty with { Tags = [.. tags.Select(t => new TagOccurrence(Tag.Create(t).Value, TagSource.Text, 0))] };
+
+    private const string DatedText = "#trabajo reunión con el cliente\nfecha límite 2026-10-19";
+
+    private async Task SeedSearchCorpusAsync()
+    {
+        await Sut.UpsertManyAsync(
+        [
+            Note("Trabajo/Reunión cliente.md", DatedText, Tagged("trabajo")),
+            Note("Trabajo/Solo reunión.md", "#trabajo reunión interna", Tagged("trabajo")),
+            Note("Archivo/Viejo.md", "#trabajo reunión cliente \"fecha límite\"", Tagged("trabajo")),
+            Note("Personal/Urgente.md", "algo urgente para hoy"),
+            Note("Personal/Compra.md", "leche, pan y café"),
+            Note("img/Cliente logo.png", string.Empty) with { Text = null },
+        ], Ct);
+    }
+
+    private async Task<List<string>> SearchAsync(string query, SearchOptions? options = null) =>
+        [.. (await Sut.SearchAsync(Domain.Search.SearchQueryParser.Parse(query).Value, options ?? SearchOptions.Default, Ct)).Select(h => h.Path.ToString())];
+
+    [Fact]
+    [Trait("Spec", "F-007.1")]
+    public async Task Search_MultipleTerms_RequiresAll()
+    {
+        await SeedSearchCorpusAsync();
+
+        (await SearchAsync("reunión cliente")).Should().BeEquivalentTo("Trabajo/Reunión cliente.md", "Archivo/Viejo.md");
+    }
+
+    [Fact]
+    [Trait("Spec", "F-007.2")]
+    public async Task Search_Operators_RespectPrecedence()
+    {
+        await SeedSearchCorpusAsync();
+
+        // tag:#trabajo AND -path:Archivo AND ("fecha límite" OR urgente)
+        (await SearchAsync("tag:#trabajo -path:Archivo \"fecha límite\" OR urgente")).Should().BeEquivalentTo("Trabajo/Reunión cliente.md");
+    }
+
+    [Fact]
+    [Trait("Spec", "F-007.3")]
+    public async Task Search_Regex_FindsIsoDates_WithRanges()
+    {
+        await SeedSearchCorpusAsync();
+
+        var hits = await Sut.SearchAsync(Domain.Search.SearchQueryParser.Parse(@"/\d{4}-\d{2}-\d{2}/").Value, SearchOptions.Default, Ct);
+
+        hits.Should().ContainSingle().Which.Path.Should().Be(P("Trabajo/Reunión cliente.md"));
+        hits[0].Ranges.Should().Equal(new Domain.Search.MatchRange(Domain.Search.MatchTarget.Content, DatedText.IndexOf("2026", StringComparison.Ordinal), 10));
+    }
+
+    [Fact]
+    public async Task Search_MatchesFileNamesOfAttachments_AndSubstrings()
+    {
+        await SeedSearchCorpusAsync();
+
+        (await SearchAsync("logo")).Should().Equal("img/Cliente logo.png");
+        (await SearchAsync("rgent")).Should().Equal("Personal/Urgente.md");
+        (await SearchAsync("cafe")).Should().Equal("Personal/Compra.md");
+        (await SearchAsync("e.md")).Should().Contain("Personal/Urgente.md");
+    }
+
+    [Fact]
+    public async Task Search_EmptyQuery_ReturnsNothing_AndNegationAlone_ReturnsTheRest()
+    {
+        await SeedSearchCorpusAsync();
+
+        (await Sut.SearchAsync(Domain.Search.SearchQuery.Empty, SearchOptions.Default, Ct)).Should().BeEmpty();
+        (await SearchAsync("-reunión")).Should().BeEquivalentTo("Personal/Urgente.md", "Personal/Compra.md", "img/Cliente logo.png");
+    }
+
+    [Fact]
+    public async Task Search_OrdersByRelevanceNameOrDate_AndLimits()
+    {
+        await SeedSearchCorpusAsync();
+        await Sut.UpsertAsync(Note("Z/cliente.md", "nada") with { Stamp = new IndexStamp(1, new DateTimeOffset(2027, 1, 1, 0, 0, 0, TimeSpan.Zero), null) }, Ct);
+
+        (await SearchAsync("cliente"))[0].Should().Be("Trabajo/Reunión cliente.md");
+        (await SearchAsync("cliente", new SearchOptions(SearchSort.NameAscending))).Should().Equal(
+            "img/Cliente logo.png", "Z/cliente.md", "Trabajo/Reunión cliente.md", "Archivo/Viejo.md");
+        (await SearchAsync("cliente", new SearchOptions(SearchSort.ModifiedNewest)))[0].Should().Be("Z/cliente.md");
+        (await SearchAsync("cliente", new SearchOptions(Limit: 2))).Should().HaveCount(2);
+    }
+
+    [Fact]
+    public async Task Search_MatchCase()
+    {
+        await SeedSearchCorpusAsync();
+
+        (await SearchAsync("Cliente", new SearchOptions(MatchCase: true))).Should().Equal("img/Cliente logo.png");
+    }
+
+    [Fact]
+    public async Task Search_SeesRenamesAndRemovals()
+    {
+        await SeedSearchCorpusAsync();
+
+        await Sut.RenameAsync(P("Personal/Compra.md"), P("Personal/Mercado.md"), Ct);
+        await Sut.RemoveAsync(P("Personal/Urgente.md"), Ct);
+
+        (await SearchAsync("mercado")).Should().Equal("Personal/Mercado.md");
+        (await SearchAsync("urgente")).Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Search_FieldsTagsAndProperties()
+    {
+        await Sut.UpsertManyAsync(
+        [
+            Note("a.md", "---\nstatus: draft\n---\nx", RichMetadata()),
+            Note("b.md", "#proyecto/x/y texto", Tagged("proyecto/x/y")),
+            Note("c.md", "- [ ] llamar\n- [x] escribir", NoteMetadata.Empty with { Tasks = [new TaskItem(0, ' ', "llamar"), new TaskItem(1, 'x', "escribir")] }),
+        ], Ct);
+
+        (await SearchAsync("[status:draft]")).Should().Equal("a.md");
+        (await SearchAsync("[rating]")).Should().Equal("a.md");
+        (await SearchAsync("tag:#proyecto")).Should().BeEquivalentTo("a.md", "b.md");
+        (await SearchAsync("tag:#proyecto/x/y")).Should().Equal("b.md");
+        (await SearchAsync("task-done:escribir")).Should().Equal("c.md");
+        (await SearchAsync("task-todo:escribir")).Should().BeEmpty();
+        (await SearchAsync("file:b")).Should().Equal("b.md");
+        (await SearchAsync("line:(llamar escribir)")).Should().BeEmpty();
+    }
 }

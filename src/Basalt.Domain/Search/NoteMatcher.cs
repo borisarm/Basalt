@@ -30,20 +30,21 @@ public interface INoteMatcher
 }
 
 /// <summary>
-/// The exact semantics of spec 08 §4.2. Terms and phrases are case- and diacritic-insensitive substring matches;
+/// The exact semantics of spec 08 §4.2. Terms and phrases are case- and diacritic-insensitive substring matches
+/// (ordinal with <c>matchCase</c>, which also makes regexes case-sensitive; tags and properties stay insensitive);
 /// regexes run on the original text (case-insensitive, NonBacktracking, 200 ms per evaluation, a timeout counts as no
 /// match). Scoped operators (<c>line:</c>, <c>block:</c>, <c>section:</c>, <c>task*:</c>) require one unit that
 /// satisfies the whole operand. Negated parts never contribute highlight ranges.
 /// </summary>
 public static class NoteMatcher
 {
-    public static INoteMatcher Create(SearchQuery query)
+    public static INoteMatcher Create(SearchQuery query, bool matchCase = false)
     {
         ArgumentNullException.ThrowIfNull(query);
-        return new Matcher(query.Root);
+        return new Matcher(query.Root, matchCase);
     }
 
-    private sealed class Matcher(SearchNode? root) : INoteMatcher
+    private sealed class Matcher(SearchNode? root, bool matchCase) : INoteMatcher
     {
         private static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(200);
 
@@ -144,11 +145,12 @@ public static class NoteMatcher
 
         private bool MatchText(string text, Scope scope, List<MatchRange>? ranges)
         {
-            var needle = Fold(text);
             if (scope.Tags is { } tags)
             {
-                return MatchTags(needle.TrimStart('#'), tags, ranges);
+                return MatchTags(Fold(text).TrimStart('#'), tags, ranges);
             }
+
+            var needle = matchCase ? text : Fold(text);
 
             if (needle.Length == 0)
             {
@@ -158,7 +160,7 @@ public static class NoteMatcher
             var any = false;
             foreach (var segment in scope.Segments)
             {
-                foreach (var (start, length) in segment.Folded.FindAll(needle))
+                foreach (var (start, length) in matchCase ? FindExact(segment.Text, needle) : segment.Folded.FindAll(needle))
                 {
                     any = true;
                     if (ranges is null)
@@ -171,6 +173,14 @@ public static class NoteMatcher
             }
 
             return any;
+        }
+
+        private static IEnumerable<(int Start, int Length)> FindExact(string text, string needle)
+        {
+            for (var index = text.IndexOf(needle, StringComparison.Ordinal); index >= 0; index = text.IndexOf(needle, index + needle.Length, StringComparison.Ordinal))
+            {
+                yield return (index, needle.Length);
+            }
         }
 
         private static bool MatchTags(string needle, IReadOnlyList<TagUnit> tags, List<MatchRange>? ranges)
@@ -284,7 +294,8 @@ public static class NoteMatcher
         {
             if (!_regexes.TryGetValue(pattern, out var regex))
             {
-                _regexes[pattern] = regex = new Regex(pattern, SearchQueryParser.RegexOptionsFor, RegexTimeout);
+                var options = matchCase ? SearchQueryParser.RegexOptionsFor & ~RegexOptions.IgnoreCase : SearchQueryParser.RegexOptionsFor;
+                _regexes[pattern] = regex = new Regex(pattern, options, RegexTimeout);
             }
 
             return regex;

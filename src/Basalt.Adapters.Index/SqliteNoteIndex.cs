@@ -1,9 +1,12 @@
+using System.Collections.Concurrent;
 using System.Globalization;
 using Basalt.Application.Ports.Index;
+using Basalt.Application.Search;
 using Basalt.Domain.Common;
 using Basalt.Domain.Links;
 using Basalt.Domain.Metadata;
 using Basalt.Domain.Notes;
+using Basalt.Domain.Search;
 using Basalt.Domain.Sync;
 using Basalt.Domain.Tags;
 using Microsoft.Data.Sqlite;
@@ -95,9 +98,10 @@ internal sealed class SqliteNoteIndex : INoteIndex
             await DeleteFileAsync(connection, transaction, to, ct).ConfigureAwait(false);
             await ExecuteAsync(connection, transaction, """
                 UPDATE files SET path = $path, path_fold = $fold, name = $name, ext = $ext, kind = $kind WHERE id = $id;
-                UPDATE content_fts SET path = $path, name = $name WHERE rowid = $id;
+                UPDATE content_fts SET path = $searchPath, name = $searchName WHERE rowid = $id;
                 """, ct, ("$path", to.ToString()), ("$fold", to.CaseFoldKey), ("$name", NameOf(to)), ("$ext", to.Extension),
-                ("$kind", (int)FileClassifier.Classify(to)), ("$id", id.Value)).ConfigureAwait(false);
+                ("$kind", (int)FileClassifier.Classify(to)), ("$id", id.Value),
+                ("$searchPath", FoldedText.Fold(to.ToString())), ("$searchName", FoldedText.Fold(to.Name))).ConfigureAwait(false);
         }, ct);
 
     public async Task<IndexSnapshotInfo> GetSnapshotInfoAsync(CancellationToken ct)
@@ -153,12 +157,69 @@ internal sealed class SqliteNoteIndex : INoteIndex
         string? text = null;
         if (row.HasText)
         {
-            await using var command = Command(connection, null, "SELECT body FROM content_fts WHERE rowid = $id", ("$id", row.Id));
+            await using var command = Command(connection, null, "SELECT body FROM contents WHERE file_id = $id", ("$id", row.Id));
             text = await command.ExecuteScalarAsync(ct).ConfigureAwait(false) as string ?? string.Empty;
         }
 
         return new IndexedNote(row.Path, row.Kind, row.Stamp, text, Metadata(row, details.For(row.Id)));
     }
+
+    /// <summary>Pre-filters with <see cref="FtsQueryBuilder"/> and evaluates the candidates with the domain matcher.</summary>
+    public async Task<IReadOnlyList<SearchHit>> SearchAsync(SearchQuery query, SearchOptions options, CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(query);
+        ArgumentNullException.ThrowIfNull(options);
+        if (query.IsEmpty)
+        {
+            return [];
+        }
+
+        var builder = new FtsQueryBuilder();
+        var condition = builder.Build(query);
+        await using var connection = await ConnectAsync(ct).ConfigureAwait(false);
+        var candidates = await ReadFilesAsync(connection, condition, builder.Parameters, includeBody: true, ct).ConfigureAwait(false);
+        if (candidates.Count == 0)
+        {
+            return [];
+        }
+
+        var details = NeedsMetadata(query.Root!) ? await ReadDetailsAsync(connection, null, ct).ConfigureAwait(false) : null;
+
+        // Matching is CPU-bound (folding and scanning every candidate): spread it over the cores, one matcher per worker.
+        var hits = new ConcurrentBag<SearchHit>();
+        Parallel.ForEach(
+            Partitioner.Create(0, candidates.Count, 256),
+            new ParallelOptions { CancellationToken = ct },
+            () => NoteMatcher.Create(query, options.MatchCase),
+            (range, _, matcher) =>
+            {
+                for (var i = range.Item1; i < range.Item2; i++)
+                {
+                    var row = candidates[i];
+                    var metadata = details is null ? NoteMetadata.Empty with { WordCount = row.WordCount, Frontmatter = row.Frontmatter } : Metadata(row, details.For(row.Id));
+                    if (matcher.Match(new SearchableNote(row.Path, row.Body ?? string.Empty, metadata)) is { } match)
+                    {
+                        hits.Add(new SearchHit(row.Path, row.Kind, row.Stamp.LastWriteUtc, match.Ranges, SearchRanking.Score(match)));
+                    }
+                }
+
+                return matcher;
+            },
+            _ => { });
+
+        return SearchRanking.Order(hits, options);
+    }
+
+    /// <summary>Whether evaluating the query reads tags, headings or tasks (frontmatter comes with the file row).</summary>
+    private static bool NeedsMetadata(SearchNode node) => node switch
+    {
+        FieldNode { Field: SearchField.Tag or SearchField.Section or SearchField.Task or SearchField.TaskTodo or SearchField.TaskDone } => true,
+        FieldNode field => NeedsMetadata(field.Operand),
+        CompositeNode composite => composite.Operands.Any(NeedsMetadata),
+        NotNode not => NeedsMetadata(not.Operand),
+        GroupNode group => NeedsMetadata(group.Inner),
+        _ => false,
+    };
 
     public ValueTask DisposeAsync()
     {
@@ -202,6 +263,9 @@ internal sealed class SqliteNoteIndex : INoteIndex
     {
         var connection = new SqliteConnection(_connectionString);
         await connection.OpenAsync(ct).ConfigureAwait(false);
+
+        // Searches read the text of thousands of candidates: map the file and keep a 64 MB page cache per connection.
+        await ExecuteAsync(connection, null, "PRAGMA mmap_size = 268435456; PRAGMA cache_size = -65536;", ct).ConfigureAwait(false);
         return connection;
     }
 
@@ -254,9 +318,12 @@ internal sealed class SqliteNoteIndex : INoteIndex
 
         if (note.Text is not null)
         {
-            await ExecuteAsync(connection, transaction, "INSERT INTO content_fts(rowid, path, name, body) VALUES ($id, $path, $name, $body)", ct,
-                ("$id", id), ("$path", note.Path.ToString()), ("$name", NameOf(note.Path)), ("$body", note.Text)).ConfigureAwait(false);
+            await ExecuteAsync(connection, transaction, "INSERT INTO contents(file_id, body) VALUES ($id, $body)", ct, ("$id", id), ("$body", note.Text)).ConfigureAwait(false);
         }
+
+        await ExecuteAsync(connection, transaction, "INSERT INTO content_fts(rowid, path, name, body) VALUES ($id, $path, $name, $body)", ct,
+            ("$id", id), ("$path", FoldedText.Fold(note.Path.ToString())), ("$name", FoldedText.Fold(note.Path.Name)),
+            ("$body", FoldedText.Fold(note.Text ?? string.Empty))).ConfigureAwait(false);
 
         var ord = 0;
         foreach (var link in m.Links.Concat(m.Embeds))
@@ -273,8 +340,9 @@ internal sealed class SqliteNoteIndex : INoteIndex
         ord = 0;
         foreach (var tag in m.Tags)
         {
-            await ExecuteAsync(connection, transaction, "INSERT INTO tags(file_id, ord, tag, tag_fold, line, source) VALUES ($id, $ord, $tag, $fold, $line, $source)", ct,
-                ("$id", id), ("$ord", ord++), ("$tag", tag.Tag.Name), ("$fold", tag.Tag.FoldKey), ("$line", tag.Line), ("$source", (int)tag.Source)).ConfigureAwait(false);
+            await ExecuteAsync(connection, transaction, "INSERT INTO tags(file_id, ord, tag, tag_fold, tag_search, line, source) VALUES ($id, $ord, $tag, $fold, $search, $line, $source)", ct,
+                ("$id", id), ("$ord", ord++), ("$tag", tag.Tag.Name), ("$fold", tag.Tag.FoldKey), ("$search", FoldedText.Fold(tag.Tag.ToString().TrimStart('#'))),
+                ("$line", tag.Line), ("$source", (int)tag.Source)).ConfigureAwait(false);
         }
 
         ord = 0;
@@ -312,11 +380,18 @@ internal sealed class SqliteNoteIndex : INoteIndex
         }
     }
 
-    private static async Task<List<FileRow>> ReadFilesAsync(SqliteConnection connection, VaultPath? path, CancellationToken ct)
+    private static Task<List<FileRow>> ReadFilesAsync(SqliteConnection connection, VaultPath? path, CancellationToken ct) =>
+        path is null
+            ? ReadFilesAsync(connection, null, [], includeBody: false, ct)
+            : ReadFilesAsync(connection, "f.path = $path", [("$path", path.Value.ToString())], includeBody: false, ct);
+
+    private static async Task<List<FileRow>> ReadFilesAsync(
+        SqliteConnection connection, string? condition, IReadOnlyList<(string Name, object Value)> parameters, bool includeBody, CancellationToken ct)
     {
-        var sql = "SELECT id, path, kind, size, mtime_utc, sha, word_count, has_text, fm_json, fm_start, fm_length, fm_line, fm_error FROM files"
-            + (path is null ? string.Empty : " WHERE path = $path");
-        await using var command = path is null ? Command(connection, null, sql) : Command(connection, null, sql, ("$path", path.Value.ToString()));
+        var sql = "SELECT f.id, f.path, f.kind, f.size, f.mtime_utc, f.sha, f.word_count, f.has_text, f.fm_json, f.fm_start, f.fm_length, f.fm_line, f.fm_error"
+            + (includeBody ? ", c.body FROM files f LEFT JOIN contents c ON c.file_id = f.id" : " FROM files f")
+            + (condition is null ? string.Empty : " WHERE " + condition);
+        await using var command = Command(connection, null, sql, [.. parameters.Select(p => (p.Name, (object?)p.Value))]);
         await using var reader = await command.ExecuteReaderAsync(ct).ConfigureAwait(false);
         var rows = new List<FileRow>();
         while (await reader.ReadAsync(ct).ConfigureAwait(false))
@@ -335,7 +410,8 @@ internal sealed class SqliteNoteIndex : INoteIndex
                 Stamp(reader, 3),
                 reader.IsDBNull(6) ? 0 : reader.GetInt32(6),
                 reader.GetInt32(7) == 1,
-                frontmatter));
+                frontmatter,
+                includeBody && !reader.IsDBNull(13) ? reader.GetString(13) : null));
         }
 
         return rows;
@@ -412,7 +488,7 @@ internal sealed class SqliteNoteIndex : INoteIndex
         return command;
     }
 
-    private sealed record FileRow(long Id, VaultPath Path, FileKind Kind, IndexStamp Stamp, int WordCount, bool HasText, Frontmatter? Frontmatter);
+    private sealed record FileRow(long Id, VaultPath Path, FileKind Kind, IndexStamp Stamp, int WordCount, bool HasText, Frontmatter? Frontmatter, string? Body = null);
 
     private sealed class FileDetails
     {

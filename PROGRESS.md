@@ -50,7 +50,7 @@ Registro de avance del plan (`docs/specs/10-plan-de-implementacion.md`). Platafo
 
 - [x] T4.1 SearchQueryParser + AST — 2026-10-19. SearchQueryParser (dominio, tolerante) + AST (Term, Phrase, Regex, And, Or, Not, Group, Field, Property) con forma canónica S-expr. 91 consultas en snapshot revisado; precedencia OR > AND con tests explícitos; regex validadas con NonBacktracking (search.invalid_regex); anidamiento máx. 64 (search.too_complex). Gramática de 08 §4.1 corregida (contradecía la nota de precedencia). Mutación 100 %.
 - [x] T4.2 INoteMatcher — 2026-10-19. NoteMatcher/INoteMatcher (dominio): términos y frases insensibles a mayúsculas y diacríticos (FoldedText con mapa a rangos originales), regex NonBacktracking 200 ms, file:/path:/content:/tag: (descendientes), line:/block:/section:/task*: (una unidad satisface el operando), propiedades (existe/contiene/null), negación sin rangos. Tabla de 85 casos por operador + rangos. Mutación 100 %.
-- [ ] T4.3 Búsqueda en SQLite
+- [x] T4.3 Búsqueda en SQLite — 2026-10-19. INoteIndexReader.SearchAsync + SearchOptions/SearchHit/SearchSort (spec 03), SearchRanking compartido, caso de uso SearchNotes (F-007.4: errores de sintaxis). SQLite: esquema v2 con FTS5 trigram sobre texto plegado + tabla contents + tags.tag_search (ADR-0013); FtsQueryBuilder sobre-aproxima (frases trigram, tags, propiedades) y NoteMatcher evalúa en paralelo. Equivalencia con el oráculo por test de propiedades (verificado saboteando el pre-filtro). NoteMatcher con matchCase; FoldedText optimizado. F-007.5: búsqueda en el vault de referencia ≤ 210 ms (Category=Performance). Gramática y ejecución de 08 §4 actualizadas.
 - [ ] T4.4 Backlinks, salientes y menciones no enlazadas
 - [ ] T4.5 Etiquetas
 - [ ] T4.6 Grafo

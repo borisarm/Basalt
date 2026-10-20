@@ -66,8 +66,11 @@ CREATE INDEX ix_links_resolved ON links(resolved_id);
 CREATE INDEX ix_links_raw ON links(raw_target COLLATE NOCASE);
 
 CREATE TABLE tags (file_id INTEGER NOT NULL REFERENCES files(id) ON DELETE CASCADE,
-                   tag TEXT NOT NULL, tag_fold TEXT NOT NULL, line INTEGER, source INTEGER NOT NULL); -- 0 texto, 1 frontmatter
+                   tag TEXT NOT NULL, tag_fold TEXT NOT NULL,
+                   tag_search TEXT NOT NULL,   -- nombre plegado como FoldedText (para tag: en búsqueda)
+                   line INTEGER, source INTEGER NOT NULL); -- 0 texto, 1 frontmatter
 CREATE INDEX ix_tags_fold ON tags(tag_fold);
+CREATE INDEX ix_tags_search ON tags(tag_search);
 
 CREATE TABLE headings (file_id INTEGER NOT NULL REFERENCES files(id) ON DELETE CASCADE,
                        level INTEGER NOT NULL, text TEXT NOT NULL, line INTEGER NOT NULL);
@@ -79,12 +82,17 @@ CREATE TABLE properties (file_id INTEGER NOT NULL REFERENCES files(id) ON DELETE
 CREATE TABLE tasks (file_id INTEGER NOT NULL REFERENCES files(id) ON DELETE CASCADE,
                     line INTEGER NOT NULL, done INTEGER NOT NULL, text TEXT NOT NULL);
 
+CREATE TABLE contents (file_id INTEGER PRIMARY KEY REFERENCES files(id) ON DELETE CASCADE, body TEXT NOT NULL);
+
+-- Ruta, nombre de fichero y texto PLEGADOS (minúsculas, sin diacríticos; FoldedText del dominio) de TODOS los
+-- ficheros (adjuntos con body vacío). Ver ADR-0013.
 CREATE VIRTUAL TABLE content_fts USING fts5(
-  path, name, body, tokenize = 'unicode61 remove_diacritics 2', prefix = '2 3'
+  path, name, body, tokenize = 'trigram case_sensitive 1'
 );  -- rowid = files.id
 ```
 
-- El texto completo NO se duplica fuera de FTS: `body` es el contenido íntegro (para post-filtrado se lee de FTS con `SELECT body` o del disco si se necesita exactitud de offsets).
+- El texto original está en `contents` (lo leen `GetAsync` y el post-filtrado, que necesita offsets exactos para resaltar); `content_fts` guarda solo el texto plegado. La semántica de términos es de **subcadena** (`puesto` encuentra `presupuesto`), por eso el pre-filtro usa el tokenizador `trigram`: una frase trigram sobre el texto plegado es exactamente "contiene la subcadena plegada" (ADR-0013).
+- Las conexiones de lectura usan `PRAGMA mmap_size = 268435456` y `cache_size = -65536` (64 MB): las búsquedas leen el texto de miles de candidatos.
 - Versión del analizador (`analyzer_version`) en `meta`: si cambia (nueva versión de la app con reglas de análisis distintas) → reindexado completo en segundo plano.
 
 ### 2.2 Indexación
@@ -144,10 +152,10 @@ term       = 1*( char excepto espacio, '"', '(', ')' )
 ### 4.3 Ejecución
 
 1. `SearchQueryParser` (dominio) → AST.
-2. `FtsQueryBuilder` (visitor en el adaptador de índice) → expresión FTS5 que **sobre-aproxima** el conjunto (pre-filtro). Nodos no traducibles (regex, line:, negaciones complejas) → sin restricción en ese subárbol.
-3. Para cada candidato: `INoteMatcher` (dominio) evalúa la consulta exacta sobre el contenido y devuelve `MatchRange[]` para resaltado.
-4. Orden: relevancia (bm25 del pre-filtro + número de coincidencias), o por nombre / fecha de modificación.
-5. Resultados en streaming (`IAsyncEnumerable`) con cancelación al teclear.
+2. `FtsQueryBuilder` (adaptador de índice) → condición SQL sobre `files` que **sobre-aproxima** el conjunto (pre-filtro): términos y frases ≥ 3 caracteres → frase trigram sobre `content_fts` (columnas `{name body}`, `name` para `file:`, `path` para `path:`, `body` para `content:`/`line:`/`block:`/`section:`/`task*:`); `tag:` → tabla `tags` (`tag_search` igual o prefijo `x/`); `[clave…]` → tabla `properties` (`key_fold`). AND conserva las partes traducibles; un OR con alguna parte no traducible, las negaciones, las regex y los términos de < 3 caracteres → sin restricción en ese subárbol.
+3. Para cada candidato: `INoteMatcher` (dominio) evalúa la consulta exacta sobre el contenido (en paralelo, un matcher por hilo) y devuelve `MatchRange[]` para resaltado. Los metadatos (etiquetas, encabezados, tareas) solo se cargan si la consulta los usa.
+4. Orden (`SearchRanking`, compartido por todas las implementaciones): relevancia = nº de rangos + 10 si coincide el nombre del fichero, desempate por ruta; o por nombre / fecha de modificación. `SearchOptions.Limit` recorta tras ordenar. `SearchOptions.MatchCase` hace sensibles a mayúsculas y acentos términos, frases y regex (no etiquetas ni propiedades).
+5. El puerto devuelve la lista completa (`IReadOnlyList<SearchHit>`); la cancelación al teclear se hace con el `CancellationToken`. El streaming incremental para la UI, si hace falta, se añadirá en la fase de presentación sin cambiar la semántica.
 
 **Equivalencia exigida**: para cualquier consulta y corpus, `SqliteNoteIndex.Search` y `InMemoryNoteIndex.Search` (oráculo lineal) DEBEN devolver el mismo conjunto de notas → property test con consultas y corpus aleatorios (ver [09](09-estrategia-de-pruebas.md) §6).
 

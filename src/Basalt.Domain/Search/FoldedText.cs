@@ -6,21 +6,22 @@ namespace Basalt.Domain.Search;
 
 /// <summary>
 /// Text folded for case- and diacritic-insensitive comparison (lower-case invariant, combining marks removed), with a
-/// map from every folded character back to the original UTF-16 range it came from.
+/// map from every folded character back to the original UTF-16 position it came from. Combining marks that fold to
+/// nothing belong to the preceding character.
 /// </summary>
 public sealed class FoldedText
 {
-    private static readonly ConcurrentDictionary<int, string> FoldedRunes = new();
+    private static readonly string?[] FoldedChars = new string?[char.MaxValue + 1];
+    private static readonly ConcurrentDictionary<int, string> FoldedSupplementary = new();
 
+    /// <summary>For each folded character, the start of the original character it comes from.</summary>
     private readonly int[] _starts;
-    private readonly int[] _ends;
 
-    private FoldedText(string original, string value, int[] starts, int[] ends)
+    private FoldedText(string original, string value, int[] starts)
     {
         Original = original;
         Value = value;
         _starts = starts;
-        _ends = ends;
     }
 
     public string Original { get; }
@@ -30,33 +31,37 @@ public sealed class FoldedText
     public static FoldedText Create(string text)
     {
         ArgumentNullException.ThrowIfNull(text);
-        var builder = new StringBuilder(text.Length);
-        var starts = new List<int>(text.Length);
-        var ends = new List<int>(text.Length);
+        var value = new char[text.Length];
+        var starts = new int[text.Length];
+        var count = 0;
         for (var i = 0; i < text.Length;)
         {
             var c = text[i];
-            var width = char.IsHighSurrogate(c) && i + 1 < text.Length && char.IsLowSurrogate(text[i + 1]) ? 2 : 1;
             if (c < 0x80)
             {
-                builder.Append(char.ToLowerInvariant(c));
-                starts.Add(i);
-                ends.Add(i + 1);
+                value[count] = c is >= 'A' and <= 'Z' ? (char)(c + 32) : c;
+                starts[count++] = i++;
+                continue;
             }
-            else
+
+            var width = char.IsHighSurrogate(c) && i + 1 < text.Length && char.IsLowSurrogate(text[i + 1]) ? 2 : 1;
+            var folded = width == 1 ? FoldChar(c) : FoldSupplementary(char.ConvertToUtf32(c, text[i + 1]));
+            if (count + folded.Length > value.Length)
             {
-                foreach (var folded in FoldRune(width == 1 ? c : char.ConvertToUtf32(c, text[i + 1])))
-                {
-                    builder.Append(folded);
-                    starts.Add(i);
-                    ends.Add(i + width);
-                }
+                Array.Resize(ref value, Math.Max(value.Length * 2, count + folded.Length));
+                Array.Resize(ref starts, value.Length);
+            }
+
+            foreach (var f in folded)
+            {
+                value[count] = f;
+                starts[count++] = i;
             }
 
             i += width;
         }
 
-        return new FoldedText(text, builder.ToString(), [.. starts], [.. ends]);
+        return new FoldedText(text, new string(value, 0, count), starts);
     }
 
     /// <summary>Folds a search operand the same way as the text.</summary>
@@ -74,32 +79,36 @@ public sealed class FoldedText
 
     public bool Contains(string needle) => Value.Contains(needle, StringComparison.Ordinal);
 
-    /// <summary>Maps a folded range to the original text; trailing combining marks belong to the last character.</summary>
+    /// <summary>Maps a folded range to the original text, up to where the next folded character's source starts.</summary>
     public (int Start, int Length) ToOriginal(int start, int length)
     {
         var originalStart = _starts[start];
-        var originalEnd = _ends[start + length - 1];
-        while (originalEnd < Original.Length && IsMark(Original[originalEnd]))
+        var last = _starts[start + length - 1];
+        var next = start + length;
+        while (next < Value.Length && _starts[next] == last)
         {
-            originalEnd++;
+            next++; // the rest of a multi-character folding (e.g. "ﬁ" → "fi")
         }
 
+        var originalEnd = next < Value.Length ? _starts[next] : Original.Length;
         return (originalStart, originalEnd - originalStart);
     }
 
-    private static string FoldRune(int rune) => FoldedRunes.GetOrAdd(rune, static r =>
+    private static string FoldChar(char c) => FoldedChars[c] ??= char.IsSurrogate(c) ? c.ToString() : FoldRune(c);
+
+    private static string FoldSupplementary(int rune) => FoldedSupplementary.GetOrAdd(rune, FoldRune);
+
+    private static string FoldRune(int rune)
     {
         var builder = new StringBuilder();
-        foreach (var c in char.ConvertFromUtf32(r).Normalize(NormalizationForm.FormD))
+        foreach (var c in char.ConvertFromUtf32(rune).Normalize(NormalizationForm.FormD))
         {
-            if (!IsMark(c))
+            if (CharUnicodeInfo.GetUnicodeCategory(c) is not (UnicodeCategory.NonSpacingMark or UnicodeCategory.EnclosingMark))
             {
                 builder.Append(c);
             }
         }
 
         return builder.ToString().ToLowerInvariant();
-    });
-
-    private static bool IsMark(char c) => CharUnicodeInfo.GetUnicodeCategory(c) is UnicodeCategory.NonSpacingMark or UnicodeCategory.EnclosingMark;
+    }
 }

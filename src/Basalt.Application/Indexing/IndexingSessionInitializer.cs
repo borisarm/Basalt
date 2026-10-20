@@ -29,6 +29,7 @@ public sealed class IndexingSessionInitializer(
         var indexer = new VaultIndexer(session, index, cache, analyzer, events, time, loggers.CreateLogger<VaultIndexer>());
         session.Own(indexer);
         session.Set<IMetadataCache>(cache);
+        session.Set<INoteIndexReader>(index);
         session.Set(indexer);
 
         session.Own(new Subscriptions(

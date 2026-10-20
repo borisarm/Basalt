@@ -93,9 +93,12 @@ public interface INoteIndexWriter
     Task<IndexSnapshotInfo> GetSnapshotInfoAsync(CancellationToken ct); // para reindexado incremental al abrir
     Task ResetAsync(CancellationToken ct);
 }
+public enum SearchSort { Relevance, NameAscending, NameDescending, ModifiedNewest, ModifiedOldest }
+public sealed record SearchOptions(SearchSort Sort = SearchSort.Relevance, bool MatchCase = false, int? Limit = null);
+public sealed record SearchHit(VaultPath Path, FileKind Kind, DateTimeOffset LastWriteUtc, IReadOnlyList<MatchRange> Ranges, double Score);
 public interface INoteIndexReader
 {
-    Task<IReadOnlyList<SearchHit>> SearchAsync(SearchQuery query, SearchOptions options, CancellationToken ct);
+    Task<IReadOnlyList<SearchHit>> SearchAsync(SearchQuery query, SearchOptions options, CancellationToken ct);   // consulta vacía → []
     Task<IReadOnlyList<IndexedNoteSummary>> GetAllSummariesAsync(CancellationToken ct);
     Task<IndexedNote?> GetAsync(VaultPath path, CancellationToken ct);
 }

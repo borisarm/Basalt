@@ -217,6 +217,32 @@ public sealed class NoteMatcherTests
         NoteMatcher.Create(SearchQueryParser.Parse("café").Value).Match(decomposed)!.Ranges.Should().Equal(new MatchRange(MatchTarget.Content, 0, 5));
     }
 
+    [Theory]
+    [InlineData("María", true)]
+    [InlineData("maría", false)]
+    [InlineData("Maria", false)]
+    [InlineData("\"del presupuesto\"", true)]
+    [InlineData("\"Del presupuesto\"", false)]
+    [InlineData("/ABC-\\d+/", true)]
+    [InlineData("/abc-\\d+/", false)]
+    [InlineData("file:Reunión", true)]
+    [InlineData("file:reunión", false)]
+    [InlineData("tag:#URGENTE", true)]
+    [InlineData("[STATUS:DONE]", true)]
+    public void MatchCase_IsCaseAndAccentSensitiveForText(string query, bool matches)
+    {
+        var matcher = NoteMatcher.Create(SearchQueryParser.Parse(query).Value, matchCase: true);
+
+        (matcher.Match(Note) is not null).Should().Be(matches, query);
+    }
+
+    [Fact]
+    public void MatchCase_RangesAreExact()
+    {
+        NoteMatcher.Create(SearchQueryParser.Parse("María").Value, matchCase: true).Match(Note)!.Ranges
+            .Should().Equal(new MatchRange(MatchTarget.Content, Text.IndexOf("María", StringComparison.Ordinal), 5));
+    }
+
     [Fact]
     public void EmptyTermsAndPhrases_MatchEverything()
     {

@@ -1,6 +1,8 @@
 using System.Collections.Concurrent;
 using Basalt.Application.Ports.Index;
+using Basalt.Application.Search;
 using Basalt.Domain.Notes;
+using Basalt.Domain.Search;
 using Basalt.Domain.Vaults;
 
 namespace Basalt.Testing.Fakes;
@@ -63,6 +65,25 @@ public sealed class InMemoryNoteIndex : INoteIndex
 
     public Task<IndexedNote?> GetAsync(VaultPath path, CancellationToken ct) =>
         Task.FromResult(_notes.GetValueOrDefault(path));
+
+    /// <summary>Linear scan with the domain matcher: the reference semantics of search (spec 08 §4.3).</summary>
+    public Task<IReadOnlyList<SearchHit>> SearchAsync(SearchQuery query, SearchOptions options, CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(query);
+        ArgumentNullException.ThrowIfNull(options);
+        var matcher = NoteMatcher.Create(query, options.MatchCase);
+        var hits = new List<SearchHit>();
+        foreach (var note in _notes.Values)
+        {
+            ct.ThrowIfCancellationRequested();
+            if (matcher.Match(new SearchableNote(note.Path, note.Text ?? string.Empty, note.Metadata)) is { } match)
+            {
+                hits.Add(new SearchHit(note.Path, note.Kind, note.Stamp.LastWriteUtc, match.Ranges, SearchRanking.Score(match)));
+            }
+        }
+
+        return Task.FromResult(SearchRanking.Order(hits, options));
+    }
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }

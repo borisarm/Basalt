@@ -11,6 +11,7 @@ using Basalt.Application.Ports.Index;
 using Basalt.Application.Ports.Markdown;
 using Basalt.Application.Ports.Platform;
 using Basalt.Application.Ports.Storage;
+using Basalt.Application.Search;
 using Basalt.Application.Vaults;
 using Basalt.Testing;
 using Basalt.VaultGenerator;
@@ -107,6 +108,23 @@ public sealed class ReferenceVaultTests
         }
 
         session.Get<IMetadataCache>().Current.Files.Should().HaveCountGreaterThan(10_000);
+        if (waitForScan)
+        {
+            // F-007.5: a term search over 10 000 notes.
+            var search = new SearchNotesHandler(sessions);
+            var timings = new Dictionary<string, TimeSpan>();
+            foreach (var term in new[] { "Nota 01234", "\"magna aliqua\"", "veniam" })
+            {
+                var watch = Stopwatch.StartNew();
+                var hits = (await search.HandleAsync(new SearchNotes(id, term, new SearchOptions(Limit: 50)), Ct)).Value;
+                timings[term] = watch.Elapsed;
+                hits.Should().NotBeEmpty();
+            }
+
+            var report = string.Join(", ", timings.Select(t => $"{t.Key}: {t.Value.TotalMilliseconds:F0} ms"));
+            TestContext.Current.SendDiagnosticMessage("Search " + report);
+            timings.Values.Should().AllSatisfy(t => t.Should().BeLessThan(TimeSpan.FromMilliseconds(300)), report);
+        }
     }
 
     private static string Hash(TempDirectory directory, string relative) =>

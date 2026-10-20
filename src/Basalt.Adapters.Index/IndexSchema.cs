@@ -3,10 +3,11 @@ namespace Basalt.Adapters.Index;
 /// <summary>SQLite schema of the vault index (spec 08 §2.1) and its migrations.</summary>
 internal static class IndexSchema
 {
-    public const int CurrentVersion = 1;
+    public const int CurrentVersion = 2;
 
-    /// <summary>Version 1. Beyond 08 §2.1: link target spans/subpath kind, tag source order, task status and the
-    /// frontmatter block so that <c>NoteMetadata</c> is rebuilt exactly.</summary>
+    /// <summary>Version 2 (spec 08 §2.1, ADR-0013): link target spans/subpath kind, tag source order, task status and the
+    /// frontmatter block so that <c>NoteMetadata</c> is rebuilt exactly; the original text lives in <c>contents</c> and
+    /// <c>content_fts</c> holds every file's folded path, name and text for trigram substring pre-filtering.</summary>
     public const string Create = """
         PRAGMA journal_mode = WAL;
         PRAGMA synchronous = NORMAL;
@@ -48,9 +49,10 @@ internal static class IndexSchema
         CREATE INDEX IF NOT EXISTS ix_links_raw ON links(raw_target COLLATE NOCASE);
 
         CREATE TABLE IF NOT EXISTS tags (file_id INTEGER NOT NULL REFERENCES files(id) ON DELETE CASCADE,
-                                         ord INTEGER NOT NULL, tag TEXT NOT NULL, tag_fold TEXT NOT NULL, line INTEGER, source INTEGER NOT NULL);
+                                         ord INTEGER NOT NULL, tag TEXT NOT NULL, tag_fold TEXT NOT NULL, tag_search TEXT NOT NULL, line INTEGER, source INTEGER NOT NULL);
         CREATE INDEX IF NOT EXISTS ix_tags_fold ON tags(tag_fold);
         CREATE INDEX IF NOT EXISTS ix_tags_file ON tags(file_id);
+        CREATE INDEX IF NOT EXISTS ix_tags_search ON tags(tag_search);
 
         CREATE TABLE IF NOT EXISTS headings (file_id INTEGER NOT NULL REFERENCES files(id) ON DELETE CASCADE,
                                              ord INTEGER NOT NULL, level INTEGER NOT NULL, text TEXT NOT NULL, line INTEGER NOT NULL);
@@ -69,8 +71,12 @@ internal static class IndexSchema
                                           ord INTEGER NOT NULL, line INTEGER NOT NULL, done INTEGER NOT NULL, status TEXT NOT NULL, text TEXT NOT NULL);
         CREATE INDEX IF NOT EXISTS ix_tasks_file ON tasks(file_id);
 
+        CREATE TABLE IF NOT EXISTS contents (file_id INTEGER PRIMARY KEY REFERENCES files(id) ON DELETE CASCADE, body TEXT NOT NULL);
+
+        -- Folded (lower-case, no diacritics) path, file name and text of every file; rowid = files.id. Trigram phrase
+        -- queries over it are exact substring tests.
         CREATE VIRTUAL TABLE IF NOT EXISTS content_fts USING fts5(
-          path, name, body, tokenize = 'unicode61 remove_diacritics 2', prefix = '2 3'
+          path, name, body, tokenize = 'trigram case_sensitive 1'
         );
         """;
 }

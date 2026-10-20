@@ -1,5 +1,6 @@
 using Basalt.Domain.Metadata;
 using Basalt.Domain.Notes;
+using Basalt.Domain.Search;
 using Basalt.Domain.Sync;
 
 namespace Basalt.Application.Ports.Index;
@@ -15,6 +16,27 @@ public sealed record IndexedNoteSummary(VaultPath Path, FileKind Kind, IndexStam
 
 /// <summary>State of the persisted index, for incremental re-indexing at open (spec 08 §2.2).</summary>
 public sealed record IndexSnapshotInfo(int AnalyzerVersion, IReadOnlyDictionary<VaultPath, IndexStamp> Entries);
+
+/// <summary>Result order of <see cref="INoteIndexReader.SearchAsync"/>.</summary>
+public enum SearchSort
+{
+    /// <summary>Score descending (file-name matches first, then number of matches), then path.</summary>
+    Relevance,
+    NameAscending,
+    NameDescending,
+    ModifiedNewest,
+    ModifiedOldest,
+}
+
+/// <param name="MatchCase">Case- and accent-sensitive terms, phrases and regexes (F-007 "match case" option).</param>
+/// <param name="Limit">Maximum number of hits (after ordering); null for all.</param>
+public sealed record SearchOptions(SearchSort Sort = SearchSort.Relevance, bool MatchCase = false, int? Limit = null)
+{
+    public static SearchOptions Default { get; } = new();
+}
+
+/// <summary>A matching file with the ranges to highlight (spec 08 §4.3).</summary>
+public sealed record SearchHit(VaultPath Path, FileKind Kind, DateTimeOffset LastWriteUtc, IReadOnlyList<MatchRange> Ranges, double Score);
 
 /// <summary>Writes to the persistent index of one vault (spec 03 §1.3).</summary>
 public interface INoteIndexWriter
@@ -37,6 +59,13 @@ public interface INoteIndexWriter
 /// <summary>Reads from the persistent index of one vault (spec 03 §1.3).</summary>
 public interface INoteIndexReader
 {
+    /// <summary>
+    /// Every indexed file (notes and attachments) for which <c>NoteMatcher</c> matches <paramref name="query"/>: the
+    /// same set for every implementation (spec 08 §4.3, equivalence with <c>InMemoryNoteIndex</c>). An empty query
+    /// returns nothing.
+    /// </summary>
+    Task<IReadOnlyList<SearchHit>> SearchAsync(SearchQuery query, SearchOptions options, CancellationToken ct);
+
     Task<IReadOnlyList<IndexedNoteSummary>> GetAllSummariesAsync(CancellationToken ct);
 
     Task<IndexedNote?> GetAsync(VaultPath path, CancellationToken ct);

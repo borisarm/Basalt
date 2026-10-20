@@ -1,9 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <ProjectReference Include="../../src/Basalt.Adapters.Index/Basalt.Adapters.Index.csproj" />
+    <ProjectReference Include="../../src/Basalt.Adapters.Markdown/Basalt.Adapters.Markdown.csproj" />
     <ProjectReference Include="../Basalt.Testing/Basalt.Testing.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="FsCheck.Xunit.v3" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
   </ItemGroup>
 </Project>

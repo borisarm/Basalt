@@ -18,11 +18,14 @@ public static class TextBinaryClassifier
 
     public static bool IsText(VaultPath path, ReadOnlySpan<byte> content)
     {
-        if (!TextExtensions.Contains(path.Extension) || !Utf8.IsValid(content))
+        if (!IsTextPath(path) || !Utf8.IsValid(content))
         {
             return false;
         }
 
         return !content[..Math.Min(content.Length, SniffLength)].Contains((byte)0);
     }
+
+    /// <summary>Extension-only check used by the pure planner, which never sees the bytes (ADR-0017).</summary>
+    public static bool IsTextPath(VaultPath path) => TextExtensions.Contains(path.Extension);
 }

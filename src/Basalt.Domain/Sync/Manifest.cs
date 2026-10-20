@@ -110,6 +110,10 @@ public sealed class Manifest : IEquatable<Manifest>
 
     public override bool Equals(object? obj) => Equals(obj as Manifest);
 
+    public static bool operator ==(Manifest? left, Manifest? right) => Equals(left, right);
+
+    public static bool operator !=(Manifest? left, Manifest? right) => !Equals(left, right);
+
     public override int GetHashCode()
     {
         var hash = new HashCode();

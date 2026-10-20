@@ -81,7 +81,7 @@ Registro de avance del plan (`docs/specs/10-plan-de-implementacion.md`). Platafo
 
 ## Fase 7 — Dominio de sincronización
 
-- [ ] T7.1 BlobSha/TreeSha/CommitSha, GitBlobHasher (incl. streaming), GitTreeHasher, GitCommitHasher
+- [x] T7.1 BlobSha/TreeSha/CommitSha, GitBlobHasher (incl. streaming), GitTreeHasher, GitCommitHasher — 2026-10-20. `TreeSha`/`CommitSha`/`BlobSha` y el hasher de blobs ya llegaron con T2.4. `GitTreeHasher` (objetos tree de Git: entradas `{mode} {name}\0{20 bytes}`, orden con directorios comparados como `nombre/`, construcción de subárboles desde un manifiesto plano ruta→blob, rechazo de fichero/carpeta con el mismo nombre y nombres inválidos) y `GitCommitHasher` (+ `GitSignature`: tree, parents, author/committer con epoch y offset, mensaje con salto final normalizado). Vectores reales generados con `git write-tree`/`commit-tree` (árbol vacío, anidado, orden directorio/fichero, commit raíz y con padre) y propiedad de invariancia al orden de inserción.
 - [ ] T7.2 Manifest, ManifestEntry, ChangeSet, SyncBase
 - [ ] T7.3 IgnoreRules
 - [ ] T7.4 ConflictCopyNamer, clasificación texto/binario

@@ -27,5 +27,10 @@ public sealed class PlatformRegistrationTests
         provider.GetRequiredService<IDocumentStore<AccountsDocument>>().Should().NotBeNull();
         provider.GetRequiredService<IDocumentStore<AppSettings>>().Should().NotBeNull();
         provider.GetRequiredService<IVaultConfigStore>().Should().NotBeNull();
+        provider.GetRequiredService<IClock>().UtcNow.Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromMinutes(1));
+        provider.GetRequiredService<IClock>().LocalZone.Should().NotBeNull();
+        provider.GetRequiredService<IIdGenerator>().NewId().Should().NotBe(Guid.Empty);
+        provider.GetRequiredService<IRandom>().Next(10).Should().BeInRange(0, 9);
+        provider.GetRequiredService<IRandom>().NextDouble().Should().BeInRange(0, 1);
     }
 }

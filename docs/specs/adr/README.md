@@ -25,3 +25,4 @@ Formato de cada ADR (`NNNN-titulo-en-kebab-case.md`):
 | [0009](0009-snapshots-propios-sin-verify.md) | Snapshots propios en lugar de Verify | Aceptado |
 | [0010](0010-modulo-metadata.md) | Módulo de dominio `Metadata` para `NoteMetadata` | Aceptado |
 | [0011](0011-almacenes-de-documentos.md) | Almacenes JSON con `IDocumentStore<T>` | Aceptado |
+| [0012](0012-sesiones-de-vault.md) | Sesiones de vault explícitas en lugar de scopes de DI | Aceptado |

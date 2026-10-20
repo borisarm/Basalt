@@ -38,7 +38,7 @@ Registro de avance del plan (`docs/specs/10-plan-de-implementacion.md`). Platafo
 
 ## Fase 3 — Aplicación: vaults, notas e índice
 
-- [ ] T3.1 Infraestructura de aplicación
+- [x] T3.1 Infraestructura de aplicación — 2026-10-19. ICommand/IQuery + handlers, IValidator, decoradores Logging (sin datos de la petición)/Validation/VaultLock; AsyncReaderWriterLock (preferencia de escritores, cancelable) y VaultLocks; InMemoryEventBus (cola ordenada por vault, aislamiento de suscriptores, WaitForIdleAsync); VaultSession/IVaultSessions (ADR-0012); puertos IClock/IIdGenerator/IRandom/IDeviceInfo con implementaciones de sistema y fakes.
 - [ ] T3.2 Casos de uso de vaults
 - [ ] T3.3 Puerto de índice + InMemoryNoteIndex + NoteIndexContract
 - [ ] T3.4 SqliteNoteIndex

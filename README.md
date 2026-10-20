@@ -5,6 +5,8 @@
 
 **Basalt** is a local-first Markdown note-taking app compatible with [Obsidian](https://obsidian.md) vaults, built with **.NET** and **Avalonia** for **Windows, macOS and iOS**. Each vault syncs to **its own GitHub repository**, so you get full version history with no servers to run.
 
+> **🤖 100 % spec-driven AI development.** Every line of code, every test and every architecture decision record in this repository is written by an AI coding agent ([Claude Code](https://claude.com/claude-code)) working from the specification in [`docs/specs/`](docs/specs/README.md). The specification is the single source of truth. See [How this project is built](#how-this-project-is-built).
+
 > **Status: early development.** The architecture, test infrastructure and CI are in place, and the features are being built phase by phase following [the implementation plan](docs/specs/10-plan-de-implementacion.md). See [`PROGRESS.md`](PROGRESS.md) for the current state. Development targets Windows first. macOS and iOS are built in CI.
 
 ## Features (planned for the MVP)
@@ -42,6 +44,23 @@ Basalt.UI (Avalonia views) → Basalt.Presentation (ViewModels, no Avalonia)
 - Architecture tests and banned-API analyzers enforce these dependency rules.
 
 The details are in the [specification](docs/specs/README.md), which is written in Spanish, and in the [architecture decision records](docs/specs/adr/README.md).
+
+## How this project is built
+
+Basalt is an experiment in **100 % spec-driven AI development**. The code is not written by hand. An AI coding agent builds it entirely from a written specification:
+
+1. **The specification decides.** [`docs/specs/`](docs/specs/README.md) describes the product: vision, architecture, domain model, ports, Gherkin scenarios, sync algorithm, UI, persistence, test strategy, non-functional requirements and an ordered [implementation plan](docs/specs/10-plan-de-implementacion.md). If the code and the specification disagree, the code is fixed.
+2. **The agent works task by task.** Following [`CLAUDE.md`](CLAUDE.md), the agent takes the next unfinished task in the plan, reads the referenced sections and implements it with strict TDD:
+   - write the tests first and watch them fail
+   - tag every test with the scenario it covers (`[Trait("Spec", "F-007.2")]`)
+   - write the minimum code to make them pass
+3. **Gaps become ADRs.** When the specification is ambiguous, the agent takes the most conservative option (the one that never loses data), records it in an [ADR](docs/specs/adr/README.md) and updates the specification in the same commit.
+4. **Machines enforce quality.** Each task meets the same Definition of Done before it is committed:
+   - a warning-free build
+   - all tests green
+   - formatting, coverage and mutation thresholds
+   - architecture tests
+5. **Progress is visible.** Each task ends with one Conventional Commit, an entry in [`PROGRESS.md`](PROGRESS.md) and a push that CI verifies on Windows, macOS and Linux.
 
 ## Repository layout
 

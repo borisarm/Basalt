@@ -48,7 +48,7 @@ Registro de avance del plan (`docs/specs/10-plan-de-implementacion.md`). Platafo
 
 ## Fase 4 — Aplicación: conocimiento y búsqueda
 
-- [ ] T4.1 SearchQueryParser + AST
+- [x] T4.1 SearchQueryParser + AST — 2026-10-19. SearchQueryParser (dominio, tolerante) + AST (Term, Phrase, Regex, And, Or, Not, Group, Field, Property) con forma canónica S-expr. 91 consultas en snapshot revisado; precedencia OR > AND con tests explícitos; regex validadas con NonBacktracking (search.invalid_regex); anidamiento máx. 64 (search.too_complex). Gramática de 08 §4.1 corregida (contradecía la nota de precedencia). Mutación 100 %.
 - [ ] T4.2 INoteMatcher
 - [ ] T4.3 Búsqueda en SQLite
 - [ ] T4.4 Backlinks, salientes y menciones no enlazadas

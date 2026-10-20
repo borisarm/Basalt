@@ -106,9 +106,9 @@ CREATE VIRTUAL TABLE content_fts USING fts5(
 ### 4.1 Gramática
 
 ```
-query      = or-expr
-or-expr    = and-expr *( "OR" and-expr )
-and-expr   = unary *( [ "AND" ] unary )          ; espacio = AND implícito
+query      = and-expr
+and-expr   = or-expr *( [ "AND" ] or-expr )      ; espacio = AND implícito
+or-expr    = unary *( "OR" unary )               ; OR liga más que AND
 unary      = [ "-" ] primary
 primary    = "(" query ")" / field / regex / phrase / term / property
 field      = field-name ":" ( primary )           ; file: path: tag: line: block: section: content: task: task-todo: task-done:
@@ -118,7 +118,9 @@ phrase     = DQUOTE *char DQUOTE
 term       = 1*( char excepto espacio, '"', '(', ')' )
 ```
 
-> Precedencia: como en Obsidian, `OR` tiene **más** precedencia que el AND implícito: `a b OR c` = `a AND (b OR c)`. Esta regla DEBE estar cubierta por tests explícitos.
+> Precedencia: como en Obsidian, `OR` tiene **más** precedencia que el AND (implícito o explícito): `a b OR c` = `a AND (b OR c)`. Esta regla DEBE estar cubierta por tests explícitos.
+>
+> Análisis tolerante (búsqueda mientras se escribe): frases, grupos y propiedades sin cerrar llegan hasta el final; `)` sin pareja y `AND`/`OR` colgantes se ignoran; grupos y campos vacíos se descartan; `OR`/`AND` solo son operadores en mayúsculas; `campo:` desconocido es un término literal; `/x/` es regex solo si la barra de cierre va seguida de un delimitador. Errores: `search.invalid_regex` (patrón no válido o no soportado por `NonBacktracking`) y `search.too_complex` (anidamiento > 64).
 
 ### 4.2 Semántica
 

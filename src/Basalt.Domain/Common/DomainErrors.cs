@@ -20,4 +20,7 @@ public static class DomainErrors
     public const string ShaInvalid = "sha.invalid";
 
     public const string AccountInvalidHost = "account.invalid_host";
+
+    public const string SearchInvalidRegex = "search.invalid_regex";
+    public const string SearchTooComplex = "search.too_complex";
 }

@@ -94,6 +94,9 @@ public interface IRemoteRepository
 
     Task<Result<byte[]>> GetBlobAsync(BlobSha sha, CancellationToken ct);
 
+    /// <summary>Every file of a commit, from its zipball (spec 06 §9.5); used for bulk downloads.</summary>
+    Task<Result<IReadOnlyDictionary<VaultPath, byte[]>>> GetArchiveAsync(CommitSha commit, CancellationToken ct);
+
     Task<Result<BlobSha>> CreateBlobAsync(ReadOnlyMemory<byte> content, CancellationToken ct);
 
     Task<Result<TreeSha>> CreateTreeAsync(TreeSha? baseTree, IReadOnlyList<TreeChange> changes, CancellationToken ct);

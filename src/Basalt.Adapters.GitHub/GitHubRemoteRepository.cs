@@ -244,7 +244,7 @@ internal sealed class GitHubRemoteRepository : IRemoteRepository
     }
 
     /// <summary>Downloads and extracts a zipball in memory, rejecting paths that escape the vault (spec 06 §9.5).</summary>
-    internal async Task<Result<IReadOnlyDictionary<VaultPath, byte[]>>> GetZipballFilesAsync(
+    public async Task<Result<IReadOnlyDictionary<VaultPath, byte[]>>> GetArchiveAsync(
         CommitSha commit,
         CancellationToken ct)
     {

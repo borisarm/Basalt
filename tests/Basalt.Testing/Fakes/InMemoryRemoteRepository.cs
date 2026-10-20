@@ -81,6 +81,28 @@ public sealed class InMemoryRemoteRepository : IRemoteRepository
         }
     }
 
+    public Task<Result<IReadOnlyDictionary<VaultPath, byte[]>>> GetArchiveAsync(CommitSha commit, CancellationToken ct)
+    {
+        ct.ThrowIfCancellationRequested();
+        lock (_gate)
+        {
+            if (!_commits.TryGetValue(commit.ToString(), out var found))
+            {
+                return Task.FromResult(Result<IReadOnlyDictionary<VaultPath, byte[]>>.Failure(
+                    NotFound($"Commit {commit} does not exist.")));
+            }
+
+            if (!_trees.TryGetValue(found.Tree, out var files))
+            {
+                return Task.FromResult(Result<IReadOnlyDictionary<VaultPath, byte[]>>.Failure(
+                    NotFound($"Tree {found.Tree} does not exist.")));
+            }
+
+            var archive = files.ToDictionary(pair => pair.Key, pair => _blobs[pair.Value.ToString()]);
+            return Task.FromResult(Result<IReadOnlyDictionary<VaultPath, byte[]>>.Success(archive));
+        }
+    }
+
     public Task<Result<BlobSha>> CreateBlobAsync(ReadOnlyMemory<byte> content, CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();

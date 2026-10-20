@@ -72,6 +72,26 @@ public abstract class RemoteRepositoryContract : ContractTest<IRemoteRepository>
 
     [Fact]
     [Trait("Spec", "REMOTE-PORT")]
+    public async Task Archive_ContainsEveryFileOfTheCommit()
+    {
+        var (_, tree, commit) = await CommitAsync(Sut, new Dictionary<string, string>
+        {
+            ["a.md"] = "A\n",
+            ["dir/b.txt"] = "B\n",
+        }, "Initial");
+
+        var archive = await Sut.GetArchiveAsync(commit, Ct);
+
+        archive.IsSuccess.Should().BeTrue();
+        Encoding.UTF8.GetString(archive.Value[P("a.md")]).Should().Be("A\n");
+        Encoding.UTF8.GetString(archive.Value[P("dir/b.txt")]).Should().Be("B\n");
+        var missing = await Sut.GetArchiveAsync(ParseCommit("0000000000000000000000000000000000000000"), Ct);
+        missing.Error.Code.Should().Be(RemoteErrors.NotFound);
+        (await Sut.GetTreeAsync(tree, Ct)).Value.Files.Should().HaveCount(2);
+    }
+
+    [Fact]
+    [Trait("Spec", "REMOTE-PORT")]
     public async Task CreateTree_AppliesUpsertsAndDeletesOnBaseTree()
     {
         var (_, baseTree, commit) = await CommitAsync(Sut, new Dictionary<string, string>

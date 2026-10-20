@@ -125,6 +125,7 @@ public interface IRemoteRepository
     // Recursivo; maneja 'truncated'. Devuelve ficheros y las rutas no materializables (cuarentena, 06 §7.4/§7.5).
     Task<Result<RemoteTreeSnapshot>> GetTreeAsync(TreeSha tree, CancellationToken ct);
     Task<Result<byte[]>> GetBlobAsync(BlobSha sha, CancellationToken ct);
+    Task<Result<IReadOnlyDictionary<VaultPath, byte[]>>> GetArchiveAsync(CommitSha commit, CancellationToken ct); // zipball (06 §9.5)
     Task<Result<BlobSha>> CreateBlobAsync(ReadOnlyMemory<byte> content, CancellationToken ct);
     Task<Result<TreeSha>> CreateTreeAsync(TreeSha? baseTree, IReadOnlyList<TreeChange> changes, CancellationToken ct); // TreeChange: Upsert(path, sha) | Delete(path)
     Task<Result<CommitSha>> CreateCommitAsync(string message, TreeSha tree, IReadOnlyList<CommitSha> parents, CommitAuthor author, CancellationToken ct);

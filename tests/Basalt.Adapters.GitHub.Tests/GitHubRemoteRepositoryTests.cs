@@ -80,7 +80,7 @@ public sealed class GitHubRemoteRepositoryTests : RemoteRepositoryContract
         var repository = new GitHubRemoteRepository(new GitHubApiClient(http, reference), reference);
         var head = await repository.GetHeadAsync(null, Ct);
 
-        var files = await repository.GetZipballFilesAsync(head.Value.Head!.Commit, Ct);
+        var files = await repository.GetArchiveAsync(head.Value.Head!.Commit, Ct);
 
         files.IsSuccess.Should().BeTrue();
         System.Text.Encoding.UTF8.GetString(files.Value[VaultPath.Create("dir/b.md").Value]).Should().Be("b");
@@ -94,7 +94,7 @@ public sealed class GitHubRemoteRepositoryTests : RemoteRepositoryContract
         var reference = new RemoteRepositoryRef(GitHubHost.GitHubDotCom, "acme", "vault", "main");
         var repository = new GitHubRemoteRepository(new GitHubApiClient(http, reference), reference);
 
-        var files = await repository.GetZipballFilesAsync(ParseCommit("0000000000000000000000000000000000000000"), Ct);
+        var files = await repository.GetArchiveAsync(ParseCommit("0000000000000000000000000000000000000000"), Ct);
 
         files.Error.Code.Should().Be(RemoteErrors.ValidationFailed);
     }
@@ -199,6 +199,9 @@ public sealed class GitHubRemoteRepositoryTests : RemoteRepositoryContract
 
         public Task<Result<byte[]>> GetBlobAsync(BlobSha sha, CancellationToken ct) => inner.GetBlobAsync(sha, ct);
 
+        public Task<Result<IReadOnlyDictionary<VaultPath, byte[]>>> GetArchiveAsync(CommitSha commit, CancellationToken ct) =>
+            inner.GetArchiveAsync(commit, ct);
+
         public Task<Result<BlobSha>> CreateBlobAsync(ReadOnlyMemory<byte> content, CancellationToken ct) =>
             inner.CreateBlobAsync(content, ct);
 
@@ -232,3 +235,4 @@ public sealed class GitHubRemoteRepositoryTests : RemoteRepositoryContract
         }
     }
 }
+

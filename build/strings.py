@@ -61,6 +61,16 @@ STRINGS = {
     "Conflict.UseDisk": ("Use the disk version", "Usar el de disco"),
     "Conflict.ShowDiff": ("Show differences", "Ver diferencias"),
     # Panels
+    "Panel.Refresh": ("Refresh", "Actualizar"),
+    "Search.Placeholder": ("Search the vault…", "Buscar en el vault…"),
+    "Search.MatchCase": ("Match case", "Distinguir mayúsculas"),
+    "Bookmarks.Remove": ("Remove bookmark", "Quitar marcador"),
+    "Backlinks.Linked": ("Linked mentions", "Menciones enlazadas"),
+    "Backlinks.Unlinked": ("Unlinked mentions", "Menciones sin enlazar"),
+    "Backlinks.Link": ("Link", "Enlazar"),
+    "Properties.Remove": ("Remove property", "Quitar propiedad"),
+    "QuickSwitcher.Placeholder": ("Find or create a note…", "Busca o crea una nota…"),
+    "CommandPalette.Placeholder": ("Type a command…", "Escribe un comando…"),
     "Explorer.NewFolder": ("New folder", "Nueva carpeta"),
     "Explorer.FolderName": ("Folder name", "Nombre de la carpeta"),
     "Explorer.Rename": ("Rename", "Renombrar"),
@@ -81,6 +91,11 @@ STRINGS = {
     # Commands
     "Commands.NewNote": ("New note", "Nueva nota"),
     "Commands.OpenDailyNote": ("Open today's daily note", "Abrir la nota diaria de hoy"),
+    "Commands.SearchVault": ("Search in vault", "Buscar en el vault"),
+    "Commands.ToggleReadingMode": ("Toggle reading/editing", "Alternar lectura/edición"),
+    "Commands.ReopenClosedTab": ("Reopen closed tab", "Reabrir pestaña cerrada"),
+    "Commands.GoBack": ("Go back", "Atrás"),
+    "Commands.GoForward": ("Go forward", "Adelante"),
     "Commands.BookmarkActiveFile": ("Bookmark current file", "Añadir el fichero actual a marcadores"),
     # Errors (domain)
     "Errors.result.uninitialized": ("Internal error: the result was not initialized.", "Error interno: el resultado no se inicializó."),

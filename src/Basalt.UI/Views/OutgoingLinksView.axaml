@@ -1,0 +1,24 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="clr-namespace:Basalt.Presentation.Panels;assembly=Basalt.Presentation"
+             xmlns:o="clr-namespace:Basalt.Presentation.Overlays;assembly=Basalt.Presentation"
+             xmlns:s="clr-namespace:Basalt.Application.Search;assembly=Basalt.Application"
+             xmlns:l="clr-namespace:Basalt.UI.Localization"
+             x:Class="Basalt.UI.Views.OutgoingLinksView"
+             x:DataType="p:OutgoingLinksViewModel">
+  <UserControl.Styles>
+    <Style Selector="TextBlock.unresolved">
+      <Setter Property="Foreground" Value="{DynamicResource BasaltUnresolvedLinkBrush}" />
+    </Style>
+  </UserControl.Styles>
+  <ItemsControl ItemsSource="{Binding Links}" Margin="{StaticResource BasaltSpacingS}">
+    <ItemsControl.ItemTemplate>
+      <DataTemplate x:DataType="p:OutgoingLinkItemViewModel">
+        <Button Background="Transparent" HorizontalContentAlignment="Left"
+                Command="{Binding $parent[UserControl].((p:OutgoingLinksViewModel)DataContext).OpenCommand}" CommandParameter="{Binding}">
+          <TextBlock Text="{Binding Target}" Classes.unresolved="{Binding !IsResolved}" />
+        </Button>
+      </DataTemplate>
+    </ItemsControl.ItemTemplate>
+  </ItemsControl>
+</UserControl>

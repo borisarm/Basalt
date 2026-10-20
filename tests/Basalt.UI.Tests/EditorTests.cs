@@ -121,16 +121,17 @@ public sealed class EditorTests
     });
 
     [Fact]
-    public Task Headings_Fold_AndReadingModeToggles() => Headless.RunAsync(async () =>
+    public Task Headings_Fold_AndCtrlEnterTogglesTasks() => Headless.RunAsync(async () =>
     {
-        var (editor, tab, window, _) = await OpenAsync("# A\nuno\n## A1\ndos\n# B\ntres\n```\ncódigo\n```");
+        var (editor, _, window, _) = await OpenAsync("# A\nuno\n## A1\ndos\n# B\ntres\n```\ncódigo\n```");
 
         // Sections A (with A1), A1 and B, and the fenced code block.
         editor.Foldings.Should().HaveCount(4);
         editor.Foldings.Select(f => editor.Editor.Document.GetLineByOffset(f.StartOffset).LineNumber).Should().BeEquivalentTo([1, 3, 5, 7]);
 
-        Press(editor, Key.E, KeyModifiers.Control);
-        tab.IsReadingMode.Should().BeTrue();
+        editor.SetText("- [ ] tarea", 3);
+        Press(editor, Key.Enter, KeyModifiers.Control);
+        editor.Editor.Text.Should().Be("- [x] tarea", "Ctrl/Cmd+Enter toggles the task (spec 04 shortcut table)");
         window.Close();
     });
 }

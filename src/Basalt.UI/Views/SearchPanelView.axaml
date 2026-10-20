@@ -1,0 +1,27 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="clr-namespace:Basalt.Presentation.Panels;assembly=Basalt.Presentation"
+             xmlns:o="clr-namespace:Basalt.Presentation.Overlays;assembly=Basalt.Presentation"
+             xmlns:s="clr-namespace:Basalt.Application.Search;assembly=Basalt.Application"
+             xmlns:l="clr-namespace:Basalt.UI.Localization"
+             x:Class="Basalt.UI.Views.SearchPanelView"
+             x:DataType="p:SearchPanelViewModel">
+  <DockPanel>
+    <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="{StaticResource BasaltSpacingS}">
+      <TextBox x:Name="Query" Text="{Binding Query}" PlaceholderText="{l:Loc Search.Placeholder}" AutomationProperties.Name="{l:Loc Panel.search}" />
+      <CheckBox x:Name="MatchCase" IsChecked="{Binding MatchCase}" Content="{l:Loc Search.MatchCase}" />
+      <TextBlock x:Name="Error" Text="{Binding Error}" IsVisible="{Binding Error, Converter={x:Static ObjectConverters.IsNotNull}}"
+                 Foreground="{DynamicResource BasaltDangerBrush}" TextWrapping="Wrap" />
+    </StackPanel>
+    <ListBox x:Name="Results" ItemsSource="{Binding Results}">
+      <ListBox.ItemTemplate>
+        <DataTemplate x:DataType="p:SearchResultGroupViewModel">
+          <DockPanel>
+            <TextBlock DockPanel.Dock="Right" Text="{Binding MatchCount}" Foreground="{DynamicResource BasaltTextMutedBrush}" />
+            <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis" />
+          </DockPanel>
+        </DataTemplate>
+      </ListBox.ItemTemplate>
+    </ListBox>
+  </DockPanel>
+</UserControl>

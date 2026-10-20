@@ -178,7 +178,7 @@ public sealed class MarkdownEditorControl : UserControl, IEditorBridge
             (Key.B, var m) when IsMod(m) => commands.ToggleWrap(State, "**"),
             (Key.I, var m) when IsMod(m) => commands.ToggleWrap(State, "*"),
             (Key.K, var m) when IsMod(m) => commands.InsertLink(State),
-            (Key.L, var m) when IsMod(m) => commands.ToggleTask(State),
+            (Key.Enter, var m) when IsMod(m) => commands.ToggleTask(State),
             _ => null,
         };
 
@@ -189,12 +189,7 @@ public sealed class MarkdownEditorControl : UserControl, IEditorBridge
             return;
         }
 
-        if (KeyGesture(e) is (Key.E, var mod) && IsMod(mod))
-        {
-            _tab.ToggleReadingModeCommand.Execute(null);
-            e.Handled = true;
-        }
-        else if (KeyGesture(e) is (Key.V, var paste) && IsMod(paste))
+        if (KeyGesture(e) is (Key.V, var paste) && IsMod(paste))
         {
             e.Handled = TryPasteImage();
         }

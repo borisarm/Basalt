@@ -1,13 +1,17 @@
 using System.ComponentModel;
 using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Basalt.Presentation.Workspace;
+using Basalt.UI.Input;
 
 namespace Basalt.UI.Views;
 
 /// <summary>
-/// An open vault (spec 07 §3). Code-behind only keeps the sidebar columns in step with their ViewModels: widths come
-/// from the saved layout and go back after the user drags a splitter (a gesture, spec 07 §1).
+/// An open vault (spec 07 §3). Code-behind keeps the sidebar columns in step with their ViewModels (widths come from
+/// the saved layout and go back after the user drags a splitter, a gesture, spec 07 §1) and turns key presses into
+/// neutral gestures for the command shortcuts (spec 07 §9).
 /// </summary>
 public partial class WorkspaceView : UserControl
 {
@@ -24,6 +28,19 @@ public partial class WorkspaceView : UserControl
         this.FindControl<GridSplitter>("LeftSplitter")!.DragCompleted += (_, _) => Remember(LeftColumn);
         this.FindControl<GridSplitter>("RightSplitter")!.DragCompleted += (_, _) => Remember(RightColumn);
         DataContextChanged += (_, _) => Attach(DataContext as WorkspaceViewModel);
+        AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Bubble);
+    }
+
+    private void OnKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Handled || _workspace is null || GestureMapper.From(e.Key, e.KeyModifiers) is not { } gesture)
+        {
+            return;
+        }
+
+        // A gesture without a command completes synchronously with false; anything else is ours.
+        var handled = _workspace.HandleGestureAsync(gesture, CancellationToken.None);
+        e.Handled = !handled.IsCompletedSuccessfully || handled.Result;
     }
 
     private void Attach(WorkspaceViewModel? workspace)

@@ -55,6 +55,23 @@ public sealed record Gesture(GestureModifiers Modifiers, string Key)
         return new Gesture(modifiers, key.Length == 1 ? key.ToUpperInvariant() : char.ToUpperInvariant(key[0]) + key[1..]);
     }
 
+    /// <summary>
+    /// Parses a <see cref="CommandDescriptor.DefaultGesture"/>: one gesture for both platforms, or <c>windows;macos</c>
+    /// when they differ (<c>Alt+Left;Mod+[</c>, spec 04 shortcut table).
+    /// </summary>
+    /// <returns><c>gesture.invalid</c>.</returns>
+    public static Result<Gesture> ParseDefault(string text, CommandPlatform platform)
+    {
+        ArgumentNullException.ThrowIfNull(text);
+        var variants = text.Split(';', StringSplitOptions.TrimEntries);
+        return variants.Length switch
+        {
+            1 => Parse(variants[0], platform),
+            2 => Parse(variants[platform == CommandPlatform.MacOS ? 1 : 0], platform),
+            _ => Invalid(text),
+        };
+    }
+
     public string ToString(CommandPlatform platform)
     {
         var names = new List<string>();
@@ -104,7 +121,10 @@ public interface ICommandHost
     Task OpenAsync(VaultPath path, bool newTab, CancellationToken ct);
 }
 
-/// <summary>A command (spec 07 §9): <see cref="DefaultGesture"/> uses <c>Mod</c> notation, e.g. <c>Mod+Shift+T</c>.</summary>
+/// <summary>
+/// A command (spec 07 §9): <see cref="DefaultGesture"/> uses <c>Mod</c> notation, e.g. <c>Mod+Shift+T</c>, or
+/// <c>windows;macos</c> when the platforms differ (see <see cref="Gesture.ParseDefault"/>).
+/// </summary>
 public sealed record CommandDescriptor(
     string Id,
     string TitleKey,
@@ -159,7 +179,7 @@ public sealed class CommandRegistry : ICommandRegistry
     public CommandDescriptor? Find(string id) => _byId.GetValueOrDefault(id);
 
     public CommandDescriptor? FindByGesture(Gesture gesture, CommandPlatform platform) =>
-        Commands.FirstOrDefault(c => c.DefaultGesture is { } text && Gesture.Parse(text, platform) is { IsSuccess: true } parsed && parsed.Value == gesture);
+        Commands.FirstOrDefault(c => c.DefaultGesture is { } text && Gesture.ParseDefault(text, platform) is { IsSuccess: true } parsed && parsed.Value == gesture);
 
     public async Task<Result<Unit>> ExecuteAsync(string id, CommandContext context, CancellationToken ct)
     {
@@ -189,7 +209,7 @@ public sealed class CoreCommands(CreateNoteHandler createNote, OpenDailyNoteHand
             var created = await createNote.HandleAsync(new CreateNote(context.Vault!.Value), ct).ConfigureAwait(false);
             return await OpenAsync(context, created, ct).ConfigureAwait(false);
         }),
-        new(OpenDailyNote, "Commands.OpenDailyNote", "daily-notes", null, HasVault, async (context, ct) =>
+        new(OpenDailyNote, "Commands.OpenDailyNote", "daily-notes", "Mod+Shift+D", HasVault, async (context, ct) =>
         {
             var note = await dailyNote.HandleAsync(new Templates.OpenDailyNote(context.Vault!.Value), ct).ConfigureAwait(false);
             return await OpenAsync(context, note.Map(n => n.Path), ct).ConfigureAwait(false);

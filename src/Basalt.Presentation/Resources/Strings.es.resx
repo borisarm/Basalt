@@ -4,10 +4,20 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Backlinks.Link" xml:space="preserve"><value>Enlazar</value></data>
+  <data name="Backlinks.Linked" xml:space="preserve"><value>Menciones enlazadas</value></data>
+  <data name="Backlinks.Unlinked" xml:space="preserve"><value>Menciones sin enlazar</value></data>
   <data name="Bookmarks.Invalid" xml:space="preserve"><value>No se pudo leer el fichero de marcadores; se apartará cuando cambies un marcador.</value></data>
+  <data name="Bookmarks.Remove" xml:space="preserve"><value>Quitar marcador</value></data>
+  <data name="CommandPalette.Placeholder" xml:space="preserve"><value>Escribe un comando…</value></data>
   <data name="Commands.BookmarkActiveFile" xml:space="preserve"><value>Añadir el fichero actual a marcadores</value></data>
+  <data name="Commands.GoBack" xml:space="preserve"><value>Atrás</value></data>
+  <data name="Commands.GoForward" xml:space="preserve"><value>Adelante</value></data>
   <data name="Commands.NewNote" xml:space="preserve"><value>Nueva nota</value></data>
   <data name="Commands.OpenDailyNote" xml:space="preserve"><value>Abrir la nota diaria de hoy</value></data>
+  <data name="Commands.ReopenClosedTab" xml:space="preserve"><value>Reabrir pestaña cerrada</value></data>
+  <data name="Commands.SearchVault" xml:space="preserve"><value>Buscar en el vault</value></data>
+  <data name="Commands.ToggleReadingMode" xml:space="preserve"><value>Alternar lectura/edición</value></data>
   <data name="Common.Busy" xml:space="preserve"><value>Trabajando…</value></data>
   <data name="Common.Cancel" xml:space="preserve"><value>Cancelar</value></data>
   <data name="Common.Close" xml:space="preserve"><value>Cerrar</value></data>
@@ -80,6 +90,7 @@
   <data name="Menu.NewWindow" xml:space="preserve"><value>Nueva ventana</value></data>
   <data name="Menu.QuickSwitcher" xml:space="preserve"><value>Selector rápido…</value></data>
   <data name="Menu.View" xml:space="preserve"><value>Ver</value></data>
+  <data name="Panel.Refresh" xml:space="preserve"><value>Actualizar</value></data>
   <data name="Panel.backlinks" xml:space="preserve"><value>Enlaces entrantes</value></data>
   <data name="Panel.bookmarks" xml:space="preserve"><value>Marcadores</value></data>
   <data name="Panel.files" xml:space="preserve"><value>Ficheros</value></data>
@@ -90,6 +101,10 @@
   <data name="Panel.search" xml:space="preserve"><value>Buscar</value></data>
   <data name="Panel.tags" xml:space="preserve"><value>Etiquetas</value></data>
   <data name="Properties.Invalid" xml:space="preserve"><value>Las propiedades no son YAML válido; edítalas en el modo código.</value></data>
+  <data name="Properties.Remove" xml:space="preserve"><value>Quitar propiedad</value></data>
+  <data name="QuickSwitcher.Placeholder" xml:space="preserve"><value>Busca o crea una nota…</value></data>
+  <data name="Search.MatchCase" xml:space="preserve"><value>Distinguir mayúsculas</value></data>
+  <data name="Search.Placeholder" xml:space="preserve"><value>Buscar en el vault…</value></data>
   <data name="Settings.About" xml:space="preserve"><value>Acerca de</value></data>
   <data name="Settings.Appearance" xml:space="preserve"><value>Apariencia</value></data>
   <data name="Settings.DailyNotes" xml:space="preserve"><value>Notas diarias</value></data>

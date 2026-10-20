@@ -1,0 +1,39 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="clr-namespace:Basalt.Presentation.Panels;assembly=Basalt.Presentation"
+             xmlns:o="clr-namespace:Basalt.Presentation.Overlays;assembly=Basalt.Presentation"
+             xmlns:s="clr-namespace:Basalt.Application.Search;assembly=Basalt.Application"
+             xmlns:l="clr-namespace:Basalt.UI.Localization"
+             x:Class="Basalt.UI.Views.FileExplorerView"
+             x:DataType="p:FileExplorerViewModel">
+  <DockPanel>
+    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="4" Margin="{StaticResource BasaltSpacingS}">
+      <Button x:Name="NewNote" Content="+" Command="{Binding NewNoteCommand}" CommandParameter="{Binding Selected}"
+              AutomationProperties.Name="{l:Loc Commands.NewNote}" ToolTip.Tip="{l:Loc Commands.NewNote}" />
+      <Button x:Name="NewFolder" Content="▣" Command="{Binding NewFolderCommand}" CommandParameter="{Binding Selected}"
+              AutomationProperties.Name="{l:Loc Explorer.NewFolder}" ToolTip.Tip="{l:Loc Explorer.NewFolder}" />
+      <Button x:Name="Refresh" Content="⟳" Command="{Binding RefreshCommand}"
+              AutomationProperties.Name="{l:Loc Panel.Refresh}" ToolTip.Tip="{l:Loc Panel.Refresh}" />
+    </StackPanel>
+    <TreeView x:Name="Tree" ItemsSource="{Binding Roots}" SelectedItem="{Binding Selected}">
+      <TreeView.Styles>
+        <Style Selector="TreeViewItem" x:DataType="p:FileTreeNodeViewModel">
+          <Setter Property="IsExpanded" Value="{Binding IsExpanded}" />
+        </Style>
+      </TreeView.Styles>
+      <TreeView.ContextMenu>
+        <ContextMenu>
+          <MenuItem Header="{l:Loc Commands.NewNote}" Command="{Binding NewNoteCommand}" CommandParameter="{Binding Selected}" />
+          <MenuItem Header="{l:Loc Explorer.NewFolder}" Command="{Binding NewFolderCommand}" CommandParameter="{Binding Selected}" />
+          <MenuItem Header="{l:Loc Explorer.Rename}" Command="{Binding RenameCommand}" CommandParameter="{Binding Selected}" />
+          <MenuItem Header="{l:Loc Explorer.Delete}" Command="{Binding DeleteCommand}" CommandParameter="{Binding Selected}" />
+        </ContextMenu>
+      </TreeView.ContextMenu>
+      <TreeView.ItemTemplate>
+        <TreeDataTemplate x:DataType="p:FileTreeNodeViewModel" ItemsSource="{Binding Children}">
+          <TextBlock Text="{Binding Name}" />
+        </TreeDataTemplate>
+      </TreeView.ItemTemplate>
+    </TreeView>
+  </DockPanel>
+</UserControl>

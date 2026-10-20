@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <ProjectReference Include="../../src/Basalt.UI/Basalt.UI.csproj" />
+    <ProjectReference Include="../../src/Basalt.Composition/Basalt.Composition.csproj" />
     <ProjectReference Include="../Basalt.Testing/Basalt.Testing.csproj" />
   </ItemGroup>
   <ItemGroup>

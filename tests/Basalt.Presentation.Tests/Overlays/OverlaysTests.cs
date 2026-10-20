@@ -188,6 +188,23 @@ public sealed class OverlaysTests
 
     [Fact]
     [Trait("Spec", "F-008.2")]
+    public async Task Gestures_RunTheirAvailableCommand()
+    {
+        var ran = new List<string>();
+        var registry = Registry(
+            Command("a", "Commands.NewNote", "Mod+N", () => ran.Add("a")),
+            Command("b", "Commands.OpenDailyNote", "Mod+D", () => ran.Add("b"), enabled: false));
+        var vm = new CommandPaletteViewModel(Services, registry, new KeyBindingService(registry, CommandPlatform.Windows), () => new CommandContext(Vault, null, _host));
+
+        (await vm.ExecuteGestureAsync(new Gesture(GestureModifiers.Control, "N"), Ct)).Should().BeTrue();
+        (await vm.ExecuteGestureAsync(new Gesture(GestureModifiers.Control, "D"), Ct)).Should().BeFalse("the command is unavailable");
+        (await vm.ExecuteGestureAsync(new Gesture(GestureModifiers.Control, "Q"), Ct)).Should().BeFalse();
+
+        ran.Should().Equal("a");
+    }
+
+    [Fact]
+    [Trait("Spec", "F-008.2")]
     public async Task Palette_ListsAvailableCommandsWithShortcuts_AndRunsThem()
     {
         var ran = new List<string>();

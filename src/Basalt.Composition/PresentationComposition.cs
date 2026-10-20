@@ -43,6 +43,7 @@ public static class PresentationComposition
         ArgumentNullException.ThrowIfNull(services);
         services.TryAddSingleton<ILocalizer>(_ => new ResxLocalizer(CultureInfo.CurrentUICulture));
         services.TryAddSingleton<IEditorCommands, EditorCommandsService>();
+        services.TryAddEnumerable(ServiceDescriptor.Transient<ICommandContribution, WorkspaceCommands>());
         services.TryAddSingleton(sp => new KeyBindingService(sp.GetRequiredService<ICommandRegistry>(), platform));
         services.TryAddSingleton(options);
         services.TryAddSingleton(sp => new ViewModelServices(

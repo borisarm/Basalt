@@ -1,0 +1,25 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="clr-namespace:Basalt.Presentation.Panels;assembly=Basalt.Presentation"
+             xmlns:o="clr-namespace:Basalt.Presentation.Overlays;assembly=Basalt.Presentation"
+             xmlns:s="clr-namespace:Basalt.Application.Search;assembly=Basalt.Application"
+             xmlns:l="clr-namespace:Basalt.UI.Localization"
+             x:Class="Basalt.UI.Views.PropertiesView"
+             x:DataType="p:PropertiesViewModel">
+  <StackPanel Margin="{StaticResource BasaltSpacingS}" Spacing="4">
+    <TextBlock x:Name="Warning" Text="{Binding Warning}" IsVisible="{Binding Warning, Converter={x:Static ObjectConverters.IsNotNull}}"
+               Foreground="{DynamicResource BasaltWarningBrush}" TextWrapping="Wrap" />
+    <ItemsControl x:Name="Rows" ItemsSource="{Binding Rows}">
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="p:PropertyRow">
+          <Grid ColumnDefinitions="110,*,Auto" Margin="0,0,0,4">
+            <TextBlock Text="{Binding Key}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" TextTrimming="CharacterEllipsis" />
+            <TextBox Grid.Column="1" Text="{Binding Text, Mode=OneWay}" Tag="{Binding}" Classes="property" />
+            <Button Grid.Column="2" Content="×" Margin="4,0,0,0" AutomationProperties.Name="{l:Loc Properties.Remove}"
+                    Command="{Binding $parent[UserControl].((p:PropertiesViewModel)DataContext).RemoveCommand}" CommandParameter="{Binding}" />
+          </Grid>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+  </StackPanel>
+</UserControl>

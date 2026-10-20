@@ -1,0 +1,26 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="clr-namespace:Basalt.Presentation.Panels;assembly=Basalt.Presentation"
+             xmlns:o="clr-namespace:Basalt.Presentation.Overlays;assembly=Basalt.Presentation"
+             xmlns:s="clr-namespace:Basalt.Application.Search;assembly=Basalt.Application"
+             xmlns:l="clr-namespace:Basalt.UI.Localization"
+             x:Class="Basalt.UI.Views.CommandPaletteView"
+             x:DataType="o:CommandPaletteViewModel">
+  <Border Classes="overlay" Width="560" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,80,0,0" Padding="{StaticResource BasaltSpacingM}"
+          Background="{DynamicResource BasaltSurfaceBrush}" BorderBrush="{DynamicResource BasaltBorderBrush}" BorderThickness="1" CornerRadius="8"
+          BoxShadow="0 8 24 0 #40000000">
+    <DockPanel>
+      <TextBox DockPanel.Dock="Top" x:Name="Input" Text="{Binding Text}" PlaceholderText="{l:Loc CommandPalette.Placeholder}" AutomationProperties.Name="{l:Loc CommandPalette.Placeholder}" />
+      <ListBox x:Name="List" ItemsSource="{Binding Items}" SelectedIndex="{Binding SelectedIndex}" MaxHeight="360" Margin="0,8,0,0">
+        <ListBox.ItemTemplate>
+          <DataTemplate x:DataType="o:CommandItem">
+            <DockPanel>
+              <TextBlock DockPanel.Dock="Right" Text="{Binding Gesture, FallbackValue=''}" Foreground="{DynamicResource BasaltTextMutedBrush}" />
+              <TextBlock Text="{Binding Title}" />
+            </DockPanel>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </DockPanel>
+  </Border>
+</UserControl>

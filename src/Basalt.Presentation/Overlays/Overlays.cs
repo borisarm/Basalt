@@ -188,6 +188,19 @@ public sealed partial class CommandPaletteViewModel(
     private CommandItem Item(CommandDescriptor command, string title, IReadOnlyList<int> positions) =>
         new(command.Id, title, bindings.GestureFor(command.Id)?.ToString(bindings.Platform), positions);
 
+    /// <summary>Runs the command bound to <paramref name="gesture"/>, if any and available.</summary>
+    public async Task<bool> ExecuteGestureAsync(Gesture gesture, CancellationToken ct)
+    {
+        var current = context();
+        if (bindings.Resolve(gesture) is not { } command || !command.CanExecute(current))
+        {
+            return false;
+        }
+
+        await RunAsync(token => registry.ExecuteAsync(command.Id, current, token)).ConfigureAwait(true);
+        return true;
+    }
+
     [RelayCommand]
     private async Task ExecuteAsync(CancellationToken ct)
     {

@@ -1,0 +1,59 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="clr-namespace:Basalt.Presentation.Panels;assembly=Basalt.Presentation"
+             xmlns:o="clr-namespace:Basalt.Presentation.Overlays;assembly=Basalt.Presentation"
+             xmlns:s="clr-namespace:Basalt.Application.Search;assembly=Basalt.Application"
+             xmlns:l="clr-namespace:Basalt.UI.Localization"
+             x:Class="Basalt.UI.Views.BacklinksView"
+             x:DataType="p:BacklinksViewModel">
+  <ScrollViewer>
+    <StackPanel Margin="{StaticResource BasaltSpacingS}" Spacing="8">
+      <TextBlock Text="{l:Loc Backlinks.Linked}" FontWeight="Bold" />
+      <ItemsControl ItemsSource="{Binding Linked}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="p:MentionGroupViewModel">
+            <StackPanel Margin="0,0,0,8">
+              <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+              <ItemsControl ItemsSource="{Binding Items}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="p:MentionItemViewModel">
+                    <DockPanel>
+                      <Button Classes="mention" Background="Transparent" HorizontalContentAlignment="Left"
+                              Command="{Binding $parent[UserControl].((p:BacklinksViewModel)DataContext).OpenCommand}" CommandParameter="{Binding}">
+                        <TextBlock Text="{Binding Context}" TextWrapping="Wrap" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
+                      </Button>
+                    </DockPanel>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+      <TextBlock Text="{l:Loc Backlinks.Unlinked}" FontWeight="Bold" />
+      <ItemsControl ItemsSource="{Binding Unlinked}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="p:MentionGroupViewModel">
+            <StackPanel Margin="0,0,0,8">
+              <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+              <ItemsControl ItemsSource="{Binding Items}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="p:MentionItemViewModel">
+                    <DockPanel>
+                      <Button DockPanel.Dock="Right" Content="{Binding Source={x:Static l:LocalizationSource.Instance}, Path=[Backlinks.Link]}"
+                              Command="{Binding $parent[UserControl].((p:BacklinksViewModel)DataContext).LinkMentionCommand}" CommandParameter="{Binding}" />
+                      <Button Classes="mention" Background="Transparent" HorizontalContentAlignment="Left"
+                              Command="{Binding $parent[UserControl].((p:BacklinksViewModel)DataContext).OpenCommand}" CommandParameter="{Binding}">
+                        <TextBlock Text="{Binding Context}" TextWrapping="Wrap" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
+                      </Button>
+                    </DockPanel>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

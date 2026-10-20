@@ -39,8 +39,16 @@ public sealed class KeyBindingService(ICommandRegistry registry, CommandPlatform
     /// <summary>The effective gesture of a command, or null when it has none.</summary>
     public Gesture? GestureFor(string commandId)
     {
-        var text = _overrides.TryGetValue(commandId, out var custom) ? custom : registry.Find(commandId)?.DefaultGesture;
-        return string.IsNullOrWhiteSpace(text) || Gesture.Parse(text, platform) is not { IsSuccess: true } parsed ? null : parsed.Value;
+        var isCustom = _overrides.TryGetValue(commandId, out var custom);
+        var text = isCustom ? custom : registry.Find(commandId)?.DefaultGesture;
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return null;
+        }
+
+        // User gestures are a single platform's gesture (and may use ';' as a key); defaults may hold "windows;macos".
+        var parsed = isCustom ? Gesture.Parse(text, platform) : Gesture.ParseDefault(text, platform);
+        return parsed.IsSuccess ? parsed.Value : null;
     }
 
     /// <summary>The command for a key gesture; with a conflict, a user-assigned command wins.</summary>

@@ -4,6 +4,8 @@
              xmlns:app="clr-namespace:Basalt.Application.Workspace;assembly=Basalt.Application"
              xmlns:l="clr-namespace:Basalt.UI.Localization"
              xmlns:ui="clr-namespace:Basalt.UI"
+             xmlns:views="clr-namespace:Basalt.UI.Views"
+             xmlns:o="clr-namespace:Basalt.Presentation.Overlays;assembly=Basalt.Presentation"
              x:Class="Basalt.UI.Views.WorkspaceView"
              x:DataType="vm:WorkspaceViewModel">
   <!-- Spec 07 §3: ribbon | left sidebar | panes with tabs | right sidebar, status bar at the bottom. -->
@@ -31,6 +33,7 @@
       </StackPanel>
     </Border>
 
+    <Panel>
     <Grid x:Name="Columns" ColumnDefinitions="280,4,*,4,280">
       <!-- Left sidebar -->
       <DockPanel Grid.Column="0" x:Name="LeftSidebar" IsVisible="{Binding LeftSidebar.IsOpen}" Background="{DynamicResource BasaltSurfaceBrush}">
@@ -107,5 +110,12 @@
         <ContentControl x:Name="RightContent" Content="{Binding RightContent}" />
       </DockPanel>
     </Grid>
+
+    <!-- Overlays (F-008) -->
+    <views:QuickSwitcherView x:Name="QuickSwitcher" DataContext="{Binding Panels.QuickSwitcher, FallbackValue={x:Null}}"
+                             x:DataType="o:QuickSwitcherViewModel" IsVisible="{Binding IsOpen, FallbackValue=False}" />
+    <views:CommandPaletteView x:Name="CommandPalette" DataContext="{Binding Panels.CommandPalette, FallbackValue={x:Null}}"
+                              x:DataType="o:CommandPaletteViewModel" IsVisible="{Binding IsOpen, FallbackValue=False}" />
+    </Panel>
   </DockPanel>
 </UserControl>

@@ -277,7 +277,7 @@ public sealed record WorkspaceUseCases(
 /// One open vault (spec 07 §2): its panes and tabs, navigation (<see cref="IWorkspaceNavigator"/>), recent files,
 /// reopening closed tabs and the per-device layout, restored on open and saved on close (F-013).
 /// </summary>
-public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNavigator, IClosable, Application.Commands.ICommandHost
+public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNavigator, IClosable, IWorkspaceCommandHost
 {
     private readonly VaultSessionInfo _vault;
     private readonly WorkspaceUseCases _useCases;
@@ -543,6 +543,30 @@ public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNaviga
 
     [RelayCommand]
     private void ShowPanel(string panelId) => FocusPanel(panelId);
+
+    Task IWorkspaceCommandHost.ShowQuickSwitcherAsync() => ShowQuickSwitcherAsync();
+
+    void IWorkspaceCommandHost.ShowCommandPalette() => ShowCommandPalette();
+
+    void IWorkspaceCommandHost.ShowPanel(string panelId) => FocusPanel(panelId);
+
+    Task IWorkspaceCommandHost.ToggleReadingModeAsync() =>
+        Layout.ActiveGroup.ActiveTab is NoteTabViewModel note ? note.ToggleReadingModeCommand.ExecuteAsync(null) : Task.CompletedTask;
+
+    Task IWorkspaceCommandHost.CloseActiveTabAsync(CancellationToken ct) =>
+        Layout.ActiveGroup.ActiveTab is { } tab ? Layout.ActiveGroup.CloseTabCommand.ExecuteAsync(tab) : Task.CompletedTask;
+
+    Task IWorkspaceCommandHost.ReopenClosedTabAsync(CancellationToken ct) => ReopenClosedTabAsync(ct);
+
+    Task IWorkspaceCommandHost.GoBackAsync(CancellationToken ct) =>
+        Layout.ActiveGroup.ActiveTab is { } tab ? tab.GoBackCommand.ExecuteAsync(null) : Task.CompletedTask;
+
+    Task IWorkspaceCommandHost.GoForwardAsync(CancellationToken ct) =>
+        Layout.ActiveGroup.ActiveTab is { } tab ? tab.GoForwardCommand.ExecuteAsync(null) : Task.CompletedTask;
+
+    /// <summary>A key gesture typed in the workspace: runs its command (spec 07 §9). True when a command answered.</summary>
+    public Task<bool> HandleGestureAsync(Application.Commands.Gesture gesture, CancellationToken ct) =>
+        Panels?.CommandPalette.ExecuteGestureAsync(gesture, ct) ?? Task.FromResult(false);
 
     private bool CanReopenClosedTab() => _closed.Count > 0;
 

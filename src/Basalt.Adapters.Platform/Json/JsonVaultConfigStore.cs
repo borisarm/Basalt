@@ -1,9 +1,11 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Basalt.Application.Bookmarks;
 using Basalt.Application.Errors;
 using Basalt.Application.Ports.FileSystem;
 using Basalt.Application.Ports.Storage;
+using Basalt.Application.Workspace;
 using Basalt.Domain.Common;
 using Basalt.Domain.Notes;
 
@@ -90,6 +92,69 @@ internal sealed class JsonVaultConfigStore : IVaultConfigStore
         var bytes = Encoding.UTF8.GetBytes(document.ToJsonString(Indented) + "\n");
         return await vault.WriteAllBytesAsync(ConfigPath, bytes, null, ct).ConfigureAwait(false);
     }
+
+    public async Task<DocumentLoad<BookmarksDocument>> LoadBookmarksAsync(IVaultFileSystem vault, CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(vault);
+        var (root, status, problem) = await VaultJson.ReadAsync(vault, BookmarksJson.Path, BookmarksJson.SchemaVersion, ct).ConfigureAwait(false);
+        if (root is null)
+        {
+            return new DocumentLoad<BookmarksDocument>(BookmarksDocument.Empty, status, problem);
+        }
+
+        var (document, readProblem) = BookmarksJson.Read(root);
+        return document is null
+            ? new DocumentLoad<BookmarksDocument>(BookmarksDocument.Empty, DocumentLoadStatus.Invalid, readProblem)
+            : new DocumentLoad<BookmarksDocument>(document, DocumentLoadStatus.Loaded);
+    }
+
+    public async Task<Result<Unit>> SaveBookmarksAsync(IVaultFileSystem vault, BookmarksDocument bookmarks, CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(vault);
+        ArgumentNullException.ThrowIfNull(bookmarks);
+        if ((await LoadBookmarksAsync(vault, ct).ConfigureAwait(false)).Status == DocumentLoadStatus.Invalid)
+        {
+            var kept = await VaultJson.KeepAsideAsync(vault, BookmarksJson.Path, ct).ConfigureAwait(false);
+            if (kept.IsFailure)
+            {
+                return kept;
+            }
+        }
+
+        return await VaultJson.WriteAsync(vault, BookmarksJson.Path, BookmarksJson.SchemaVersion, BookmarksJson.Write(bookmarks), ct).ConfigureAwait(false);
+    }
+
+    public async Task<DocumentLoad<WorkspaceState?>> LoadWorkspaceAsync(IVaultFileSystem vault, Guid deviceId, CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(vault);
+        var (root, status, problem) = await VaultJson.ReadAsync(vault, WorkspaceJson.PathFor(deviceId), WorkspaceJson.SchemaVersion, ct).ConfigureAwait(false);
+        if (root is null)
+        {
+            return new DocumentLoad<WorkspaceState?>(null, status, problem);
+        }
+
+        try
+        {
+            return root.Deserialize(PlatformJsonContext.Default.WorkspaceState) is { } workspace
+                ? new DocumentLoad<WorkspaceState?>(workspace, DocumentLoadStatus.Loaded)
+                : Invalid<WorkspaceState>("Empty document.");
+        }
+        catch (JsonException ex)
+        {
+            return Invalid<WorkspaceState>(ex.Message);
+        }
+    }
+
+    public Task<Result<Unit>> SaveWorkspaceAsync(IVaultFileSystem vault, Guid deviceId, WorkspaceState workspace, CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(vault);
+        ArgumentNullException.ThrowIfNull(workspace);
+        var content = (JsonObject)JsonSerializer.SerializeToNode(workspace, PlatformJsonContext.Default.WorkspaceState)!;
+        return VaultJson.WriteAsync(vault, WorkspaceJson.PathFor(deviceId), WorkspaceJson.SchemaVersion, content, ct);
+    }
+
+    private static DocumentLoad<T?> Invalid<T>(string problem)
+        where T : class => new(null, DocumentLoadStatus.Invalid, problem);
 
     private static DocumentLoad<VaultConfig?> Invalid(string problem) => new(null, DocumentLoadStatus.Invalid, problem);
 }

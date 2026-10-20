@@ -25,6 +25,8 @@
 - Serialización con `System.Text.Json` source-generated, `camelCase`, indentado para los que están en el vault (legibles en diffs de GitHub), compacto para los de `{AppData}`.
 - Todos llevan `schemaVersion` (int). Migraciones explícitas en `Basalt.Adapters.Platform/Migrations` con tests por versión.
 - Escritura atómica (temp + rename). Lectura tolerante: si un fichero del vault es inválido (p. ej. tras un conflicto con marcadores), se usa el valor por defecto, se registra un aviso visible y **no se sobrescribe** hasta que el usuario cambie algo.
+- Al guardar sobre un fichero compartido inválido, este se aparta antes como `.basalt/{nombre}.invalid.json` (ADR-0014). Un tipo de entrada desconocido hace inválido el documento entero.
+- `bookmarks.json` tiene forma similar a la de Obsidian: `{ "schemaVersion": 1, "items": [ { "type": "file", "path": "A.md", "subpath": "#Tema", "title": "…" }, { "type": "folder", "path": … }, { "type": "search", "query": … }, { "type": "group", "title": …, "items": [ … ] } ] }`.
 - `bookmarks.json` y `types.json` se fusionan de forma estructural ante conflictos de sync si ambos lados son JSON válido (mismo mecanismo que el frontmatter: `IJsonStructuralMerger` en dominio, a nivel de elemento/clave).
 
 ## 2. Índice SQLite

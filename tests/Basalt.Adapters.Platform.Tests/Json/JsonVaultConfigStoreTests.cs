@@ -8,12 +8,63 @@ namespace Basalt.Adapters.Platform.Tests.Json;
 
 public sealed class JsonVaultConfigStoreTests : VaultConfigStoreContract
 {
+    private const string ConflictedBookmarks = "<<<<<<< Laptop\n{\"items\":[]}\n=======\n{}\n>>>>>>> GitHub\n";
     private static readonly VaultPath ConfigPath = VaultPath.Create(".basalt/vault.json").Value;
+    private static readonly VaultPath BookmarksPath = VaultPath.Create(".basalt/bookmarks.json").Value;
 
     protected override Task<IVaultConfigStore> CreateSutAsync() => Task.FromResult<IVaultConfigStore>(new JsonVaultConfigStore());
 
     protected override Task CorruptAsync() =>
         Vault.WriteAllBytesAsync(ConfigPath, Encoding.UTF8.GetBytes("<<<<<<< Laptop\n{}\n=======\n{}\n>>>>>>> GitHub\n"), null, Ct);
+
+    protected override Task CorruptBookmarksAsync() =>
+        Vault.WriteAllBytesAsync(BookmarksPath, Encoding.UTF8.GetBytes(ConflictedBookmarks), null, Ct);
+
+    [Fact]
+    [Trait("Spec", "PERS-1.1")]
+    public async Task SavingOverInvalidBookmarks_KeepsTheInvalidFileAside()
+    {
+        await CorruptBookmarksAsync();
+        await Vault.WriteAllBytesAsync(VaultPath.Create(".basalt/bookmarks.invalid.json").Value, "older"u8.ToArray(), null, Ct);
+
+        await Sut.SaveBookmarksAsync(Vault, SampleBookmarks, Ct);
+
+        (await Vault.ReadAllTextAsync(VaultPath.Create(".basalt/bookmarks.invalid 2.json").Value, Ct)).Value.Should().Be(ConflictedBookmarks);
+        (await Sut.LoadBookmarksAsync(Vault, Ct)).Value.Should().BeEquivalentTo(SampleBookmarks);
+    }
+
+    [Fact]
+    public async Task Bookmarks_UseAnObsidianLikeShape()
+    {
+        await Sut.SaveBookmarksAsync(Vault, SampleBookmarks, Ct);
+
+        var text = (await Vault.ReadAllTextAsync(BookmarksPath, Ct)).Value;
+
+        text.Should().StartWith("{\n  \"schemaVersion\": 1,\n  \"items\": [\n    {\n      \"type\": \"file\",\n      \"path\": \"Proyectos/A.md\"\n    },");
+        text.Should().Contain("\"type\": \"group\"").And.Contain("\"type\": \"search\"").And.Contain("\"query\": \"tag:#urgente\"").And.EndWith("}\n");
+    }
+
+    [Fact]
+    public async Task Bookmarks_FromANewerVersion_AreInvalid_AndUnknownTypesAreKept()
+    {
+        await Vault.WriteAllBytesAsync(BookmarksPath, Encoding.UTF8.GetBytes("""{"schemaVersion":9,"items":[]}"""), null, Ct);
+        (await Sut.LoadBookmarksAsync(Vault, Ct)).Status.Should().Be(DocumentLoadStatus.Invalid);
+
+        await Vault.WriteAllBytesAsync(BookmarksPath, Encoding.UTF8.GetBytes("""{"items":[{"type":"canvas","path":"x.canvas"},{"type":"file","path":"a.md"}]}"""), null, Ct);
+        var load = await Sut.LoadBookmarksAsync(Vault, Ct);
+        load.Status.Should().Be(DocumentLoadStatus.Invalid);
+        load.Problem.Should().Contain("canvas");
+    }
+
+    [Fact]
+    public async Task Workspace_FileIsNamedAfterTheDevice()
+    {
+        await Sut.SaveWorkspaceAsync(Vault, DeviceA, SampleWorkspace, Ct);
+
+        (await Vault.ExistsAsync(VaultPath.Create($".basalt/workspace.{DeviceA}.json").Value, Ct)).Should().BeTrue();
+        await Vault.WriteAllBytesAsync(VaultPath.Create($".basalt/workspace.{DeviceB}.json").Value, "not json"u8.ToArray(), null, Ct);
+        (await Sut.LoadWorkspaceAsync(Vault, DeviceB, Ct)).Status.Should().Be(DocumentLoadStatus.Invalid);
+    }
 
     [Fact]
     public async Task Save_WritesIndentedJsonWithSchemaVersion()

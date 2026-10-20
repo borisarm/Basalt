@@ -195,7 +195,8 @@ public interface ISyncStateStore           // base de sincronización + journal 
     Task SaveHashCacheAsync(HashCache cache, CancellationToken ct);
 }
 public interface IAppSettingsStore { /* ajustes globales de la app: tema, idioma, atajos, último vault */ }
-public interface IVaultConfigStore         // .basalt/vault.json, .basalt/workspace.<deviceId>.json, bookmarks, etc. dentro del vault
+public interface IVaultConfigStore         // .basalt/vault.json, .basalt/bookmarks.json, .basalt/workspace.<deviceId>.json dentro del vault (Load/Save de cada uno)
+public interface IRecentFilesStore         // {AppData}/vaults/{vaultId}/recent.json: LoadAsync(VaultId) / SaveAsync(VaultId, paths)
 { /* lectura/escritura tipada vía IVaultFileSystem */ }
 ```
 
@@ -267,7 +268,7 @@ Cada caso de uso es un `record` comando/consulta + un handler. Lista completa (l
 `GetBacklinks(VaultId, Path)` (enlazadas + menciones no enlazadas con contexto), `GetOutgoingLinks`, `LinkUnlinkedMention(VaultId, SourcePath, Span, TargetPath)`, `GetTags(VaultId)`, `Search(VaultId, QueryText, Options)`, `QuickSwitch(VaultId, Text)` (fuzzy sobre títulos + alias, incluye "crear nota X"), `GetOutline(VaultId, Path)`, `GetGraph(VaultId, GraphFilter)`, `GetLocalGraph(VaultId, Path, Depth, Filter)`, `ResolveLink(VaultId, SourcePath, LinkText)`, `SuggestLinkTargets(VaultId, SourcePath, Partial)` (autocompletado: notas, encabezados tras `#`, bloques tras `^`), `SuggestTags(VaultId, Partial)`.
 
 ### Productividad
-`OpenDailyNote(VaultId, Date)` (crea si no existe desde plantilla), `InsertTemplate(VaultId, TemplatePath, TargetPath)` → texto a insertar, `ListTemplates`, `AddBookmark/RemoveBookmark/ListBookmarks`, `SaveWorkspace/LoadWorkspace(VaultId)` (pestañas, paneles, nota activa, por dispositivo), `ExecuteCommand(CommandId)` vía `ICommandRegistry`.
+`OpenDailyNote(VaultId, Date?)` (crea si no existe desde plantilla; hoy en la zona local por defecto; plantilla configurada inexistente → `entry.not_found` sin crear nada), `InsertTemplate(VaultId, TemplatePath, TargetPath, CurrentText, Cursor)` → `TemplateInsertion(Text, Cursor)`: devuelve el texto completo del editor con el cuerpo insertado en el cursor y las propiedades de la plantilla añadidas al frontmatter (prevalecen las de la nota); **no escribe en disco** (el editor aplica el resultado a su búfer y guarda como siempre, sin pisar ediciones sin guardar), `ListTemplates`, `AddBookmark/RemoveBookmark/ListBookmarks` (los marcadores siguen renombrados y movimientos; los de ficheros borrados se conservan), `RecordRecentFile/ListRecentFiles` (50 por vault y dispositivo; siguen renombrados y quitan borrados), `GetOutline`, `SaveWorkspace/LoadWorkspace(VaultId)` (pestañas, paneles, nota activa, por dispositivo), `ExecuteCommand(CommandId)` vía `ICommandRegistry`.
 
 ### Cuentas y sincronización
 | Caso de uso | Notas |

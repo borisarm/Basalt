@@ -25,6 +25,7 @@ public static class ErrorCodes
     public const string MoveIntoItself = "entry.move_into_itself";
     public const string MentionNotFound = "mention.not_found";
     public const string BlockNotFound = "block.not_found";
+    public const string BookmarkNotFound = "bookmark.not_found";
 
     public const string VaultAlreadyRegistered = "vault.already_registered";
     public const string VaultNotRegistered = "vault.not_registered";

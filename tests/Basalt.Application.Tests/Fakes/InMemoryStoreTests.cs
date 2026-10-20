@@ -31,6 +31,23 @@ public sealed class InMemoryVaultConfigStoreTests : VaultConfigStoreContract
         ((InMemoryVaultConfigStore)Sut).Corrupt(Vault);
         return Task.CompletedTask;
     }
+
+    protected override Task CorruptBookmarksAsync()
+    {
+        ((InMemoryVaultConfigStore)Sut).CorruptBookmarks(Vault);
+        return Task.CompletedTask;
+    }
+}
+
+public sealed class InMemoryRecentFilesStoreTests : RecentFilesStoreContract
+{
+    protected override Task<IRecentFilesStore> CreateSutAsync() => Task.FromResult<IRecentFilesStore>(new InMemoryRecentFilesStore());
+
+    protected override Task CorruptAsync()
+    {
+        ((InMemoryRecentFilesStore)Sut).Corrupt(VaultA);
+        return Task.CompletedTask;
+    }
 }
 
 internal static class StoreSamples

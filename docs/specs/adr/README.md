@@ -27,3 +27,4 @@ Formato de cada ADR (`NNNN-titulo-en-kebab-case.md`):
 | [0011](0011-almacenes-de-documentos.md) | Almacenes JSON con `IDocumentStore<T>` | Aceptado |
 | [0012](0012-sesiones-de-vault.md) | Sesiones de vault explícitas en lugar de scopes de DI | Aceptado |
 | [0013](0013-busqueda-por-subcadena-con-trigramas.md) | Búsqueda por subcadena: FTS5 `trigram` sobre texto plegado | Aceptado |
+| [0014](0014-json-invalido-se-aparta.md) | Un JSON compartido inválido se aparta antes de sobrescribirlo | Aceptado |

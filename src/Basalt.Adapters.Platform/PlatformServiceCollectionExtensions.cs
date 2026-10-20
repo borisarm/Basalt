@@ -26,6 +26,7 @@ public static class PlatformServiceCollectionExtensions
         services.AddSingleton<IDocumentStore<AccountsDocument>>(sp => Store(sp, "accounts.json", PlatformJsonContext.Default.AccountsDocument, () => AccountsDocument.Empty));
         services.AddSingleton<IDocumentStore<AppSettings>>(sp => Store(sp, "settings.json", PlatformJsonContext.Default.AppSettings, () => AppSettings.Default));
         services.AddSingleton<IVaultConfigStore, JsonVaultConfigStore>();
+        services.AddSingleton<IRecentFilesStore, JsonRecentFilesStore>();
         services.AddSingleton<Application.Ports.FileSystem.IVaultLocalDataStore, VaultLocalDataStore>();
         return services;
     }

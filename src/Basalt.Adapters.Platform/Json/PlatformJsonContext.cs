@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using Basalt.Application.Accounts;
 using Basalt.Application.Settings;
 using Basalt.Application.Vaults;
+using Basalt.Application.Workspace;
 using Basalt.Domain.Vaults;
 
 namespace Basalt.Adapters.Platform.Json;
@@ -19,4 +20,6 @@ internal sealed record VaultConfigDto(VaultId VaultId, VaultSettings Settings);
 [JsonSerializable(typeof(AccountsDocument))]
 [JsonSerializable(typeof(AppSettings))]
 [JsonSerializable(typeof(VaultConfigDto))]
+[JsonSerializable(typeof(WorkspaceState))]
+[JsonSerializable(typeof(RecentFilesDocument))]
 internal sealed partial class PlatformJsonContext : JsonSerializerContext;

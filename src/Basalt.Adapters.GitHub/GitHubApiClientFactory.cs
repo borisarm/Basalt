@@ -3,7 +3,6 @@ using System.Net;
 using Basalt.Application.Auth;
 using Basalt.Application.Ports.Remote;
 using Basalt.Domain.Accounts;
-using Basalt.Domain.Common;
 using Microsoft.Extensions.Logging;
 
 namespace Basalt.Adapters.GitHub;
@@ -59,12 +58,4 @@ internal sealed class GitHubApiClientFactory : IDisposable
             return new HttpClient(retry) { BaseAddress = host.ApiUrl };
         });
     }
-}
-
-/// <summary>Until the account store/token provider is wired (T8.6), remote calls fail with <c>remote.unauthorized</c>.</summary>
-internal sealed class UnavailableGitHubTokenProvider : IGitHubTokenProvider
-{
-    public Task<Result<GitHubToken>> GetTokenAsync(GitHubAccountId account, CancellationToken ct) =>
-        Task.FromResult(Result<GitHubToken>.Failure(
-            new Error(RemoteErrors.Unauthorized, "No GitHub account is signed in.")));
 }

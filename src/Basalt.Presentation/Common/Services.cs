@@ -54,6 +54,12 @@ public interface IDialogService
     Task<string?> PickFolderAsync(string title, CancellationToken ct);
 }
 
+/// <summary>Content that must save its state before it goes away (a workspace before its vault closes).</summary>
+public interface IClosable
+{
+    Task CloseAsync(CancellationToken ct);
+}
+
 /// <summary>Where and how to open a file.</summary>
 public sealed record OpenRequest(VaultPath Path, bool NewTab = false, string? Subpath = null, int? Line = null);
 

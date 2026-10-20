@@ -1,0 +1,388 @@
+using System.Collections.ObjectModel;
+using Basalt.Application.Abstractions;
+using Basalt.Application.Errors;
+using Basalt.Application.Vaults;
+using Basalt.Application.Workspace;
+using Basalt.Domain.Common;
+using Basalt.Domain.Notes;
+using Basalt.Presentation.Common;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+
+namespace Basalt.Presentation.Workspace;
+
+/// <summary>Creates tabs of one kind (spec 07 §2: Open/Closed for new tab types).</summary>
+public interface ITabFactory
+{
+    string Kind { get; }
+
+    bool CanOpen(VaultPath path);
+
+    TabViewModel Create();
+}
+
+/// <summary>A group of tabs in one pane.</summary>
+public sealed partial class TabGroupViewModel(ViewModelServices services, IReadOnlyList<ITabFactory> factories) : ViewModelBase(services)
+{
+    public ObservableCollection<TabViewModel> Tabs { get; } = [];
+
+    [ObservableProperty]
+    public partial TabViewModel? ActiveTab { get; set; }
+
+    /// <summary>Share of the split.</summary>
+    [ObservableProperty]
+    public partial double Size { get; set; } = 1;
+
+    /// <summary>Raised after a tab is closed, with what it was showing.</summary>
+    public event EventHandler<OpenRequest>? TabClosed;
+
+    /// <summary>
+    /// Shows the file: activates a tab already showing it; otherwise navigates the active tab (unless pinned, of
+    /// another kind or <see cref="OpenRequest.NewTab"/>) or opens a new tab next to it.
+    /// </summary>
+    /// <returns><c>entry.unsupported</c> when no tab type can show the file, or the tab's load error.</returns>
+    public async Task<Result<Unit>> OpenAsync(OpenRequest request, CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        if (!request.NewTab && Tabs.FirstOrDefault(t => t.Path == request.Path) is { } existing)
+        {
+            ActiveTab = existing;
+            return Result.Success();
+        }
+
+        if (factories.FirstOrDefault(f => f.CanOpen(request.Path)) is not { } factory)
+        {
+            return new Error(ErrorCodes.EntryUnsupported, "No tab can show this file.").With("path", request.Path.ToString());
+        }
+
+        if (!request.NewTab && ActiveTab is { IsPinned: false } active && active.Kind == factory.Kind)
+        {
+            return await active.NavigateAsync(request, ct).ConfigureAwait(true);
+        }
+
+        var tab = factory.Create();
+        var shown = await tab.ShowAsync(request, ct).ConfigureAwait(true);
+        if (shown.IsFailure)
+        {
+            tab.Dispose();
+            return shown;
+        }
+
+        Tabs.Insert(ActiveTab is null ? Tabs.Count : Tabs.IndexOf(ActiveTab) + 1, tab);
+        ActiveTab = tab;
+        return Result.Success();
+    }
+
+    /// <summary>Adds a restored tab (workspace persistence).</summary>
+    public async Task<bool> RestoreAsync(WorkspaceTab saved, CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(saved);
+        if (saved.Path is null || VaultPath.Create(saved.Path) is not { IsSuccess: true } path
+            || factories.FirstOrDefault(f => f.Kind == saved.Kind && f.CanOpen(path.Value)) is not { } factory)
+        {
+            return false;
+        }
+
+        var tab = factory.Create();
+        if ((await tab.ShowAsync(new OpenRequest(path.Value), ct).ConfigureAwait(true)).IsFailure)
+        {
+            tab.Dispose();
+            return false;
+        }
+
+        tab.IsPinned = saved.Pinned;
+        tab.RestoreViewState(saved.ViewState);
+        Tabs.Add(tab);
+        return true;
+    }
+
+    public async Task FlushAllAsync(CancellationToken ct)
+    {
+        foreach (var tab in Tabs.ToList())
+        {
+            await tab.FlushAsync(ct).ConfigureAwait(true);
+        }
+    }
+
+    public WorkspacePane Capture() => new(
+        [.. Tabs.Select(t => new WorkspaceTab(t.Kind, t.Path?.ToString(), t.IsPinned, t.ViewState))],
+        ActiveTab is null ? 0 : Tabs.IndexOf(ActiveTab),
+        Size);
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            foreach (var tab in Tabs)
+            {
+                tab.Dispose();
+            }
+        }
+
+        base.Dispose(disposing);
+    }
+
+    [RelayCommand]
+    private async Task CloseTabAsync(TabViewModel? tab, CancellationToken ct)
+    {
+        if (tab is null || !Tabs.Contains(tab))
+        {
+            return;
+        }
+
+        await tab.FlushAsync(ct).ConfigureAwait(true);
+        var index = Tabs.IndexOf(tab);
+        Tabs.RemoveAt(index);
+        if (ActiveTab == tab)
+        {
+            ActiveTab = Tabs.Count == 0 ? null : Tabs[Math.Max(0, index - 1)];
+        }
+
+        var current = tab.Current;
+        tab.Dispose();
+        if (current is not null)
+        {
+            TabClosed?.Invoke(this, current);
+        }
+    }
+
+    [RelayCommand]
+    private static void TogglePin(TabViewModel? tab)
+    {
+        if (tab is not null)
+        {
+            tab.IsPinned = !tab.IsPinned;
+        }
+    }
+}
+
+/// <summary>The central area: one level of split panes (F-013), each a <see cref="TabGroupViewModel"/>.</summary>
+public sealed partial class PaneLayoutViewModel : ViewModelBase
+{
+    private readonly Func<TabGroupViewModel> _groupFactory;
+
+    public PaneLayoutViewModel(ViewModelServices services, Func<TabGroupViewModel> groupFactory)
+        : base(services)
+    {
+        ArgumentNullException.ThrowIfNull(groupFactory);
+        _groupFactory = groupFactory;
+        ActiveGroup = AddGroup();
+    }
+
+    public ObservableCollection<TabGroupViewModel> Groups { get; } = [];
+
+    [ObservableProperty]
+    public partial TabGroupViewModel ActiveGroup { get; set; }
+
+    [ObservableProperty]
+    public partial SplitOrientation Orientation { get; set; }
+
+    /// <summary>Raised when any group closes a tab.</summary>
+    public event EventHandler<OpenRequest>? TabClosed;
+
+    public TabGroupViewModel AddGroup()
+    {
+        var group = _groupFactory();
+        group.TabClosed += OnTabClosed;
+        Groups.Add(group);
+        foreach (var each in Groups)
+        {
+            each.Size = 1.0 / Groups.Count;
+        }
+
+        return group;
+    }
+
+    public async Task FlushAllAsync(CancellationToken ct)
+    {
+        foreach (var group in Groups.ToList())
+        {
+            await group.FlushAllAsync(ct).ConfigureAwait(true);
+        }
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            foreach (var group in Groups)
+            {
+                group.Dispose();
+            }
+        }
+
+        base.Dispose(disposing);
+    }
+
+    /// <summary>Splits the area: a new pane showing the active file.</summary>
+    [RelayCommand]
+    private async Task SplitAsync(SplitOrientation orientation, CancellationToken ct)
+    {
+        var current = ActiveGroup.ActiveTab?.Current;
+        Orientation = orientation;
+        var group = AddGroup();
+        ActiveGroup = group;
+        if (current is not null)
+        {
+            await group.OpenAsync(current with { NewTab = true }, ct).ConfigureAwait(true);
+        }
+    }
+
+    private void OnTabClosed(object? sender, OpenRequest closed)
+    {
+        // An emptied secondary pane closes.
+        if (sender is TabGroupViewModel group && group.Tabs.Count == 0 && Groups.Count > 1)
+        {
+            var index = Groups.IndexOf(group);
+            Groups.Remove(group);
+            group.TabClosed -= OnTabClosed;
+            group.Dispose();
+            foreach (var each in Groups)
+            {
+                each.Size = 1.0 / Groups.Count;
+            }
+
+            if (ActiveGroup == group)
+            {
+                ActiveGroup = Groups[Math.Max(0, index - 1)];
+            }
+        }
+
+        TabClosed?.Invoke(this, closed);
+    }
+}
+
+/// <summary>The use cases behind the workspace.</summary>
+public sealed record WorkspaceUseCases(
+    ICommandHandler<RecordRecentFile, Unit> RecordRecent,
+    IQueryHandler<LoadWorkspace, WorkspaceState?> Load,
+    ICommandHandler<SaveWorkspace, Unit> Save);
+
+/// <summary>
+/// One open vault (spec 07 §2): its panes and tabs, navigation (<see cref="IWorkspaceNavigator"/>), recent files,
+/// reopening closed tabs and the per-device layout, restored on open and saved on close (F-013).
+/// </summary>
+public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNavigator, IClosable
+{
+    private readonly VaultSessionInfo _vault;
+    private readonly WorkspaceUseCases _useCases;
+    private readonly Stack<OpenRequest> _closed = new();
+
+    public WorkspaceViewModel(
+        ViewModelServices services,
+        VaultSessionInfo vault,
+        IReadOnlyList<ITabFactory> tabFactories,
+        IWorkspaceMessenger messenger,
+        WorkspaceUseCases useCases)
+        : base(services)
+    {
+        ArgumentNullException.ThrowIfNull(vault);
+        _vault = vault;
+        _useCases = useCases;
+        Messenger = messenger;
+        Layout = new PaneLayoutViewModel(services, () => new TabGroupViewModel(services, tabFactories));
+        Layout.TabClosed += (_, closed) =>
+        {
+            _closed.Push(closed);
+            ReopenClosedTabCommand.NotifyCanExecuteChanged();
+        };
+    }
+
+    public string Title => _vault.Name;
+
+    public IWorkspaceMessenger Messenger { get; }
+
+    public PaneLayoutViewModel Layout { get; }
+
+    [ObservableProperty]
+    public partial string? FocusedPanel { get; private set; }
+
+    /// <summary>Restores the layout saved on this device.</summary>
+    public async Task InitializeAsync(CancellationToken ct)
+    {
+        var state = await RunAsync(token => _useCases.Load.HandleAsync(new LoadWorkspace(_vault.Id), token), notifyErrors: false).ConfigureAwait(true);
+        if (state.IsFailure || state.Value is not { Panes.Count: > 0 } saved)
+        {
+            return;
+        }
+
+        Layout.Orientation = saved.Orientation;
+        var groups = new List<TabGroupViewModel>();
+        foreach (var pane in saved.Panes)
+        {
+            var group = groups.Count == 0 ? Layout.Groups[0] : Layout.AddGroup();
+            foreach (var tab in pane.Tabs)
+            {
+                await group.RestoreAsync(tab, ct).ConfigureAwait(true);
+            }
+
+            group.ActiveTab = group.Tabs.Count == 0 ? null : group.Tabs[Math.Clamp(pane.ActiveTab, 0, group.Tabs.Count - 1)];
+            groups.Add(group);
+        }
+
+        foreach (var empty in groups.Skip(1).Where(g => g.Tabs.Count == 0).ToList())
+        {
+            Layout.Groups.Remove(empty);
+            empty.Dispose();
+            groups.Remove(empty);
+        }
+
+        foreach (var group in Layout.Groups)
+        {
+            group.Size = 1.0 / Layout.Groups.Count;
+        }
+
+        Layout.ActiveGroup = Layout.Groups[Math.Clamp(saved.ActivePane, 0, Layout.Groups.Count - 1)];
+    }
+
+    public async Task OpenAsync(OpenRequest request, CancellationToken ct) => await OpenFileAsync(request, ct).ConfigureAwait(true);
+
+    /// <summary>Opens a file in the active pane and records it as recent.</summary>
+    public async Task<Result<Unit>> OpenFileAsync(OpenRequest request, CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        var opened = await RunAsync(token => Layout.ActiveGroup.OpenAsync(request, token)).ConfigureAwait(true);
+        if (opened.IsSuccess)
+        {
+            await _useCases.RecordRecent.HandleAsync(new RecordRecentFile(_vault.Id, request.Path), ct).ConfigureAwait(true);
+        }
+
+        return opened;
+    }
+
+    public void FocusPanel(string panelId) => FocusedPanel = panelId;
+
+    public WorkspaceState CaptureState() => new(
+        [.. Layout.Groups.Select(g => g.Capture())],
+        Layout.Groups.IndexOf(Layout.ActiveGroup),
+        Layout.Orientation);
+
+    /// <summary>Saves every tab and the layout (window close, vault close).</summary>
+    public async Task CloseAsync(CancellationToken ct)
+    {
+        await Layout.FlushAllAsync(ct).ConfigureAwait(true);
+        await RunAsync(token => _useCases.Save.HandleAsync(new SaveWorkspace(_vault.Id, CaptureState()), token)).ConfigureAwait(true);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            Layout.Dispose();
+        }
+
+        base.Dispose(disposing);
+    }
+
+    private bool CanReopenClosedTab() => _closed.Count > 0;
+
+    [RelayCommand(CanExecute = nameof(CanReopenClosedTab))]
+    private async Task ReopenClosedTabAsync(CancellationToken ct)
+    {
+        if (_closed.TryPop(out var request))
+        {
+            ReopenClosedTabCommand.NotifyCanExecuteChanged();
+            await OpenFileAsync(request with { NewTab = true }, ct).ConfigureAwait(true);
+        }
+    }
+}

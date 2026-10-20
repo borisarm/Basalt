@@ -113,6 +113,12 @@ public sealed partial class ShellViewModel : ViewModelBase, IVaultOpener
             return;
         }
 
+        // Unsaved edits and the layout are written before the vault's session goes away (F-003: never lose an edit).
+        if (Content is IClosable closable)
+        {
+            await closable.CloseAsync(CancellationToken.None).ConfigureAwait(true);
+        }
+
         await RunAsync(token => _close.HandleAsync(new CloseVault(vault), token)).ConfigureAwait(true);
         (Content as IDisposable)?.Dispose();
         Content = Picker;

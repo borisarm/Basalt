@@ -25,6 +25,7 @@
   <data name="Errors.daily_note.invalid_format" xml:space="preserve"><value>The daily note format is not valid.</value></data>
   <data name="Errors.entry.move_into_itself" xml:space="preserve"><value>A folder cannot be moved into itself.</value></data>
   <data name="Errors.entry.not_found" xml:space="preserve"><value>“{path}” does not exist.</value></data>
+  <data name="Errors.entry.unsupported" xml:space="preserve"><value>This kind of file cannot be opened here.</value></data>
   <data name="Errors.frontmatter.invalid_yaml" xml:space="preserve"><value>The properties are not valid YAML.</value></data>
   <data name="Errors.frontmatter.not_a_mapping" xml:space="preserve"><value>The properties must be key: value pairs.</value></data>
   <data name="Errors.frontmatter.too_large" xml:space="preserve"><value>The properties block is too large.</value></data>

@@ -17,9 +17,17 @@ public sealed class ShellViewModelTests
     private static readonly VaultId IdA = new(Guid.Parse("aaaaaaaa-0000-4000-8000-000000000001"));
     private static readonly VaultId IdB = new(Guid.Parse("bbbbbbbb-0000-4000-8000-000000000002"));
 
-    private sealed class FakeWorkspace(ViewModelServices services, VaultSessionInfo info) : ViewModelBase(services)
+    private sealed class FakeWorkspace(ViewModelServices services, VaultSessionInfo info) : ViewModelBase(services), IClosable
     {
         public VaultSessionInfo Info { get; } = info;
+
+        public int Closed { get; private set; }
+
+        public Task CloseAsync(CancellationToken ct)
+        {
+            Closed++;
+            return Task.CompletedTask;
+        }
     }
 
     private readonly ViewModelServices _services = new(new ImmediateDispatcher(), new FakeNotificationService(), PresentationFakes.Localizer(), new FakeTimeProvider());
@@ -111,10 +119,11 @@ public sealed class ShellViewModelTests
     {
         var shell = Shell();
         await shell.InitializeAsync(IdA, Ct);
-        var workspace = shell.Content;
+        var workspace = (FakeWorkspace)shell.Content;
 
         await shell.CloseVaultCommand.ExecuteAsync(null);
 
+        workspace.Closed.Should().Be(1, "the workspace saves its tabs before the vault closes");
         await _close.Received(1).HandleAsync(new CloseVault(IdA), Arg.Any<CancellationToken>());
         shell.Content.Should().BeOfType<VaultPickerViewModel>();
         shell.ActiveVault.Should().BeNull();

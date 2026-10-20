@@ -63,6 +63,7 @@ STRINGS = {
     "Errors.note.modified_externally": ("The note changed on disk while you were editing it.", "La nota cambió en el disco mientras la editabas."),
     "Errors.note.not_a_task": ("That line is not a task.", "Esa línea no es una tarea."),
     "Errors.note.frontmatter_invalid": ("The properties (frontmatter) are not valid YAML; fix them in the source editor.", "Las propiedades (frontmatter) no son YAML válido; corrígelas en el editor de código."),
+    "Errors.entry.unsupported": ("This kind of file cannot be opened here.", "Este tipo de fichero no se puede abrir aquí."),
     "Errors.entry.move_into_itself": ("A folder cannot be moved into itself.", "Una carpeta no se puede mover dentro de sí misma."),
     "Errors.mention.not_found": ("The mention is no longer there.", "La mención ya no está."),
     "Errors.block.not_found": ("There is no block on that line.", "No hay ningún bloque en esa línea."),

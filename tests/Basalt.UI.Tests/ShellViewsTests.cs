@@ -43,7 +43,7 @@ public sealed class ShellViewsTests
             Substitute.For<ICommandHandler<CloseVault, Unit>>(),
             Substitute.For<IWindowService>(),
             opener => new VaultPickerViewModel(services, new VaultPickerUseCases(list, null!, null!, null!, null!), dialogs, opener),
-            info => new Presentation.Workspace.WorkspaceViewModel(services, info, [], new WorkspaceMessenger(), null!));
+            info => new Presentation.Workspace.WorkspaceViewModel(services, info, [], new WorkspaceMessenger(), null!, Substitute.For<IWindowService>()));
         return (new MainWindow(shell, notifications), shell, dialogs, open);
     }
 

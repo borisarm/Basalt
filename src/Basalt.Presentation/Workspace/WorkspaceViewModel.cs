@@ -6,6 +6,7 @@ using Basalt.Application.Workspace;
 using Basalt.Domain.Common;
 using Basalt.Domain.Notes;
 using Basalt.Presentation.Common;
+using Basalt.Presentation.Shell;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -341,6 +342,7 @@ public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNaviga
 {
     private readonly VaultSessionInfo _vault;
     private readonly WorkspaceUseCases _useCases;
+    private readonly IWindowService _windows;
     private readonly Stack<OpenRequest> _closed = new();
     private WorkspacePanels? _panels;
     private TabGroupViewModel? _watchedGroup;
@@ -352,12 +354,14 @@ public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNaviga
         VaultSessionInfo vault,
         IReadOnlyList<ITabFactory> tabFactories,
         IWorkspaceMessenger messenger,
-        WorkspaceUseCases useCases)
+        WorkspaceUseCases useCases,
+        IWindowService windows)
         : base(services)
     {
         ArgumentNullException.ThrowIfNull(vault);
         _vault = vault;
         _useCases = useCases;
+        _windows = windows;
         Messenger = messenger;
         Layout = new PaneLayoutViewModel(services, () => new TabGroupViewModel(services, tabFactories));
         Layout.TabClosed += (_, closed) =>
@@ -609,6 +613,10 @@ public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNaviga
     private Task<Result<Unit>> OpenGraphAsync(CancellationToken ct) =>
         RunAsync(token => Layout.ActiveGroup.OpenKindAsync(GraphTabViewModel.KindId, token));
 
+    /// <summary>Opens the settings window of the app and this vault (F-014).</summary>
+    [RelayCommand]
+    private void OpenSettings() => _windows.OpenSettings(_vault);
+
     Task IWorkspaceCommandHost.ShowQuickSwitcherAsync() => ShowQuickSwitcherAsync();
 
     void IWorkspaceCommandHost.ShowCommandPalette() => ShowCommandPalette();
@@ -630,6 +638,12 @@ public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNaviga
         Layout.ActiveGroup.ActiveTab is { } tab ? tab.GoForwardCommand.ExecuteAsync(null) : Task.CompletedTask;
 
     Task IWorkspaceCommandHost.OpenGraphAsync(CancellationToken ct) => OpenGraphAsync(ct);
+
+    Task IWorkspaceCommandHost.OpenSettingsAsync()
+    {
+        OpenSettings();
+        return Task.CompletedTask;
+    }
 
     /// <summary>A key gesture typed in the workspace: runs its command (spec 07 §9). True when a command answered.</summary>
     public Task<bool> HandleGestureAsync(Application.Commands.Gesture gesture, CancellationToken ct) =>

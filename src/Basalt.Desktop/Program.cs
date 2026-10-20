@@ -4,6 +4,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Basalt.Application.Commands;
 using Basalt.Application.Ports.Platform;
 using Basalt.Application.Settings;
+using Basalt.Application.Vaults;
 using Basalt.Composition;
 using Basalt.Presentation.Localization;
 using Basalt.Presentation.Settings;
@@ -60,6 +61,7 @@ internal static class Program
             .AddBasaltPresentation(platform, new ShellOptions(MultipleWindows: true))
             .AddBasaltUi();
         services.AddSingleton<Func<ShellViewModel>>(sp => sp.GetRequiredService<ShellFactory>().Create);
+        services.AddSingleton<Func<VaultSessionInfo?, SettingsViewModel>>(sp => sp.GetRequiredService<ShellFactory>().CreateSettings);
 
         // Rolling log files kept 7 days (spec 08 §1); tokens and note content are never logged (spec 13 §6).
         services.Replace(ServiceDescriptor.Singleton<ILoggerFactory>(sp => new SerilogLoggerFactory(

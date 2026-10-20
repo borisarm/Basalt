@@ -140,7 +140,8 @@ public sealed class WorkspaceFactory(IServiceProvider services)
                     () => new GraphTabViewModel(common, vault.Id, Get<IQueryHandler<GetGraph, GraphModel>>(), workspace!, Get<IRandom>(), events)),
             ],
             messenger,
-            new WorkspaceUseCases(Get<ICommandHandler<RecordRecentFile, Unit>>(), Get<IQueryHandler<LoadWorkspace, WorkspaceState?>>(), Get<ICommandHandler<SaveWorkspace, Unit>>()));
+            new WorkspaceUseCases(Get<ICommandHandler<RecordRecentFile, Unit>>(), Get<IQueryHandler<LoadWorkspace, WorkspaceState?>>(), Get<ICommandHandler<SaveWorkspace, Unit>>()),
+            Get<IWindowService>());
 
         var context = new PanelContext(vault.Id, events, messenger, workspace);
         workspace.Panels = new WorkspacePanels(

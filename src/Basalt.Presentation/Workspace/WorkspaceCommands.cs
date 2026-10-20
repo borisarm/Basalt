@@ -24,6 +24,8 @@ public interface IWorkspaceCommandHost : ICommandHost
     Task GoForwardAsync(CancellationToken ct);
 
     Task OpenGraphAsync(CancellationToken ct);
+
+    Task OpenSettingsAsync();
 }
 
 /// <summary>Commands that act on views (spec 07 §9), with the default shortcuts of spec 04.</summary>
@@ -38,6 +40,7 @@ public sealed class WorkspaceCommands : ICommandContribution
     public const string GoBack = "workspace.go-back";
     public const string GoForward = "workspace.go-forward";
     public const string OpenGraph = "workspace.open-graph";
+    public const string OpenSettings = "workspace.open-settings";
 
     public IEnumerable<CommandDescriptor> GetCommands() =>
     [
@@ -50,6 +53,7 @@ public sealed class WorkspaceCommands : ICommandContribution
         Command(GoBack, "Commands.GoBack", "Alt+Left;Mod+[", (host, ct) => host.GoBackAsync(ct)),
         Command(GoForward, "Commands.GoForward", "Alt+Right;Mod+]", (host, ct) => host.GoForwardAsync(ct)),
         Command(OpenGraph, "Commands.OpenGraph", null, (host, ct) => host.OpenGraphAsync(ct)),
+        Command(OpenSettings, "Commands.OpenSettings", "Mod+,", (host, _) => host.OpenSettingsAsync()),
     ];
 
     private static CommandDescriptor Command(string id, string titleKey, string? gesture, Func<IWorkspaceCommandHost, CancellationToken, Task> run) =>

@@ -1,4 +1,5 @@
 using Avalonia.Controls.ApplicationLifetimes;
+using Basalt.Application.Vaults;
 using Basalt.Domain.Vaults;
 using Basalt.Presentation.Common;
 using Basalt.Presentation.Settings;
@@ -27,7 +28,7 @@ public static class UiServiceCollectionExtensions
 }
 
 /// <summary>Opens desktop windows; each window has its own shell (F-001.7).</summary>
-public sealed class DesktopWindowService(Func<ShellViewModel> createShell, NotificationService notifications) : IWindowService
+public sealed class DesktopWindowService(Func<ShellViewModel> createShell, Func<VaultSessionInfo?, SettingsViewModel> createSettings, NotificationService notifications) : IWindowService
 {
     /// <summary>Opens a window showing the picker, or the given vault.</summary>
     public async Task<MainWindow> OpenWindowAsync(VaultId? vault)
@@ -42,6 +43,12 @@ public sealed class DesktopWindowService(Func<ShellViewModel> createShell, Notif
     public void OpenVaultWindow(VaultId vault) => _ = OpenWindowAsync(vault);
 
     public void OpenNewWindow() => _ = OpenWindowAsync(null);
+
+    public void OpenSettings(VaultSessionInfo vault)
+    {
+        ArgumentNullException.ThrowIfNull(vault);
+        new SettingsWindow(createSettings(vault)).Show();
+    }
 
     /// <summary>Makes the first window the desktop lifetime's main window.</summary>
     public async Task StartAsync(IClassicDesktopStyleApplicationLifetime desktop, VaultId? vault)

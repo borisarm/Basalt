@@ -10,6 +10,7 @@ using Basalt.Domain.Notes;
 using Basalt.Domain.Vaults;
 using Basalt.Presentation.Common;
 using Basalt.Presentation.Localization;
+using Basalt.Presentation.Shell;
 using Basalt.Presentation.Workspace;
 using Basalt.UI.Localization;
 using Basalt.UI.Services;
@@ -45,7 +46,8 @@ public sealed class WorkspaceViewTests
             new VaultSessionInfo(new VaultId(Guid.NewGuid()), "Notas", "C:/v", VaultSettings.Default, null),
             [new DelegateTabFactory("note", _ => true, () => new TestTab(services))],
             new WorkspaceMessenger(),
-            new WorkspaceUseCases(recent, Substitute.For<IQueryHandler<LoadWorkspace, WorkspaceState?>>(), Substitute.For<ICommandHandler<SaveWorkspace, Unit>>()));
+            new WorkspaceUseCases(recent, Substitute.For<IQueryHandler<LoadWorkspace, WorkspaceState?>>(), Substitute.For<ICommandHandler<SaveWorkspace, Unit>>()),
+            Substitute.For<IWindowService>());
         var window = new Window { Width = 1200, Height = 700, Content = new WorkspaceView { DataContext = workspace } };
         return (window, workspace);
     }

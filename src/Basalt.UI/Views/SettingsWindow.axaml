@@ -1,0 +1,12 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:settings="clr-namespace:Basalt.Presentation.Settings;assembly=Basalt.Presentation"
+        xmlns:views="clr-namespace:Basalt.UI.Views"
+        xmlns:l="clr-namespace:Basalt.UI.Localization"
+        x:Class="Basalt.UI.Views.SettingsWindow"
+        x:DataType="settings:SettingsViewModel"
+        Title="{l:Loc Settings.Title}"
+        Width="820" Height="720" MinWidth="600" MinHeight="480"
+        Background="{DynamicResource BasaltBackgroundBrush}">
+  <views:SettingsView x:Name="Body" />
+</Window>

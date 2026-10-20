@@ -9,6 +9,7 @@ using Basalt.Domain.Graph;
 using Basalt.Domain.Notes;
 using Basalt.Domain.Vaults;
 using Basalt.Presentation.Common;
+using Basalt.Presentation.Shell;
 using Basalt.Presentation.Workspace;
 using Basalt.Testing.Fakes;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -63,7 +64,8 @@ public sealed class GraphTabOpeningTests : IAsyncDisposable
                     () => new GraphTabViewModel(services, Vault, _graph, workspace!, new FakeRandom(1), _events)),
             ],
             messenger,
-            new WorkspaceUseCases(_recent, _load, _save));
+            new WorkspaceUseCases(_recent, _load, _save),
+            Substitute.For<IWindowService>());
         return workspace;
     }
 

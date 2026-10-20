@@ -19,6 +19,9 @@ public interface IWindowService
 
     /// <summary>A new window showing the vault picker.</summary>
     void OpenNewWindow();
+
+    /// <summary>A window with the settings of the app and, when a vault is open, of that vault (F-014).</summary>
+    void OpenSettings(VaultSessionInfo vault);
 }
 
 /// <summary>

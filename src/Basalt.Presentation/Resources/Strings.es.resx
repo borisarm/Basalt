@@ -16,6 +16,7 @@
   <data name="Commands.NewNote" xml:space="preserve"><value>Nueva nota</value></data>
   <data name="Commands.OpenDailyNote" xml:space="preserve"><value>Abrir la nota diaria de hoy</value></data>
   <data name="Commands.OpenGraph" xml:space="preserve"><value>Abrir el grafo</value></data>
+  <data name="Commands.OpenSettings" xml:space="preserve"><value>Abrir los ajustes</value></data>
   <data name="Commands.ReopenClosedTab" xml:space="preserve"><value>Reabrir pestaña cerrada</value></data>
   <data name="Commands.SearchVault" xml:space="preserve"><value>Buscar en el vault</value></data>
   <data name="Commands.ToggleReadingMode" xml:space="preserve"><value>Alternar lectura/edición</value></data>
@@ -126,13 +127,55 @@
   <data name="Search.MatchCase" xml:space="preserve"><value>Distinguir mayúsculas</value></data>
   <data name="Search.Placeholder" xml:space="preserve"><value>Buscar en el vault…</value></data>
   <data name="Settings.About" xml:space="preserve"><value>Acerca de</value></data>
+  <data name="Settings.About.Licenses" xml:space="preserve"><value>Licencias</value></data>
+  <data name="Settings.About.Logs" xml:space="preserve"><value>Carpeta de registros</value></data>
+  <data name="Settings.About.Version" xml:space="preserve"><value>Versión</value></data>
   <data name="Settings.Appearance" xml:space="preserve"><value>Apariencia</value></data>
+  <data name="Settings.Appearance.Accent" xml:space="preserve"><value>Color de acento</value></data>
+  <data name="Settings.Appearance.InterfaceFontSize" xml:space="preserve"><value>Tamaño de fuente de la interfaz</value></data>
+  <data name="Settings.Appearance.Theme" xml:space="preserve"><value>Tema</value></data>
+  <data name="Settings.Appearance.ThemeDark" xml:space="preserve"><value>Oscuro</value></data>
+  <data name="Settings.Appearance.ThemeLight" xml:space="preserve"><value>Claro</value></data>
+  <data name="Settings.Appearance.ThemeSystem" xml:space="preserve"><value>Sistema</value></data>
   <data name="Settings.DailyNotes" xml:space="preserve"><value>Notas diarias</value></data>
+  <data name="Settings.DailyNotes.DateFormat" xml:space="preserve"><value>Formato de fecha</value></data>
+  <data name="Settings.DailyNotes.Folder" xml:space="preserve"><value>Carpeta</value></data>
+  <data name="Settings.DailyNotes.Preview" xml:space="preserve"><value>Vista previa</value></data>
+  <data name="Settings.DailyNotes.Template" xml:space="preserve"><value>Plantilla</value></data>
   <data name="Settings.Editor" xml:space="preserve"><value>Editor</value></data>
+  <data name="Settings.Editor.AutoPairBrackets" xml:space="preserve"><value>Autocerrar paréntesis</value></data>
+  <data name="Settings.Editor.FontFamily" xml:space="preserve"><value>Familia de fuente</value></data>
+  <data name="Settings.Editor.FontSize" xml:space="preserve"><value>Tamaño de fuente</value></data>
+  <data name="Settings.Editor.ReadableLineLength" xml:space="preserve"><value>Ancho de línea legible</value></data>
+  <data name="Settings.Editor.ShowLineNumbers" xml:space="preserve"><value>Mostrar números de línea</value></data>
+  <data name="Settings.Editor.SpellCheck" xml:space="preserve"><value>Corrector ortográfico</value></data>
+  <data name="Settings.Editor.WordWrap" xml:space="preserve"><value>Ajuste de línea</value></data>
   <data name="Settings.FilesAndLinks" xml:space="preserve"><value>Ficheros y enlaces</value></data>
+  <data name="Settings.FilesLinks.AttachmentFolder" xml:space="preserve"><value>Carpeta de adjuntos</value></data>
+  <data name="Settings.FilesLinks.AutoUpdateLinks" xml:space="preserve"><value>Actualizar enlaces al renombrar una nota</value></data>
+  <data name="Settings.FilesLinks.LinkFormat" xml:space="preserve"><value>Formato de enlaces</value></data>
+  <data name="Settings.FilesLinks.LinkPathStyle" xml:space="preserve"><value>Estilo de ruta de los enlaces</value></data>
+  <data name="Settings.FilesLinks.NewNoteFolder" xml:space="preserve"><value>Carpeta de notas nuevas</value></data>
   <data name="Settings.General" xml:space="preserve"><value>General</value></data>
+  <data name="Settings.General.English" xml:space="preserve"><value>Inglés</value></data>
+  <data name="Settings.General.Language" xml:space="preserve"><value>Idioma</value></data>
+  <data name="Settings.General.OpenLastVault" xml:space="preserve"><value>Abrir el último vault al iniciar</value></data>
+  <data name="Settings.General.Spanish" xml:space="preserve"><value>Español</value></data>
+  <data name="Settings.General.System" xml:space="preserve"><value>Sistema</value></data>
   <data name="Settings.Hotkeys" xml:space="preserve"><value>Atajos de teclado</value></data>
+  <data name="Settings.Hotkeys.Assign" xml:space="preserve"><value>Asignar</value></data>
+  <data name="Settings.Hotkeys.Command" xml:space="preserve"><value>Comando</value></data>
+  <data name="Settings.Hotkeys.Conflict" xml:space="preserve"><value>Este atajo lo usa otro comando</value></data>
+  <data name="Settings.Hotkeys.Reset" xml:space="preserve"><value>Restablecer</value></data>
+  <data name="Settings.Hotkeys.Shortcut" xml:space="preserve"><value>Atajo</value></data>
+  <data name="Settings.LinkFormat.Markdown" xml:space="preserve"><value>Markdown</value></data>
+  <data name="Settings.LinkFormat.Wikilink" xml:space="preserve"><value>Wikilink</value></data>
+  <data name="Settings.LinkPathStyle.Absolute" xml:space="preserve"><value>Ruta absoluta</value></data>
+  <data name="Settings.LinkPathStyle.Relative" xml:space="preserve"><value>Ruta relativa</value></data>
+  <data name="Settings.LinkPathStyle.Shortest" xml:space="preserve"><value>Ruta más corta</value></data>
   <data name="Settings.Templates" xml:space="preserve"><value>Plantillas</value></data>
+  <data name="Settings.Templates.Folder" xml:space="preserve"><value>Carpeta de plantillas</value></data>
+  <data name="Settings.Title" xml:space="preserve"><value>Ajustes</value></data>
   <data name="Shell.Title" xml:space="preserve"><value>Basalt</value></data>
   <data name="Shell.TitleWithVault" xml:space="preserve"><value>{0} — Basalt</value></data>
   <data name="VaultPicker.ChooseLocation" xml:space="preserve"><value>Elige dónde crear el vault</value></data>

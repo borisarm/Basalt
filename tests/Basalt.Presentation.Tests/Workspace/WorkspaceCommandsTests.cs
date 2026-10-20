@@ -24,6 +24,7 @@ public sealed class WorkspaceCommandsTests
         { WorkspaceCommands.ReopenClosedTab, "Ctrl+Shift+T", "Cmd+Shift+T" },
         { WorkspaceCommands.GoBack, "Alt+Left", "Cmd+[" },
         { WorkspaceCommands.GoForward, "Alt+Right", "Cmd+]" },
+        { WorkspaceCommands.OpenSettings, "Ctrl+,", "Cmd+," },
     };
 
     [Theory]
@@ -79,6 +80,7 @@ public sealed class WorkspaceCommandsTests
         await host.Received(1).GoBackAsync(Arg.Any<CancellationToken>());
         await host.Received(1).GoForwardAsync(Arg.Any<CancellationToken>());
         await host.Received(1).OpenGraphAsync(Arg.Any<CancellationToken>());
+        await host.Received(1).OpenSettingsAsync();
     }
 
     [Fact]

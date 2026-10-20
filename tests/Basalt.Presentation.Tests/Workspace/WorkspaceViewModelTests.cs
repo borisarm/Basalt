@@ -7,6 +7,7 @@ using Basalt.Domain.Common;
 using Basalt.Domain.Notes;
 using Basalt.Domain.Vaults;
 using Basalt.Presentation.Common;
+using Basalt.Presentation.Shell;
 using Basalt.Presentation.Workspace;
 using Basalt.Testing.Fakes;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -26,6 +27,7 @@ public sealed class WorkspaceViewModelTests : IAsyncLifetime
     private readonly ICommandHandler<RecordRecentFile, Unit> _recent = Substitute.For<ICommandHandler<RecordRecentFile, Unit>>();
     private readonly IQueryHandler<LoadWorkspace, WorkspaceState?> _load = Substitute.For<IQueryHandler<LoadWorkspace, WorkspaceState?>>();
     private readonly ICommandHandler<SaveWorkspace, Unit> _save = Substitute.For<ICommandHandler<SaveWorkspace, Unit>>();
+    private readonly IWindowService _windows = Substitute.For<IWindowService>();
     private WorkspaceViewModel _workspace = null!;
 
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
@@ -66,7 +68,8 @@ public sealed class WorkspaceViewModelTests : IAsyncLifetime
             new VaultSessionInfo(Vault, "Notas", "C:/v", VaultSettings.Default, null),
             [factory],
             messenger,
-            new WorkspaceUseCases(_recent, _load, _save));
+            new WorkspaceUseCases(_recent, _load, _save),
+            _windows);
     }
 
     public async ValueTask DisposeAsync()
@@ -76,6 +79,15 @@ public sealed class WorkspaceViewModelTests : IAsyncLifetime
     }
 
     private List<string> Tabs(TabGroupViewModel? group = null) => [.. (group ?? _workspace.Layout.ActiveGroup).Tabs.Select(t => t.Title)];
+
+    [Fact]
+    [Trait("Spec", "F-014")]
+    public async Task OpenSettings_AsksTheWindowService()
+    {
+        _workspace.OpenSettingsCommand.Execute(null);
+
+        _windows.Received(1).OpenSettings(Arg.Is<VaultSessionInfo>(v => v.Id == Vault));
+    }
 
     [Fact]
     public async Task Open_ReusesTheActiveTab_UnlessPinnedOrNewTab()

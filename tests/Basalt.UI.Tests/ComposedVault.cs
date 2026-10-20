@@ -26,11 +26,13 @@ internal sealed class ComposedVault : IAsyncDisposable
 {
     private readonly TempDirectory _root;
     private readonly ServiceProvider _provider;
+    private readonly IWindowService _windows;
 
-    private ComposedVault(TempDirectory root, ServiceProvider provider, VaultSessionInfo vault, WorkspaceViewModel workspace, Window window)
+    private ComposedVault(TempDirectory root, ServiceProvider provider, VaultSessionInfo vault, WorkspaceViewModel workspace, Window window, IWindowService windows)
     {
         _root = root;
         _provider = provider;
+        _windows = windows;
         Vault = vault;
         Workspace = workspace;
         Window = window;
@@ -44,6 +46,10 @@ internal sealed class ComposedVault : IAsyncDisposable
 
     public FakeDialogService Dialogs => (FakeDialogService)_provider.GetRequiredService<IDialogService>();
 
+    public IWindowService Windows => _windows;
+
+    public IServiceProvider Services => _provider;
+
     public string RootLocation => Vault.RootLocation;
 
     public static async Task<ComposedVault> CreateAsync(IReadOnlyDictionary<string, string> files, string culture = "en")
@@ -54,7 +60,8 @@ internal sealed class ComposedVault : IAsyncDisposable
             .AddBasaltCore(Path.Combine(root.Path, "appdata"))
             .AddBasaltPresentation(CommandPlatform.Windows, new ShellOptions(MultipleWindows: true));
         services.AddSingleton<IDialogService, FakeDialogService>();
-        services.AddSingleton(Substitute.For<IWindowService>());
+        var windows = Substitute.For<IWindowService>();
+        services.AddSingleton(windows);
         services.AddBasaltUi();
         var provider = services.BuildServiceProvider();
         LocalizationSource.Instance.Attach(new ResxLocalizer(CultureInfo.GetCultureInfo(culture)));
@@ -74,7 +81,7 @@ internal sealed class ComposedVault : IAsyncDisposable
         await workspace.InitializeAsync(ct);
         var window = new Window { Width = 1200, Height = 800, Content = new WorkspaceView { DataContext = workspace } };
         window.Show();
-        return new ComposedVault(root, provider, vault, workspace, window);
+        return new ComposedVault(root, provider, vault, workspace, window, windows);
     }
 
     public async ValueTask DisposeAsync()

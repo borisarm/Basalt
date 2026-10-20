@@ -3,6 +3,7 @@
              xmlns:vm="clr-namespace:Basalt.Presentation.Workspace;assembly=Basalt.Presentation"
              xmlns:editor="clr-namespace:Basalt.UI.Editor"
              xmlns:l="clr-namespace:Basalt.UI.Localization"
+             xmlns:reading="clr-namespace:Basalt.UI.Reading"
              x:Class="Basalt.UI.Views.NoteTabView"
              x:DataType="vm:NoteTabViewModel">
   <DockPanel>
@@ -21,8 +22,7 @@
     </Border>
     <Panel>
       <editor:MarkdownEditorControl x:Name="SourceEditor" IsVisible="{Binding !IsReadingMode}" />
-      <!-- Reading mode (rendered document) arrives with T6.5. -->
-      <ContentControl x:Name="ReadingView" IsVisible="{Binding IsReadingMode}" />
+      <reading:RenderDocumentView x:Name="ReadingView" IsVisible="{Binding IsReadingMode}" Tab="{Binding}" Document="{Binding Rendered}" />
     </Panel>
   </DockPanel>
 </UserControl>

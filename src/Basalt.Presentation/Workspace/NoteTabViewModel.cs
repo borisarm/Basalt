@@ -38,6 +38,18 @@ public sealed record NoteEditingUseCases(
     ICommandHandler<EnsureBlockId, BlockId> EnsureBlockId,
     ICommandHandler<ImportAttachment, ImportedAttachment> Import);
 
+/// <summary>The use cases behind reading mode (spec 07 §6).</summary>
+public sealed record NoteReadingUseCases(
+    IQueryHandler<RenderNote, Application.Ports.Markdown.RenderDocument> Render,
+    IQueryHandler<ResolveLink, VaultPath?> ResolveLink,
+    IQueryHandler<GetEmbed, EmbedContent> Embed,
+    IQueryHandler<ReadAttachment, byte[]> ReadAttachment,
+    ICommandHandler<ToggleTask, Unit> ToggleTask,
+    ICommandHandler<CreateNote, VaultPath> CreateNote);
+
+/// <summary>Asks the workspace to open something (a link clicked in reading mode).</summary>
+public sealed record NavigateRequested(OpenRequest Request);
+
 /// <summary>Local edits and a disk version that do not merge cleanly (F-003.3).</summary>
 public sealed record ExternalConflict(string Mine, string Disk, BlobSha? DiskSha);
 
@@ -56,6 +68,7 @@ public sealed partial class NoteTabViewModel : TabViewModel
 
     private readonly NoteTabUseCases _useCases;
     private readonly NoteEditingUseCases? _editing;
+    private readonly NoteReadingUseCases? _reading;
     private readonly IWorkspaceMessenger _messenger;
     private readonly VaultId _vault;
     private readonly IDisposable[] _subscriptions;
@@ -75,9 +88,11 @@ public sealed partial class NoteTabViewModel : TabViewModel
         IWorkspaceMessenger messenger,
         VaultId vault,
         NoteEditingUseCases? editing = null,
-        IEditorCommands? editorCommands = null)
+        IEditorCommands? editorCommands = null,
+        NoteReadingUseCases? reading = null)
         : base(services)
     {
+        _reading = reading;
         ArgumentNullException.ThrowIfNull(events);
         _useCases = useCases;
         _editing = editing;
@@ -98,6 +113,10 @@ public sealed partial class NoteTabViewModel : TabViewModel
 
     [ObservableProperty]
     public partial bool IsReadingMode { get; private set; }
+
+    /// <summary>The rendered note while in reading mode.</summary>
+    [ObservableProperty]
+    public partial Application.Ports.Markdown.RenderDocument? Rendered { get; private set; }
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(KeepMineCommand), nameof(UseDiskCommand), nameof(ShowConflictDiffCommand))]
@@ -391,7 +410,106 @@ public sealed partial class NoteTabViewModel : TabViewModel
     }
 
     [RelayCommand]
-    private void ToggleReadingMode() => IsReadingMode = !IsReadingMode;
+    private async Task ToggleReadingModeAsync()
+    {
+        IsReadingMode = !IsReadingMode;
+        if (IsReadingMode)
+        {
+            await RenderAsync().ConfigureAwait(true);
+        }
+    }
+
+    private async Task RenderAsync()
+    {
+        if (_reading is null || Path is not { } path)
+        {
+            return;
+        }
+
+        var text = CurrentText;
+        var document = await RunAsync(token => _reading.Render.HandleAsync(new RenderNote(_vault, path, text), token)).ConfigureAwait(true);
+        if (document.IsSuccess)
+        {
+            Rendered = document.Value;
+        }
+    }
+
+    /// <summary>A link clicked in reading mode: opens its target, or creates the note when it does not exist (F-003).</summary>
+    public async Task OpenLinkAsync(string target, string? subpath, bool newTab, CancellationToken ct)
+    {
+        if (_reading is null || Path is not { } path)
+        {
+            return;
+        }
+
+        var resolved = await RunAsync(token => _reading.ResolveLink.HandleAsync(new ResolveLink(_vault, path, target), token)).ConfigureAwait(true);
+        if (resolved.IsFailure)
+        {
+            return;
+        }
+
+        var destination = resolved.Value;
+        if (destination is null)
+        {
+            var created = await RunAsync(token => _reading.CreateNote.HandleAsync(new CreateNote(_vault, Title: target), token)).ConfigureAwait(true);
+            if (created.IsFailure)
+            {
+                return;
+            }
+
+            destination = created.Value;
+        }
+
+        _messenger.Send(new NavigateRequested(new OpenRequest(destination.Value, newTab, subpath)));
+    }
+
+    /// <summary>The content of an embed of this note; <paramref name="ancestors"/> are the notes around it.</summary>
+    public async Task<EmbedContent> GetEmbedAsync(string target, string? subpath, IReadOnlyList<VaultPath> ancestors, CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(ancestors);
+        if (_reading is null || Path is not { } path)
+        {
+            return new MissingEmbed(target);
+        }
+
+        var embed = await _reading.Embed.HandleAsync(new GetEmbed(_vault, path, target, subpath, [.. ancestors, path]), ct).ConfigureAwait(true);
+        return embed.IsSuccess ? embed.Value : new MissingEmbed(target);
+    }
+
+    /// <summary>The bytes of an image shown in reading mode (null when it cannot be read).</summary>
+    public async Task<byte[]?> ReadAttachmentAsync(VaultPath path, CancellationToken ct)
+    {
+        if (_reading is null)
+        {
+            return null;
+        }
+
+        var bytes = await _reading.ReadAttachment.HandleAsync(new ReadAttachment(_vault, path), ct).ConfigureAwait(true);
+        return bytes.IsSuccess ? bytes.Value : null;
+    }
+
+    /// <summary>A task checkbox clicked in reading mode: saves pending edits, toggles the task and shows the result.</summary>
+    public async Task ToggleTaskAsync(int line, CancellationToken ct)
+    {
+        if (_reading is null || Path is not { } path)
+        {
+            return;
+        }
+
+        await FlushAsync(ct).ConfigureAwait(true);
+        var toggled = await RunAsync(token => _reading.ToggleTask.HandleAsync(new ToggleTask(_vault, path, line), token)).ConfigureAwait(true);
+        if (toggled.IsFailure)
+        {
+            return;
+        }
+
+        var disk = await RunAsync(token => _useCases.Read.HandleAsync(new ReadNote(_vault, path), token)).ConfigureAwait(true);
+        if (disk.IsSuccess)
+        {
+            ApplyDiskVersion(disk.Value.Content.Text, disk.Value.Sha);
+            await RenderAsync().ConfigureAwait(true);
+        }
+    }
 
     private void Accept(string text, BlobSha? sha)
     {

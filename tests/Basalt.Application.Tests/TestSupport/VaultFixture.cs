@@ -41,6 +41,8 @@ public sealed class VaultFixture : IAsyncDisposable
 
     public IFrontmatterEditor FrontmatterEditor => Markdown.GetRequiredService<IFrontmatterEditor>();
 
+    public IMarkdownRenderer Renderer => Markdown.GetRequiredService<IMarkdownRenderer>();
+
     public ICultureProvider Culture { get; } = new FakeCultureProvider();
 
     public MetadataSnapshot Cache => Session.Get<IMetadataCache>().Current;

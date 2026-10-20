@@ -122,10 +122,17 @@ public sealed class WorkspaceFactory(IServiceProvider services)
             Get<IQueryHandler<SuggestTags, IReadOnlyList<TagSuggestion>>>(),
             Get<ICommandHandler<EnsureBlockId, BlockId>>(),
             Get<ICommandHandler<ImportAttachment, ImportedAttachment>>());
+        var reading = new NoteReadingUseCases(
+            Get<IQueryHandler<RenderNote, Application.Ports.Markdown.RenderDocument>>(),
+            Get<IQueryHandler<ResolveLink, VaultPath?>>(),
+            Get<IQueryHandler<GetEmbed, EmbedContent>>(),
+            Get<IQueryHandler<ReadAttachment, byte[]>>(),
+            Get<ICommandHandler<ToggleTask, Unit>>(),
+            Get<ICommandHandler<CreateNote, VaultPath>>());
         var workspace = new WorkspaceViewModel(
             common,
             vault,
-            [new DelegateTabFactory("note", p => FileClassifier.Classify(p) == FileKind.Note, () => new NoteTabViewModel(common, noteTabs, events, messenger, vault.Id, editing, Get<IEditorCommands>()))],
+            [new DelegateTabFactory("note", p => FileClassifier.Classify(p) == FileKind.Note, () => new NoteTabViewModel(common, noteTabs, events, messenger, vault.Id, editing, Get<IEditorCommands>(), reading))],
             messenger,
             new WorkspaceUseCases(Get<ICommandHandler<RecordRecentFile, Unit>>(), Get<IQueryHandler<LoadWorkspace, WorkspaceState?>>(), Get<ICommandHandler<SaveWorkspace, Unit>>()));
 

@@ -313,6 +313,7 @@ public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNaviga
             }
         };
         Watch(Layout.ActiveGroup);
+        messenger.Register<NavigateRequested>(this, (_, m) => _ = OpenFileAsync(m.Request, CancellationToken.None));
         LeftSidebar.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(SidebarViewModel.ActivePanel))

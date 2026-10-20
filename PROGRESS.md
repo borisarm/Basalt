@@ -89,7 +89,7 @@ Registro de avance del plan (`docs/specs/10-plan-de-implementacion.md`). Platafo
 
 ## Fase 8 — Adaptador GitHub y autenticación
 
-- [ ] T8.1 Basalt.Testing.FakeGitHub
+- [x] T8.1 Basalt.Testing.FakeGitHub — 2026-10-20. Servidor ASP.NET Core minimal APIs sobre Kestrel (`127.0.0.1:0`) y `TestServer`, con almacén Git real (blobs/trees/commits con SHA vía `GitBlobHasher`/`GitTreeHasher`/`GitCommitHasher`), refs con fast-forward y hook `BeforeUpdateRef`, repos vacíos (409 hasta el primer PUT contents), permisos/archivado/visibilidad, redirección 301 por renombrado, ETag/304 sin consumir cuota, rate limit configurable, árboles truncables, zipball con redirección a codeload y paginación con `Link`. Endpoints de §9.1/§9.3 (usuario, repos, Git Data, contents, historial, descarga) y device flow configurable (pending, `slow_down`, aprobación tras N, denegación, expiración). `FaultPlan` cubre estado, latencia, `retry-after`, corte de conexión y respuesta truncada; `Requests` registra método/ruta/query/cabeceras. API de control (`CreateRepo`, `CommitFiles`, `ForcePush`, `GetFiles`, `RenameRepo`) y validación con vectores Git conocidos (tree `12899b9…`, commit `8b5c233…`). 11 tests en `Basalt.Adapters.GitHub.Tests`.
 - [ ] T8.2 InMemoryRemoteRepository + RemoteRepositoryContract
 - [ ] T8.3 GitHubApiClient
 - [ ] T8.4 GitHubRemoteRepository

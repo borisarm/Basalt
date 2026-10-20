@@ -11,7 +11,7 @@ internal sealed class DesktopPlatformPaths : IPlatformPaths
     public DesktopPlatformPaths(string? appDataOverride = null)
     {
         AppDataDirectory = appDataOverride ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Basalt");
-        DefaultVaultsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Basalt");
+        DefaultVaultsDirectory = Path.Combine(DocumentsFolder(), "Basalt");
         LogsDirectory = Path.Combine(AppDataDirectory, "logs");
     }
 
@@ -20,4 +20,17 @@ internal sealed class DesktopPlatformPaths : IPlatformPaths
     public string DefaultVaultsDirectory { get; }
 
     public string LogsDirectory { get; }
+
+    /// <summary>The user's documents folder; some systems (e.g. Linux without XDG folders) have none: the home folder then.</summary>
+    private static string DocumentsFolder()
+    {
+        var documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        if (Path.IsPathRooted(documents))
+        {
+            return documents;
+        }
+
+        var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        return Path.IsPathRooted(home) ? home : Path.GetTempPath();
+    }
 }

@@ -133,16 +133,18 @@ public sealed partial class TabGroupViewModel(ViewModelServices services, IReadO
         await tab.FlushAsync(ct).ConfigureAwait(true);
         var index = Tabs.IndexOf(tab);
         Tabs.RemoveAt(index);
-        if (ActiveTab == tab)
-        {
-            ActiveTab = Tabs.Count == 0 ? null : Tabs[Math.Max(0, index - 1)];
-        }
-
         var current = tab.Current;
         tab.Dispose();
+
+        // The layout hears first: an emptied secondary pane goes away before it could report "no active file".
         if (current is not null)
         {
             TabClosed?.Invoke(this, current);
+        }
+
+        if (ActiveTab == tab)
+        {
+            ActiveTab = Tabs.Count == 0 ? null : Tabs[Math.Max(0, index - 1)];
         }
     }
 
@@ -221,11 +223,12 @@ public sealed partial class PaneLayoutViewModel : ViewModelBase
         var current = ActiveGroup.ActiveTab?.Current;
         Orientation = orientation;
         var group = AddGroup();
-        ActiveGroup = group;
         if (current is not null)
         {
             await group.OpenAsync(current with { NewTab = true }, ct).ConfigureAwait(true);
         }
+
+        ActiveGroup = group;
     }
 
     private void OnTabClosed(object? sender, OpenRequest closed)
@@ -267,6 +270,9 @@ public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNaviga
     private readonly VaultSessionInfo _vault;
     private readonly WorkspaceUseCases _useCases;
     private readonly Stack<OpenRequest> _closed = new();
+    private TabGroupViewModel? _watchedGroup;
+    private TabViewModel? _watchedTab;
+    private VaultPath? _announced;
 
     public WorkspaceViewModel(
         ViewModelServices services,
@@ -286,6 +292,14 @@ public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNaviga
             _closed.Push(closed);
             ReopenClosedTabCommand.NotifyCanExecuteChanged();
         };
+        Layout.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(PaneLayoutViewModel.ActiveGroup))
+            {
+                Watch(Layout.ActiveGroup);
+            }
+        };
+        Watch(Layout.ActiveGroup);
     }
 
     public string Title => _vault.Name;
@@ -372,6 +386,61 @@ public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNaviga
         }
 
         base.Dispose(disposing);
+    }
+
+    /// <summary>Follows the active group and tab so that panels hear about the active file (<see cref="ActiveFileChanged"/>).</summary>
+    private void Watch(TabGroupViewModel group)
+    {
+        if (_watchedGroup is not null)
+        {
+            _watchedGroup.PropertyChanged -= OnGroupChanged;
+        }
+
+        _watchedGroup = group;
+        group.PropertyChanged += OnGroupChanged;
+        WatchTab(group.ActiveTab);
+    }
+
+    private void OnGroupChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(TabGroupViewModel.ActiveTab))
+        {
+            WatchTab(_watchedGroup?.ActiveTab);
+        }
+    }
+
+    private void WatchTab(TabViewModel? tab)
+    {
+        if (_watchedTab is not null)
+        {
+            _watchedTab.PropertyChanged -= OnTabChanged;
+        }
+
+        _watchedTab = tab;
+        if (tab is not null)
+        {
+            tab.PropertyChanged += OnTabChanged;
+        }
+
+        Announce();
+    }
+
+    private void OnTabChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(TabViewModel.Path))
+        {
+            Announce();
+        }
+    }
+
+    private void Announce()
+    {
+        var path = _watchedTab?.Path;
+        if (path != _announced)
+        {
+            _announced = path;
+            Messenger.Send(new ActiveFileChanged(path));
+        }
     }
 
     private bool CanReopenClosedTab() => _closed.Count > 0;

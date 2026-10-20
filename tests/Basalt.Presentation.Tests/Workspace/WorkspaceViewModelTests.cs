@@ -205,6 +205,26 @@ public sealed class WorkspaceViewModelTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task ActiveFileChanges_AreAnnouncedToThePanels()
+    {
+        var announced = new List<VaultPath?>();
+        _workspace.Messenger.Register<ActiveFileChanged>(this, (_, m) => announced.Add(m.Path));
+
+        await _workspace.OpenAsync(new OpenRequest(P("A.md")), Ct);
+        await _workspace.OpenAsync(new OpenRequest(P("B.md")), Ct);
+        await _workspace.OpenAsync(new OpenRequest(P("C.md"), NewTab: true), Ct);
+        _workspace.Layout.ActiveGroup.ActiveTab = _workspace.Layout.ActiveGroup.Tabs[0];
+        await _workspace.Layout.SplitCommand.ExecuteAsync(SplitOrientation.Vertical);
+        _workspace.Layout.ActiveGroup = _workspace.Layout.Groups[0];
+        await _workspace.Layout.ActiveGroup.CloseTabCommand.ExecuteAsync(_workspace.Layout.ActiveGroup.Tabs[1]);
+        await _workspace.Layout.ActiveGroup.CloseTabCommand.ExecuteAsync(_workspace.Layout.ActiveGroup.Tabs[0]);
+        _workspace.Layout.Groups.Should().ContainSingle("the emptied first pane closed; the split pane (showing B) is active");
+        await _workspace.Layout.ActiveGroup.CloseTabCommand.ExecuteAsync(_workspace.Layout.ActiveGroup.Tabs[0]);
+
+        announced.Select(p => p?.ToString()).Should().Equal("A.md", "B.md", "C.md", "B.md", null);
+    }
+
+    [Fact]
     public void FocusPanel_IsExposed()
     {
         _workspace.FocusPanel("search");

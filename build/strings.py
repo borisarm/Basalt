@@ -30,6 +30,15 @@ STRINGS = {
     "VaultPicker.Locate": ("Locate…", "Localizar…"),
     "VaultPicker.LocateTitle": ("Locate the folder of “{0}”", "Localiza la carpeta de «{0}»"),
     "VaultPicker.Empty": ("No vaults yet. Create one or open a folder.", "Aún no hay vaults. Crea uno o abre una carpeta."),
+    # Panels
+    "Explorer.NewFolder": ("New folder", "Nueva carpeta"),
+    "Explorer.FolderName": ("Folder name", "Nombre de la carpeta"),
+    "Explorer.Rename": ("Rename", "Renombrar"),
+    "Explorer.NewName": ("New name", "Nuevo nombre"),
+    "Explorer.Delete": ("Delete", "Eliminar"),
+    "Explorer.DeleteMessage": ("“{0}” will be moved to the vault trash.", "«{0}» se moverá a la papelera del vault."),
+    "Bookmarks.Invalid": ("The bookmarks file could not be read; it will be kept aside when you change a bookmark.", "No se pudo leer el fichero de marcadores; se apartará cuando cambies un marcador."),
+    "Properties.Invalid": ("The properties are not valid YAML; edit them in source mode.", "Las propiedades no son YAML válido; edítalas en el modo código."),
     # Commands
     "Commands.NewNote": ("New note", "Nueva nota"),
     "Commands.OpenDailyNote": ("Open today's daily note", "Abrir la nota diaria de hoy"),

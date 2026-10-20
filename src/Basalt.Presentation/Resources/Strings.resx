@@ -4,6 +4,7 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Bookmarks.Invalid" xml:space="preserve"><value>The bookmarks file could not be read; it will be kept aside when you change a bookmark.</value></data>
   <data name="Commands.BookmarkActiveFile" xml:space="preserve"><value>Bookmark current file</value></data>
   <data name="Commands.NewNote" xml:space="preserve"><value>New note</value></data>
   <data name="Commands.OpenDailyNote" xml:space="preserve"><value>Open today's daily note</value></data>
@@ -63,6 +64,13 @@
   <data name="Errors.vault.location_missing" xml:space="preserve"><value>The vault folder cannot be found.</value></data>
   <data name="Errors.vault.not_open" xml:space="preserve"><value>The vault is not open.</value></data>
   <data name="Errors.vault.not_registered" xml:space="preserve"><value>The vault is not in the list.</value></data>
+  <data name="Explorer.Delete" xml:space="preserve"><value>Delete</value></data>
+  <data name="Explorer.DeleteMessage" xml:space="preserve"><value>“{0}” will be moved to the vault trash.</value></data>
+  <data name="Explorer.FolderName" xml:space="preserve"><value>Folder name</value></data>
+  <data name="Explorer.NewFolder" xml:space="preserve"><value>New folder</value></data>
+  <data name="Explorer.NewName" xml:space="preserve"><value>New name</value></data>
+  <data name="Explorer.Rename" xml:space="preserve"><value>Rename</value></data>
+  <data name="Properties.Invalid" xml:space="preserve"><value>The properties are not valid YAML; edit them in source mode.</value></data>
   <data name="Shell.Title" xml:space="preserve"><value>Basalt</value></data>
   <data name="Shell.TitleWithVault" xml:space="preserve"><value>{0} — Basalt</value></data>
   <data name="VaultPicker.ChooseLocation" xml:space="preserve"><value>Choose where to create the vault</value></data>

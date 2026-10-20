@@ -124,6 +124,17 @@ internal static class FakeGitHubEndpoints
         app.MapPost("/login/oauth/access_token", async (HttpContext context) =>
         {
             var form = await context.Request.ReadFormAsync(context.RequestAborted).ConfigureAwait(false);
+            if (form["grant_type"].ToString() == "refresh_token" && form["refresh_token"].ToString().Length > 0)
+            {
+                return Results.Json(new
+                {
+                    access_token = server.DeviceFlow.AccessToken + "-refreshed",
+                    token_type = "bearer",
+                    scope = "repo,read:user",
+                    expires_in = 28_800,
+                });
+            }
+
             if (form["device_code"].ToString() != server.DeviceFlow.DeviceCode)
             {
                 return Results.Json(new { error = "incorrect_device_code" });
@@ -261,11 +272,6 @@ internal static class FakeGitHubEndpoints
                 return Forbidden();
             }
 
-            if (repository.IsEmpty)
-            {
-                return EmptyRepository();
-            }
-
             var body = await ReadBodyAsync(context).ConfigureAwait(false);
             var fullRef = Str(body, "ref");
             var sha = Str(body, "sha");
@@ -339,11 +345,6 @@ internal static class FakeGitHubEndpoints
                 return NotFound();
             }
 
-            if (repository.IsEmpty)
-            {
-                return EmptyRepository();
-            }
-
             var commit = FakeGitStore.FindCommit(repository, sha);
             return commit is null ? NotFound() : Results.Json(CommitDto(context, owner, repo, commit));
         });
@@ -359,11 +360,6 @@ internal static class FakeGitHubEndpoints
             if (!repository.AllowPush || repository.Archived)
             {
                 return Forbidden();
-            }
-
-            if (repository.IsEmpty)
-            {
-                return EmptyRepository();
             }
 
             var body = await ReadBodyAsync(context).ConfigureAwait(false);
@@ -389,13 +385,20 @@ internal static class FakeGitHubEndpoints
             }
 
             var message = Str(body, "message") ?? string.Empty;
-            var author = Signature(body?["author"], server.Options.DefaultSignature);
-            var committer = Signature(body?["committer"], author);
-            var commit = FakeGitStore.CreateCommit(
-                repository, TreeSha.Parse(tree).Value, parents, message, author, committer);
-            return Results.Json(
-                CommitDto(context, owner, repo, FakeGitStore.FindCommit(repository, commit.ToString())!),
-                statusCode: StatusCodes.Status201Created);
+            try
+            {
+                var author = Signature(body?["author"], server.Options.DefaultSignature);
+                var committer = Signature(body?["committer"], author);
+                var commit = FakeGitStore.CreateCommit(
+                    repository, TreeSha.Parse(tree).Value, parents, message, author, committer);
+                return Results.Json(
+                    CommitDto(context, owner, repo, FakeGitStore.FindCommit(repository, commit.ToString())!),
+                    statusCode: StatusCodes.Status201Created);
+            }
+            catch (ArgumentException exception)
+            {
+                return ValidationFailed(exception.Message);
+            }
         });
 
         app.MapGet("/repos/{owner}/{repo}/git/trees/{sha}", (HttpContext context, string owner, string repo, string sha) =>
@@ -404,11 +407,6 @@ internal static class FakeGitHubEndpoints
             if (repository is null)
             {
                 return NotFound();
-            }
-
-            if (repository.IsEmpty)
-            {
-                return EmptyRepository();
             }
 
             var commit = FakeGitStore.FindCommit(repository, sha);
@@ -449,11 +447,6 @@ internal static class FakeGitHubEndpoints
             if (!repository.AllowPush || repository.Archived)
             {
                 return Forbidden();
-            }
-
-            if (repository.IsEmpty)
-            {
-                return EmptyRepository();
             }
 
             var body = await ReadBodyAsync(context).ConfigureAwait(false);
@@ -552,11 +545,6 @@ internal static class FakeGitHubEndpoints
                 return Forbidden();
             }
 
-            if (repository.IsEmpty)
-            {
-                return EmptyRepository();
-            }
-
             var body = await ReadBodyAsync(context).ConfigureAwait(false);
             var encoded = Str(body, "content");
             if (encoded is null)
@@ -589,11 +577,6 @@ internal static class FakeGitHubEndpoints
             if (repository is null)
             {
                 return NotFound();
-            }
-
-            if (repository.IsEmpty)
-            {
-                return EmptyRepository();
             }
 
             var content = FakeGitStore.FindBlob(repository, sha);

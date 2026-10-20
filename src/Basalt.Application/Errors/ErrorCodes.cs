@@ -23,6 +23,7 @@ public static class ErrorCodes
     public const string NoteNotATask = "note.not_a_task";
     public const string NoteFrontmatterInvalid = "note.frontmatter_invalid";
     public const string MoveIntoItself = "entry.move_into_itself";
+    public const string MentionNotFound = "mention.not_found";
 
     public const string VaultAlreadyRegistered = "vault.already_registered";
     public const string VaultNotRegistered = "vault.not_registered";

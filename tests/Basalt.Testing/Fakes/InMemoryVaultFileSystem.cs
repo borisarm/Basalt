@@ -17,6 +17,8 @@ public sealed class InMemoryVaultFileSystem : IVaultFileSystem
     private readonly Lock _gate = new();
     private readonly Dictionary<string, Entry> _entries = new(StringComparer.Ordinal);
     private readonly Dictionary<string, Error> _failNextWrite = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, Error> _failNextRead = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, long> _enumeratedSizes = new(StringComparer.Ordinal);
     private readonly List<ManualFileWatcher> _watchers = [];
     private readonly TimeProvider _time;
 
@@ -41,6 +43,34 @@ public sealed class InMemoryVaultFileSystem : IVaultFileSystem
         lock (_gate)
         {
             _failNextWrite[Key(path)] = error;
+        }
+    }
+
+    /// <summary>The next read of <paramref name="path"/> fails with <paramref name="error"/>.</summary>
+    public void FailNextRead(VaultPath path, Error error)
+    {
+        lock (_gate)
+        {
+            _failNextRead[Key(path)] = error;
+        }
+    }
+
+    /// <summary>Reports a different size when enumerating, to simulate a file that changes while it is being scanned.</summary>
+    public void SetEnumeratedSize(VaultPath path, long size)
+    {
+        lock (_gate)
+        {
+            _enumeratedSizes[Key(path)] = size;
+        }
+    }
+
+    /// <summary>Adds a symbolic link entry (the scanner must exclude it and never follow it).</summary>
+    public void SimulateSymbolicLink(VaultPath path, string target)
+    {
+        lock (_gate)
+        {
+            EnsureDirectory(path.Parent);
+            _entries[Key(path)] = new Entry(path, false, Encoding.UTF8.GetBytes(target), _time.GetUtcNow(), IsSymbolicLink: true);
         }
     }
 
@@ -89,7 +119,7 @@ public sealed class InMemoryVaultFileSystem : IVaultFileSystem
         ct.ThrowIfCancellationRequested();
         lock (_gate)
         {
-            return Task.FromResult(ReadUnlocked(path));
+            return Task.FromResult(TakeInjectedReadFailure(path) is { } failure ? Result.Failure<byte[]>(failure) : ReadUnlocked(path));
         }
     }
 
@@ -254,7 +284,8 @@ public sealed class InMemoryVaultFileSystem : IVaultFileSystem
         {
             ct.ThrowIfCancellationRequested();
             await Task.Yield();
-            yield return new FileEntry(entry.Path, entry.IsDirectory, entry.Content.Length, entry.LastWrite);
+            var size = _enumeratedSizes.GetValueOrDefault(Key(entry.Path), entry.Content.Length);
+            yield return new FileEntry(entry.Path, entry.IsDirectory, size, entry.LastWrite, entry.IsSymbolicLink);
         }
     }
 
@@ -337,6 +368,9 @@ public sealed class InMemoryVaultFileSystem : IVaultFileSystem
     private Error? TakeInjectedFailure(VaultPath path) =>
         _failNextWrite.Remove(Key(path), out var error) ? error : null;
 
+    private Error? TakeInjectedReadFailure(VaultPath path) =>
+        _failNextRead.Remove(Key(path), out var error) ? error : null;
+
     private void Notify(FileSystemChange change)
     {
         List<ManualFileWatcher> watchers;
@@ -356,5 +390,5 @@ public sealed class InMemoryVaultFileSystem : IVaultFileSystem
     private static Error NotFound(VaultPath path) =>
         new Error(ErrorCodes.FsNotFound, "The file or folder does not exist.").With("path", path.ToString());
 
-    private sealed record Entry(VaultPath Path, bool IsDirectory, byte[] Content, DateTimeOffset LastWrite);
+    private sealed record Entry(VaultPath Path, bool IsDirectory, byte[] Content, DateTimeOffset LastWrite, bool IsSymbolicLink = false);
 }

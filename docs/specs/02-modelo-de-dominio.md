@@ -153,6 +153,7 @@ El detalle funcional está en [06](06-sincronizacion-github.md). Tipos de domini
 | `SyncPlanner` | `SyncPlan Plan(SyncBase base, Manifest local, Manifest remote, SyncPolicy policy)`. Totalmente puro. Tabla de decisión en [06](06-sincronizacion-github.md) §5. |
 | `SyncPlan` | Lista ordenada de `SyncAction`: `Download(path, remoteSha)`, `Upload(path, localSha)`, `DeleteLocal(path, expectedLocalSha)`, `DeleteRemote(path)`, `MergeText(path, baseSha, localSha, remoteSha)`, `CreateConflictCopy(path, side, sha)`, `NoOp`. Más `ExpectedNewBase` (manifiesto resultante esperado). |
 | `SyncPolicy` | Política de conflictos de texto, de binarios, de borrado-vs-edición, límites de tamaño. |
+| `SyncScope` | Qué parte del vault se sincroniza: adjuntos, configuración de Obsidian, papelera y patrones extra del perfil (por defecto: adjuntos sí; `.obsidian/` y `.trash/` no). |
 | `ConflictCopyNamer` | Genera nombres de copia de conflicto únicos: `Nombre (conflict 2026-10-19 154233 MacBook).md`; si existe, añade ` 2`, ` 3`… Recibe el conjunto de rutas existentes, el instante y el nombre del dispositivo. Respeta las reglas de `VaultPath` (sustituye caracteres inválidos del nombre del dispositivo por `-`). |
 | `SyncOutcome` | Resumen: contadores por tipo de acción, conflictos generados, commit creado, duración. |
 

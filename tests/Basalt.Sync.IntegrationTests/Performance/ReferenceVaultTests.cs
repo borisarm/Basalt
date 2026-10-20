@@ -12,7 +12,9 @@ using Basalt.Application.Ports.Markdown;
 using Basalt.Application.Ports.Platform;
 using Basalt.Application.Ports.Storage;
 using Basalt.Application.Search;
+using Basalt.Application.Sync;
 using Basalt.Application.Vaults;
+using Basalt.Domain.Sync;
 using Basalt.Testing;
 using Basalt.VaultGenerator;
 using Microsoft.Extensions.DependencyInjection;
@@ -89,6 +91,34 @@ public sealed class ReferenceVaultTests
         TestContext.Current.SendDiagnosticMessage($"Initial indexing {initial.Elapsed}, re-open {reopen.Elapsed}");
         initial.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(60));
         reopen.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(2));
+    }
+
+    [Fact]
+    [Trait("Category", "Performance")]
+    [Trait("Spec", "NFR-010")]
+    public async Task LocalScanOfTheReferenceVault_WithAValidHashCache_IsFast()
+    {
+        await using var root = TempDirectory.Create("refvault-scan");
+        var vaultFolder = Path.Combine(root.Path, "Reference");
+        ReferenceVaultGenerator.Generate(vaultFolder, new VaultGeneratorOptions());
+        await using var services = new ServiceCollection().AddBasaltFileSystemAdapter().BuildServiceProvider();
+        var fileSystem = (await services.GetRequiredService<IVaultFileSystemFactory>().OpenAsync(vaultFolder, Ct)).Value;
+        var scanner = new LocalSnapshotScanner(fileSystem, SyncScope.Default, SyncPolicy.Default, IgnoreRules.Default);
+
+        var cold = Stopwatch.StartNew();
+        var first = await scanner.ScanAsync(HashCache.Empty, null, Ct);
+        cold.Stop();
+
+        var warm = Stopwatch.StartNew();
+        var second = await scanner.ScanAsync(first.HashCache, null, Ct);
+        warm.Stop();
+
+        TestContext.Current.SendDiagnosticMessage(
+            $"Local scan: cold {cold.Elapsed}, with cache {warm.Elapsed} ({second.Manifest.Count} files)");
+        second.Manifest.Should().Be(first.Manifest);
+        second.Manifest.Count.Should().BeGreaterThan(10_000);
+        second.Incidents.Should().BeEmpty();
+        warm.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(2));
     }
 
     private static async Task OpenAndWaitAsync(ServiceProvider services, VaultRegistry registry, Domain.Vaults.VaultId id, bool waitForScan)

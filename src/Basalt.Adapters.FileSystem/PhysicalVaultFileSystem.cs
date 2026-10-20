@@ -241,8 +241,14 @@ internal sealed class PhysicalVaultFileSystem : IVaultFileSystem
 
                 var child = childResult.Value;
                 var isDirectory = info is DirectoryInfo;
-                yield return new FileEntry(child, isDirectory, isDirectory ? 0 : ((FileInfo)info).Length, new DateTimeOffset(info.LastWriteTimeUtc, TimeSpan.Zero));
-                if (isDirectory && recursive)
+                var isSymbolicLink = (info.Attributes & FileAttributes.ReparsePoint) != 0;
+                yield return new FileEntry(
+                    child,
+                    isDirectory,
+                    isDirectory ? 0 : ((FileInfo)info).Length,
+                    new DateTimeOffset(info.LastWriteTimeUtc, TimeSpan.Zero),
+                    isSymbolicLink);
+                if (isDirectory && !isSymbolicLink && recursive)
                 {
                     pending.Push(((DirectoryInfo)info, child));
                 }

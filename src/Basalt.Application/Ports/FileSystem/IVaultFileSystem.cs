@@ -7,8 +7,8 @@ namespace Basalt.Application.Ports.FileSystem;
 /// <summary>Metadata of a file or folder.</summary>
 public sealed record FileStat(long Size, DateTimeOffset LastWriteUtc, bool IsDirectory);
 
-/// <summary>An enumerated vault entry.</summary>
-public sealed record FileEntry(VaultPath Path, bool IsDirectory, long Size, DateTimeOffset LastWriteUtc);
+/// <summary>An enumerated vault entry; symbolic links are reported but never traversed.</summary>
+public sealed record FileEntry(VaultPath Path, bool IsDirectory, long Size, DateTimeOffset LastWriteUtc, bool IsSymbolicLink = false);
 
 public enum FileSystemChangeKind
 {

@@ -100,7 +100,7 @@ Registro de avance del plan (`docs/specs/10-plan-de-implementacion.md`). Platafo
 
 ## Fase 9 — Motor y UX de sincronización
 
-- [ ] T9.1 LocalSnapshotScanner + hash cache
+- [x] T9.1 LocalSnapshotScanner + hash cache — 2026-10-21. `LocalSnapshotScanner` (Aplicación) enumera el vault por `IVaultFileSystem`, aplica reglas de ignorado (por defecto + `.basalt/syncignore` compuestas por el llamador), `SyncScope` (adjuntos, `.obsidian/`, `.trash/`, patrones extra del perfil), límite de tamaño y cuarentena; hashea en streaming con `GitBlobHasher` reutilizando `HashCache` por `(ruta, tamaño, mtimeUtcTicks)` y devuelve `Manifest` + caché + incidencias (demasiado grande, enlace simbólico, colisión de mayúsculas, ilegible, cambiado durante el escaneo) + `ExcludedPaths` (las rutas excluidas deben quitarse también de la base y del remoto antes de planificar, para no borrar ficheros ignorados: 06 §3; se conectará en T9.7). `FileEntry` marca enlaces simbólicos y `PhysicalVaultFileSystem` ya no recorre carpetas enlazadas. `SyncScope` añadido a `Domain.Sync` (spec 02 §11 actualizada). NFR-010 medido en `Basalt.Sync.IntegrationTests` (escaneo en caliente del vault de referencia < 2 s); cobertura Aplicación 92,0 % líneas / 86,2 % ramas y Dominio 97,5 % / 93,4 %.
 - [ ] T9.2 RemoteSnapshotProvider
 - [ ] T9.3 PlanMaterializer
 - [ ] T9.4 RemotePublisher

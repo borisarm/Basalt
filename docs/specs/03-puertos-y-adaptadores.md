@@ -40,7 +40,7 @@ public interface IFileWriter
 
 public interface IFileEnumerator
 {
-    IAsyncEnumerable<FileEntry> EnumerateAsync(VaultPath root, bool recursive, CancellationToken ct); // incluye ocultos; el filtrado lo hace el núcleo
+    IAsyncEnumerable<FileEntry> EnumerateAsync(VaultPath root, bool recursive, CancellationToken ct); // incluye ocultos; el filtrado lo hace el núcleo; FileEntry marca los enlaces simbólicos, que no se recorren
 }
 
 public interface IFileWatcher : IAsyncDisposable

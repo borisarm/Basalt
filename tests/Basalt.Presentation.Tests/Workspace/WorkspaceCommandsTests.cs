@@ -78,6 +78,19 @@ public sealed class WorkspaceCommandsTests
         await host.Received(1).ReopenClosedTabAsync(Arg.Any<CancellationToken>());
         await host.Received(1).GoBackAsync(Arg.Any<CancellationToken>());
         await host.Received(1).GoForwardAsync(Arg.Any<CancellationToken>());
+        await host.Received(1).OpenGraphAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    [Trait("Spec", "F-012")]
+    public void OpenGraph_HasNoDefaultGesture()
+    {
+        var registry = new CommandRegistry([new WorkspaceCommands()]);
+
+        var command = registry.Commands.Single(c => c.Id == WorkspaceCommands.OpenGraph);
+        command.DefaultGesture.Should().BeNull("the shortcut table of spec 04 has no graph gesture");
+        new KeyBindingService(registry, CommandPlatform.Windows).GestureFor(WorkspaceCommands.OpenGraph).Should().BeNull();
+        registry.FindByGesture(G("Ctrl+G"), CommandPlatform.Windows).Should().BeNull();
     }
 
     [Fact]

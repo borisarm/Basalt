@@ -197,4 +197,23 @@ public sealed class OutlinePropertiesGraphTests : PanelTestBase
         await vm.OpenNodeCommand.ExecuteAsync(model.Nodes[1]);
         await Navigator.Received(1).OpenAsync(new OpenRequest(P("B.md")), Arg.Any<CancellationToken>());
     }
+
+    [Fact]
+    [Trait("Spec", "F-012.1")]
+    public async Task LocalGraph_FiltersAreSpecifiedAsOptions()
+    {
+        _graph.HandleAsync(Arg.Any<GetLocalGraph>(), Arg.Any<CancellationToken>()).Returns(GraphModel.Empty);
+        var vm = new LocalGraphViewModel(Services, Context, _graph, new FakeRandom());
+        Activate("A.md");
+        await vm.WhenRefreshedAsync();
+
+        vm.ShowAttachments = true;
+        await vm.WhenRefreshedAsync();
+        vm.ShowOrphans = false;
+        await vm.WhenRefreshedAsync();
+
+        await _graph.Received(1).HandleAsync(Arg.Is<GetLocalGraph>(g => g.Options == new GraphOptions { ShowAttachments = true }), Arg.Any<CancellationToken>());
+        await _graph.Received(1).HandleAsync(
+            Arg.Is<GetLocalGraph>(g => g.Options == new GraphOptions { ShowOrphans = false, ShowAttachments = true }), Arg.Any<CancellationToken>());
+    }
 }

@@ -22,6 +22,8 @@ public interface IWorkspaceCommandHost : ICommandHost
     Task GoBackAsync(CancellationToken ct);
 
     Task GoForwardAsync(CancellationToken ct);
+
+    Task OpenGraphAsync(CancellationToken ct);
 }
 
 /// <summary>Commands that act on views (spec 07 §9), with the default shortcuts of spec 04.</summary>
@@ -35,6 +37,7 @@ public sealed class WorkspaceCommands : ICommandContribution
     public const string ReopenClosedTab = "workspace.reopen-closed-tab";
     public const string GoBack = "workspace.go-back";
     public const string GoForward = "workspace.go-forward";
+    public const string OpenGraph = "workspace.open-graph";
 
     public IEnumerable<CommandDescriptor> GetCommands() =>
     [
@@ -46,9 +49,10 @@ public sealed class WorkspaceCommands : ICommandContribution
         Command(ReopenClosedTab, "Commands.ReopenClosedTab", "Mod+Shift+T", (host, ct) => host.ReopenClosedTabAsync(ct)),
         Command(GoBack, "Commands.GoBack", "Alt+Left;Mod+[", (host, ct) => host.GoBackAsync(ct)),
         Command(GoForward, "Commands.GoForward", "Alt+Right;Mod+]", (host, ct) => host.GoForwardAsync(ct)),
+        Command(OpenGraph, "Commands.OpenGraph", null, (host, ct) => host.OpenGraphAsync(ct)),
     ];
 
-    private static CommandDescriptor Command(string id, string titleKey, string gesture, Func<IWorkspaceCommandHost, CancellationToken, Task> run) =>
+    private static CommandDescriptor Command(string id, string titleKey, string? gesture, Func<IWorkspaceCommandHost, CancellationToken, Task> run) =>
         new(id, titleKey, "workspace", gesture, c => c.Host is IWorkspaceCommandHost, async (context, ct) =>
         {
             await run((IWorkspaceCommandHost)context.Host, ct).ConfigureAwait(true);

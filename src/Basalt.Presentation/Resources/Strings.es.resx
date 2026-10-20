@@ -15,6 +15,7 @@
   <data name="Commands.GoForward" xml:space="preserve"><value>Adelante</value></data>
   <data name="Commands.NewNote" xml:space="preserve"><value>Nueva nota</value></data>
   <data name="Commands.OpenDailyNote" xml:space="preserve"><value>Abrir la nota diaria de hoy</value></data>
+  <data name="Commands.OpenGraph" xml:space="preserve"><value>Abrir el grafo</value></data>
   <data name="Commands.ReopenClosedTab" xml:space="preserve"><value>Reabrir pestaña cerrada</value></data>
   <data name="Commands.SearchVault" xml:space="preserve"><value>Buscar en el vault</value></data>
   <data name="Commands.ToggleReadingMode" xml:space="preserve"><value>Alternar lectura/edición</value></data>
@@ -84,6 +85,25 @@
   <data name="Explorer.NewFolder" xml:space="preserve"><value>Nueva carpeta</value></data>
   <data name="Explorer.NewName" xml:space="preserve"><value>Nuevo nombre</value></data>
   <data name="Explorer.Rename" xml:space="preserve"><value>Renombrar</value></data>
+  <data name="Graph.ColorGroups" xml:space="preserve"><value>Grupos de color (una consulta por línea)</value></data>
+  <data name="Graph.Depth" xml:space="preserve"><value>Profundidad</value></data>
+  <data name="Graph.Direction" xml:space="preserve"><value>Dirección</value></data>
+  <data name="Graph.DirectionBoth" xml:space="preserve"><value>Ambas</value></data>
+  <data name="Graph.DirectionIncoming" xml:space="preserve"><value>Entrantes</value></data>
+  <data name="Graph.DirectionOutgoing" xml:space="preserve"><value>Salientes</value></data>
+  <data name="Graph.Filter" xml:space="preserve"><value>Consulta de búsqueda</value></data>
+  <data name="Graph.Filters" xml:space="preserve"><value>Filtros</value></data>
+  <data name="Graph.Forces" xml:space="preserve"><value>Fuerzas</value></data>
+  <data name="Graph.Gravity" xml:space="preserve"><value>Gravedad</value></data>
+  <data name="Graph.LinkDistance" xml:space="preserve"><value>Distancia de enlace</value></data>
+  <data name="Graph.LinkStrength" xml:space="preserve"><value>Fuerza de enlace</value></data>
+  <data name="Graph.Repulsion" xml:space="preserve"><value>Repulsión</value></data>
+  <data name="Graph.Settings" xml:space="preserve"><value>Ajustes del grafo</value></data>
+  <data name="Graph.ShowAttachments" xml:space="preserve"><value>Adjuntos</value></data>
+  <data name="Graph.ShowOrphans" xml:space="preserve"><value>Notas huérfanas</value></data>
+  <data name="Graph.ShowTags" xml:space="preserve"><value>Etiquetas</value></data>
+  <data name="Graph.ShowUnresolved" xml:space="preserve"><value>Enlaces sin resolver</value></data>
+  <data name="Graph.Title" xml:space="preserve"><value>Grafo</value></data>
   <data name="Menu.CloseVault" xml:space="preserve"><value>Cerrar vault</value></data>
   <data name="Menu.CommandPalette" xml:space="preserve"><value>Paleta de comandos…</value></data>
   <data name="Menu.File" xml:space="preserve"><value>Archivo</value></data>

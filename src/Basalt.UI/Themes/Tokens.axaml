@@ -20,6 +20,10 @@
       <Color x:Key="BasaltUnresolvedLinkColor">#8E7DBE</Color>
       <Color x:Key="BasaltTagColor">#3E5FB8</Color>
       <Color x:Key="BasaltCodeBackgroundColor">#F1F1F4</Color>
+      <Color x:Key="BasaltGraphGroup0Color">#D9713C</Color>
+      <Color x:Key="BasaltGraphGroup1Color">#2E9E6B</Color>
+      <Color x:Key="BasaltGraphGroup2Color">#C2499E</Color>
+      <Color x:Key="BasaltGraphGroup3Color">#3E8FD0</Color>
     </ResourceDictionary>
     <ResourceDictionary x:Key="Dark">
       <Color x:Key="BasaltBackgroundColor">#1C1C21</Color>
@@ -39,6 +43,10 @@
       <Color x:Key="BasaltUnresolvedLinkColor">#8C80B0</Color>
       <Color x:Key="BasaltTagColor">#8FB0FF</Color>
       <Color x:Key="BasaltCodeBackgroundColor">#2A2A31</Color>
+      <Color x:Key="BasaltGraphGroup0Color">#F2A06B</Color>
+      <Color x:Key="BasaltGraphGroup1Color">#6BC79B</Color>
+      <Color x:Key="BasaltGraphGroup2Color">#E88BC2</Color>
+      <Color x:Key="BasaltGraphGroup3Color">#7FB4F0</Color>
     </ResourceDictionary>
   </ResourceDictionary.ThemeDictionaries>
 
@@ -59,6 +67,10 @@
   <SolidColorBrush x:Key="BasaltUnresolvedLinkBrush" Color="{DynamicResource BasaltUnresolvedLinkColor}" />
   <SolidColorBrush x:Key="BasaltTagBrush" Color="{DynamicResource BasaltTagColor}" />
   <SolidColorBrush x:Key="BasaltCodeBackgroundBrush" Color="{DynamicResource BasaltCodeBackgroundColor}" />
+  <SolidColorBrush x:Key="BasaltGraphGroup0Brush" Color="{DynamicResource BasaltGraphGroup0Color}" />
+  <SolidColorBrush x:Key="BasaltGraphGroup1Brush" Color="{DynamicResource BasaltGraphGroup1Color}" />
+  <SolidColorBrush x:Key="BasaltGraphGroup2Brush" Color="{DynamicResource BasaltGraphGroup2Color}" />
+  <SolidColorBrush x:Key="BasaltGraphGroup3Brush" Color="{DynamicResource BasaltGraphGroup3Color}" />
 
   <Thickness x:Key="BasaltSpacingXs">2</Thickness>
   <Thickness x:Key="BasaltSpacingS">4</Thickness>

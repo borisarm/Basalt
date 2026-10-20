@@ -15,6 +15,7 @@
   <data name="Commands.GoForward" xml:space="preserve"><value>Go forward</value></data>
   <data name="Commands.NewNote" xml:space="preserve"><value>New note</value></data>
   <data name="Commands.OpenDailyNote" xml:space="preserve"><value>Open today's daily note</value></data>
+  <data name="Commands.OpenGraph" xml:space="preserve"><value>Open graph</value></data>
   <data name="Commands.ReopenClosedTab" xml:space="preserve"><value>Reopen closed tab</value></data>
   <data name="Commands.SearchVault" xml:space="preserve"><value>Search in vault</value></data>
   <data name="Commands.ToggleReadingMode" xml:space="preserve"><value>Toggle reading/editing</value></data>
@@ -84,6 +85,25 @@
   <data name="Explorer.NewFolder" xml:space="preserve"><value>New folder</value></data>
   <data name="Explorer.NewName" xml:space="preserve"><value>New name</value></data>
   <data name="Explorer.Rename" xml:space="preserve"><value>Rename</value></data>
+  <data name="Graph.ColorGroups" xml:space="preserve"><value>Colour groups (one query per line)</value></data>
+  <data name="Graph.Depth" xml:space="preserve"><value>Depth</value></data>
+  <data name="Graph.Direction" xml:space="preserve"><value>Direction</value></data>
+  <data name="Graph.DirectionBoth" xml:space="preserve"><value>Both</value></data>
+  <data name="Graph.DirectionIncoming" xml:space="preserve"><value>Incoming</value></data>
+  <data name="Graph.DirectionOutgoing" xml:space="preserve"><value>Outgoing</value></data>
+  <data name="Graph.Filter" xml:space="preserve"><value>Search query</value></data>
+  <data name="Graph.Filters" xml:space="preserve"><value>Filters</value></data>
+  <data name="Graph.Forces" xml:space="preserve"><value>Forces</value></data>
+  <data name="Graph.Gravity" xml:space="preserve"><value>Gravity</value></data>
+  <data name="Graph.LinkDistance" xml:space="preserve"><value>Link distance</value></data>
+  <data name="Graph.LinkStrength" xml:space="preserve"><value>Link strength</value></data>
+  <data name="Graph.Repulsion" xml:space="preserve"><value>Repulsion</value></data>
+  <data name="Graph.Settings" xml:space="preserve"><value>Graph settings</value></data>
+  <data name="Graph.ShowAttachments" xml:space="preserve"><value>Attachments</value></data>
+  <data name="Graph.ShowOrphans" xml:space="preserve"><value>Orphan notes</value></data>
+  <data name="Graph.ShowTags" xml:space="preserve"><value>Tags</value></data>
+  <data name="Graph.ShowUnresolved" xml:space="preserve"><value>Unresolved links</value></data>
+  <data name="Graph.Title" xml:space="preserve"><value>Graph</value></data>
   <data name="Menu.CloseVault" xml:space="preserve"><value>Close vault</value></data>
   <data name="Menu.CommandPalette" xml:space="preserve"><value>Command palette…</value></data>
   <data name="Menu.File" xml:space="preserve"><value>File</value></data>

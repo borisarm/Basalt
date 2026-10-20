@@ -1,0 +1,37 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Basalt.Presentation.Workspace;assembly=Basalt.Presentation"
+             xmlns:g="clr-namespace:Basalt.UI.Graph"
+             xmlns:l="clr-namespace:Basalt.UI.Localization"
+             x:Class="Basalt.UI.Views.GraphTabView"
+             x:DataType="vm:GraphTabViewModel">
+  <!-- Spec 07 §7: the graph fills the tab, the settings panel (filters, colour groups, forces) docks on the right. -->
+  <DockPanel>
+    <Border DockPanel.Dock="Right" Width="240" Background="{DynamicResource BasaltSurfaceBrush}"
+            BorderBrush="{DynamicResource BasaltBorderBrush}" BorderThickness="1,0,0,0">
+      <ScrollViewer>
+        <StackPanel Margin="{StaticResource BasaltSpacingM}" Spacing="6">
+          <TextBlock Text="{l:Loc Graph.Settings}" FontWeight="Bold" />
+          <TextBlock Text="{l:Loc Graph.Filters}" FontWeight="SemiBold" />
+          <CheckBox Content="{l:Loc Graph.ShowOrphans}" IsChecked="{Binding ShowOrphans}" />
+          <CheckBox Content="{l:Loc Graph.ShowAttachments}" IsChecked="{Binding ShowAttachments}" />
+          <CheckBox Content="{l:Loc Graph.ShowUnresolved}" IsChecked="{Binding ShowUnresolved}" />
+          <CheckBox Content="{l:Loc Graph.ShowTags}" IsChecked="{Binding ShowTags}" />
+          <TextBox Text="{Binding Filter}" PlaceholderText="{l:Loc Graph.Filter}" />
+          <TextBlock Text="{l:Loc Graph.ColorGroups}" TextWrapping="Wrap" />
+          <TextBox x:Name="ColorGroups" Text="{Binding ColorGroupsText}" AcceptsReturn="True" Height="72" />
+          <TextBlock Text="{l:Loc Graph.Forces}" FontWeight="SemiBold" Margin="0,8,0,0" />
+          <TextBlock Text="{l:Loc Graph.Repulsion}" />
+          <Slider Minimum="10" Maximum="3000" Value="{Binding Repulsion}" />
+          <TextBlock Text="{l:Loc Graph.LinkDistance}" />
+          <Slider Minimum="10" Maximum="300" Value="{Binding LinkDistance}" />
+          <TextBlock Text="{l:Loc Graph.LinkStrength}" />
+          <Slider Minimum="0.01" Maximum="1" Value="{Binding LinkStrength}" />
+          <TextBlock Text="{l:Loc Graph.Gravity}" />
+          <Slider Minimum="0" Maximum="0.5" Value="{Binding Gravity}" />
+        </StackPanel>
+      </ScrollViewer>
+    </Border>
+    <g:GraphCanvas x:Name="Canvas" Graph="{Binding Graph}" Layout="{Binding Layout}" />
+  </DockPanel>
+</UserControl>

@@ -130,10 +130,15 @@ public sealed class WorkspaceFactory(IServiceProvider services)
             Get<IQueryHandler<ReadAttachment, byte[]>>(),
             Get<ICommandHandler<ToggleTask, Unit>>(),
             Get<ICommandHandler<CreateNote, VaultPath>>());
-        var workspace = new WorkspaceViewModel(
+        WorkspaceViewModel? workspace = null;
+        workspace = new WorkspaceViewModel(
             common,
             vault,
-            [new DelegateTabFactory("note", p => FileClassifier.Classify(p) == FileKind.Note, () => new NoteTabViewModel(common, noteTabs, events, messenger, vault.Id, editing, Get<IEditorCommands>(), reading))],
+            [
+                new DelegateTabFactory("note", p => FileClassifier.Classify(p) == FileKind.Note, () => new NoteTabViewModel(common, noteTabs, events, messenger, vault.Id, editing, Get<IEditorCommands>(), reading)),
+                new DelegateTabFactory(GraphTabViewModel.KindId, _ => false,
+                    () => new GraphTabViewModel(common, vault.Id, Get<IQueryHandler<GetGraph, GraphModel>>(), workspace!, Get<IRandom>(), events)),
+            ],
             messenger,
             new WorkspaceUseCases(Get<ICommandHandler<RecordRecentFile, Unit>>(), Get<IQueryHandler<LoadWorkspace, WorkspaceState?>>(), Get<ICommandHandler<SaveWorkspace, Unit>>()));
 

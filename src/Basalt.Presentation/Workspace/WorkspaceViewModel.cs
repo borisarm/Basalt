@@ -68,16 +68,56 @@ public sealed partial class TabGroupViewModel(ViewModelServices services, IReadO
             return shown;
         }
 
+        Add(tab);
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Shows a tab that does not stand for a file (<c>graph</c>): activates the one already open of that kind, or
+    /// opens it next to the active tab. <c>entry.unsupported</c> when no tab type has that kind.
+    /// </summary>
+    public async Task<Result<Unit>> OpenKindAsync(string kind, CancellationToken ct)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(kind);
+        if (Tabs.FirstOrDefault(t => t.Kind == kind) is { } existing)
+        {
+            ActiveTab = existing;
+            return Result.Success();
+        }
+
+        if (factories.FirstOrDefault(f => f.Kind == kind) is not { } factory)
+        {
+            return new Error(ErrorCodes.EntryUnsupported, "No tab of this kind.").With("kind", kind);
+        }
+
+        var tab = factory.Create();
+        var shown = await tab.ShowAsync(ct).ConfigureAwait(true);
+        if (shown.IsFailure)
+        {
+            tab.Dispose();
+            return shown;
+        }
+
+        Add(tab);
+        return Result.Success();
+    }
+
+    private void Add(TabViewModel tab)
+    {
         Tabs.Insert(ActiveTab is null ? Tabs.Count : Tabs.IndexOf(ActiveTab) + 1, tab);
         ActiveTab = tab;
-        return Result.Success();
     }
 
     /// <summary>Adds a restored tab (workspace persistence).</summary>
     public async Task<bool> RestoreAsync(WorkspaceTab saved, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(saved);
-        if (saved.Path is null || VaultPath.Create(saved.Path) is not { IsSuccess: true } path
+        if (saved.Path is null)
+        {
+            return await RestoreKindAsync(saved, ct).ConfigureAwait(true);
+        }
+
+        if (VaultPath.Create(saved.Path) is not { IsSuccess: true } path
             || factories.FirstOrDefault(f => f.Kind == saved.Kind && f.CanOpen(path.Value)) is not { } factory)
         {
             return false;
@@ -85,6 +125,26 @@ public sealed partial class TabGroupViewModel(ViewModelServices services, IReadO
 
         var tab = factory.Create();
         if ((await tab.ShowAsync(new OpenRequest(path.Value), ct).ConfigureAwait(true)).IsFailure)
+        {
+            tab.Dispose();
+            return false;
+        }
+
+        tab.IsPinned = saved.Pinned;
+        tab.RestoreViewState(saved.ViewState);
+        Tabs.Add(tab);
+        return true;
+    }
+
+    private async Task<bool> RestoreKindAsync(WorkspaceTab saved, CancellationToken ct)
+    {
+        if (factories.FirstOrDefault(f => f.Kind == saved.Kind) is not { } factory)
+        {
+            return false;
+        }
+
+        var tab = factory.Create();
+        if ((await tab.ShowAsync(ct).ConfigureAwait(true)).IsFailure)
         {
             tab.Dispose();
             return false;
@@ -544,6 +604,11 @@ public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNaviga
     [RelayCommand]
     private void ShowPanel(string panelId) => FocusPanel(panelId);
 
+    /// <summary>Opens (or activates) the graph tab of the active pane (F-012).</summary>
+    [RelayCommand]
+    private Task<Result<Unit>> OpenGraphAsync(CancellationToken ct) =>
+        RunAsync(token => Layout.ActiveGroup.OpenKindAsync(GraphTabViewModel.KindId, token));
+
     Task IWorkspaceCommandHost.ShowQuickSwitcherAsync() => ShowQuickSwitcherAsync();
 
     void IWorkspaceCommandHost.ShowCommandPalette() => ShowCommandPalette();
@@ -563,6 +628,8 @@ public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNaviga
 
     Task IWorkspaceCommandHost.GoForwardAsync(CancellationToken ct) =>
         Layout.ActiveGroup.ActiveTab is { } tab ? tab.GoForwardCommand.ExecuteAsync(null) : Task.CompletedTask;
+
+    Task IWorkspaceCommandHost.OpenGraphAsync(CancellationToken ct) => OpenGraphAsync(ct);
 
     /// <summary>A key gesture typed in the workspace: runs its command (spec 07 §9). True when a command answered.</summary>
     public Task<bool> HandleGestureAsync(Application.Commands.Gesture gesture, CancellationToken ct) =>

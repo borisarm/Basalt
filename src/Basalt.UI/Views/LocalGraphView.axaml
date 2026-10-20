@@ -1,0 +1,34 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="clr-namespace:Basalt.Presentation.Panels;assembly=Basalt.Presentation"
+             xmlns:g="clr-namespace:Basalt.UI.Graph"
+             xmlns:l="clr-namespace:Basalt.UI.Localization"
+             x:Class="Basalt.UI.Views.LocalGraphView"
+             x:DataType="p:LocalGraphViewModel">
+  <!-- Spec 07 §6: the local graph of the active note with its depth, direction and filters. -->
+  <DockPanel>
+    <StackPanel DockPanel.Dock="Top" Margin="{StaticResource BasaltSpacingS}" Spacing="4">
+      <DockPanel>
+        <TextBlock DockPanel.Dock="Left" Text="{l:Loc Graph.Depth}" VerticalAlignment="Center" />
+        <ComboBox x:Name="Depth" Margin="8,0,0,0" ItemsSource="{Binding Depths}" SelectedItem="{Binding Depth}" />
+      </DockPanel>
+      <DockPanel>
+        <TextBlock DockPanel.Dock="Left" Text="{l:Loc Graph.Direction}" VerticalAlignment="Center" />
+        <ComboBox x:Name="Direction" Margin="8,0,0,0" ItemsSource="{Binding Directions}" SelectedItem="{Binding SelectedDirection}">
+          <ComboBox.ItemTemplate>
+            <DataTemplate x:DataType="p:LocalGraphViewModel+DirectionChoice">
+              <TextBlock Text="{Binding Label}" />
+            </DataTemplate>
+          </ComboBox.ItemTemplate>
+        </ComboBox>
+      </DockPanel>
+      <WrapPanel>
+        <CheckBox Content="{l:Loc Graph.ShowOrphans}" IsChecked="{Binding ShowOrphans}" />
+        <CheckBox Content="{l:Loc Graph.ShowAttachments}" IsChecked="{Binding ShowAttachments}" />
+        <CheckBox Content="{l:Loc Graph.ShowUnresolved}" IsChecked="{Binding ShowUnresolved}" />
+        <CheckBox Content="{l:Loc Graph.ShowTags}" IsChecked="{Binding ShowTags}" />
+      </WrapPanel>
+    </StackPanel>
+    <g:GraphCanvas x:Name="Canvas" Graph="{Binding Graph}" Layout="{Binding Layout}" />
+  </DockPanel>
+</UserControl>

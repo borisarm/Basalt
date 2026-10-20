@@ -1,3 +1,4 @@
+using Basalt.Application.Errors;
 using Basalt.Domain.Common;
 using Basalt.Domain.Notes;
 using Basalt.Presentation.Common;
@@ -7,7 +8,7 @@ using CommunityToolkit.Mvvm.Input;
 namespace Basalt.Presentation.Workspace;
 
 /// <summary>
-/// A tab of the central area (spec 07 §2). Each tab keeps its own back/forward history (F-013); <see cref="ShowAsync"/>
+/// A tab of the central area (spec 07 §2). Each tab keeps its own back/forward history (F-013); <see cref="ShowAsync(OpenRequest, CancellationToken)"/>
 /// replaces its content, <see cref="NavigateAsync"/> does so recording history.
 /// </summary>
 public abstract partial class TabViewModel(ViewModelServices services) : ViewModelBase(services)
@@ -53,7 +54,22 @@ public abstract partial class TabViewModel(ViewModelServices services) : ViewMod
         return shown;
     }
 
-    /// <summary>Like <see cref="ShowAsync"/>, remembering where the tab was for <see cref="GoBackCommand"/>.</summary>
+    /// <summary>
+    /// Shows what this tab shows by default when it does not stand for a file (the graph). Tabs that need an
+    /// <see cref="OpenRequest"/> fail with <c>entry.unsupported</c>.
+    /// </summary>
+    public async Task<Result<Unit>> ShowAsync(CancellationToken ct)
+    {
+        var shown = await LoadAsync(ct).ConfigureAwait(true);
+        if (shown.IsSuccess)
+        {
+            Current = null;
+        }
+
+        return shown;
+    }
+
+    /// <summary>Like <see cref="ShowAsync(OpenRequest, CancellationToken)"/>, remembering where the tab was for <see cref="GoBackCommand"/>.</summary>
     public async Task<Result<Unit>> NavigateAsync(OpenRequest request, CancellationToken ct)
     {
         var previous = Current;
@@ -72,6 +88,10 @@ public abstract partial class TabViewModel(ViewModelServices services) : ViewMod
     public virtual Task FlushAsync(CancellationToken ct) => Task.CompletedTask;
 
     protected abstract Task<Result<Unit>> LoadAsync(OpenRequest request, CancellationToken ct);
+
+    /// <summary>Loads the tab's default content; only tabs without a file (<c>graph</c>) override it.</summary>
+    protected virtual Task<Result<Unit>> LoadAsync(CancellationToken ct) =>
+        Task.FromResult(Result.Failure<Unit>(new Error(ErrorCodes.EntryUnsupported, "This tab needs a file.")));
 
     private bool CanGoBack() => _back.Count > 0;
 

@@ -281,6 +281,32 @@ public sealed partial class LocalGraphViewModel(ViewModelServices services, Pane
     : ActiveNotePanelViewModel(services, context)
 {
     private int _depth = GetGraphHandler.MinDepth;
+    private IReadOnlyList<DirectionChoice>? _directions;
+
+    /// <summary>A direction with the label the combo box shows.</summary>
+    public sealed record DirectionChoice(LocalGraphDirection Value, string Label);
+
+    /// <summary>The depths the panel offers (F-012.1: 1–5).</summary>
+    public IReadOnlyList<int> Depths { get; } = [.. Enumerable.Range(GetGraphHandler.MinDepth, GetGraphHandler.MaxDepth)];
+
+    public IReadOnlyList<DirectionChoice> Directions => _directions ??=
+    [
+        new(LocalGraphDirection.Both, Localizer.Get("Graph.DirectionBoth")),
+        new(LocalGraphDirection.Outgoing, Localizer.Get("Graph.DirectionOutgoing")),
+        new(LocalGraphDirection.Incoming, Localizer.Get("Graph.DirectionIncoming")),
+    ];
+
+    public DirectionChoice? SelectedDirection
+    {
+        get => Directions.FirstOrDefault(d => d.Value == Direction);
+        set
+        {
+            if (value is { } choice && choice.Value != Direction)
+            {
+                Direction = choice.Value;
+            }
+        }
+    }
 
     /// <summary>Hops from the note, 1–5.</summary>
     public int Depth
@@ -302,14 +328,38 @@ public sealed partial class LocalGraphViewModel(ViewModelServices services, Pane
     public partial GraphOptions Options { get; set; } = GraphOptions.Default;
 
     [ObservableProperty]
+    public partial bool ShowOrphans { get; set; } = GraphOptions.Default.ShowOrphans;
+
+    [ObservableProperty]
+    public partial bool ShowAttachments { get; set; } = GraphOptions.Default.ShowAttachments;
+
+    [ObservableProperty]
+    public partial bool ShowUnresolved { get; set; } = GraphOptions.Default.ShowUnresolved;
+
+    [ObservableProperty]
+    public partial bool ShowTags { get; set; } = GraphOptions.Default.ShowTags;
+
+    [ObservableProperty]
     public partial GraphModel? Graph { get; private set; }
 
     [ObservableProperty]
     public partial ForceLayout? Layout { get; private set; }
 
-    partial void OnDirectionChanged(LocalGraphDirection value) => StartRefresh();
+    partial void OnDirectionChanged(LocalGraphDirection value)
+    {
+        OnPropertyChanged(nameof(SelectedDirection));
+        StartRefresh();
+    }
 
     partial void OnOptionsChanged(GraphOptions value) => StartRefresh();
+
+    partial void OnShowOrphansChanged(bool value) => Options = Options with { ShowOrphans = value };
+
+    partial void OnShowAttachmentsChanged(bool value) => Options = Options with { ShowAttachments = value };
+
+    partial void OnShowUnresolvedChanged(bool value) => Options = Options with { ShowUnresolved = value };
+
+    partial void OnShowTagsChanged(bool value) => Options = Options with { ShowTags = value };
 
     protected override async Task RefreshAsync(VaultPath? file, CancellationToken ct)
     {

@@ -210,6 +210,8 @@ public interface IConnectivityMonitor { bool IsOnline { get; } event EventHandle
 public interface IBackgroundSyncScheduler { void Schedule(TimeSpan earliest); void Cancel(); }   // iOS: BGTaskScheduler; escritorio: no-op (timer en proceso)
 public interface IExternalLauncher { Task OpenUriAsync(Uri uri, CancellationToken ct); Task RevealInFileManagerAsync(string location, CancellationToken ct); }
 public interface IClipboardService { Task<ClipboardContent> GetAsync(CancellationToken ct); Task SetTextAsync(string text, CancellationToken ct); }
+public interface ICultureProvider { CultureInfo Current { get; } }   // fechas de plantillas y notas diarias
+public interface ISystemTrash { bool IsAvailable { get; } Task<Result<Unit>> MoveToTrashAsync(string rootLocation, VaultPath path, CancellationToken ct); }   // DeleteMode.SystemTrash; si no está disponible se usa .trash/
 public interface IEventBus { ValueTask PublishAsync<T>(T evt, CancellationToken ct) where T : IApplicationEvent; IDisposable Subscribe<T>(Func<T, CancellationToken, ValueTask> handler) where T : IApplicationEvent; }
 ```
 
@@ -295,4 +297,6 @@ Cada caso de uso es un `record` comando/consulta + un handler. Lista completa (l
 | `ISecretStore` | `WindowsCredentialStore`, `AppleKeychainStore` | `InMemorySecretStore` | `SecretStoreContract` (los reales se ejecutan solo en su SO, `[Trait("OS", ...)]`) |
 | `I*Store` (JSON) | `JsonFileStore<T>` | `InMemoryStore<T>` | `KeyValueStoreContract` |
 | `IClock` | `SystemClock` | `FakeClock` (avanzable) | — |
+| `ICultureProvider` | `SystemCultureProvider` | `FakeCultureProvider` (es-ES) | — |
+| `ISystemTrash` | `SystemTrash` (Windows: papelera de reciclaje; otros: no disponible → `fs.trash_unavailable`) | `FakeSystemTrash` | `SystemTrashContract` |
 | `IUiDispatcher` | `AvaloniaUiDispatcher` | `ImmediateDispatcher` | — |

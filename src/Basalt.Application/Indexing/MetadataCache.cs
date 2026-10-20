@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using System.Text;
 using Basalt.Application.Ports.Index;
 using Basalt.Domain.Links;
 using Basalt.Domain.Notes;
@@ -137,7 +136,7 @@ public sealed class MetadataCache : IMetadataCache
             var sources = new HashSet<VaultPath>(upserts.Select(u => u.Path));
             foreach (var source in state.Files.Values)
             {
-                if (changedNames.Count > 0 && source.Metadata.AllLinks.Any(l => CandidateNames(l).Overlaps(changedNames)))
+                if (changedNames.Count > 0 && source.Metadata.AllLinks.Any(l => LinkNames.CandidateNames(l).Overlaps(changedNames)))
                 {
                     sources.Add(source.Path);
                 }
@@ -174,15 +173,6 @@ public sealed class MetadataCache : IMetadataCache
 
     private static List<ResolvedLink> Resolve(IndexedNoteSummary source, MetadataSnapshot catalog) =>
         [.. source.Metadata.AllLinks.Select(link => new ResolvedLink(source.Path, link, LinkResolver.Resolve(link, source.Path, catalog).TargetPath))];
-
-    /// <summary>File names (upper case) a link could resolve to by name: its last segment with and without ".md".</summary>
-    private static HashSet<string> CandidateNames(Link link)
-    {
-        var target = link.Kind is LinkKind.MarkdownLink or LinkKind.MarkdownEmbed ? Uri.UnescapeDataString(link.RawTarget) : link.RawTarget;
-        target = target.Trim().Replace('\\', '/').Normalize(NormalizationForm.FormC).TrimStart('<').TrimEnd('>');
-        var name = target[(target.LastIndexOf('/') + 1)..].ToUpperInvariant();
-        return name.Length == 0 ? [] : [name, name + ".MD"];
-    }
 
     private static MetadataSnapshot AddFile(MetadataSnapshot state, IndexedNoteSummary file)
     {

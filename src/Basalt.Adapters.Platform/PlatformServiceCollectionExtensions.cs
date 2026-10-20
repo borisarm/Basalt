@@ -20,6 +20,8 @@ public static class PlatformServiceCollectionExtensions
         services.TryAddSingleton<IClock, SystemClock>();
         services.TryAddSingleton<IIdGenerator, GuidIdGenerator>();
         services.TryAddSingleton<IRandom, SystemRandom>();
+        services.TryAddSingleton<ICultureProvider, SystemCultureProvider>();
+        services.TryAddSingleton<ISystemTrash, SystemTrash>();
         services.AddSingleton<IDocumentStore<VaultRegistryDocument>>(sp => Store(sp, "vaults.json", PlatformJsonContext.Default.VaultRegistryDocument, () => VaultRegistryDocument.Empty));
         services.AddSingleton<IDocumentStore<AccountsDocument>>(sp => Store(sp, "accounts.json", PlatformJsonContext.Default.AccountsDocument, () => AccountsDocument.Empty));
         services.AddSingleton<IDocumentStore<AppSettings>>(sp => Store(sp, "settings.json", PlatformJsonContext.Default.AppSettings, () => AppSettings.Default));

@@ -13,8 +13,16 @@ public static class ErrorCodes
     public const string FsConcurrentModification = "fs.concurrent_modification";
     public const string FsAccessDenied = "fs.access_denied";
     public const string FsIo = "fs.io";
+    public const string FsTrashUnavailable = "fs.trash_unavailable";
 
     public const string StorageIo = "storage.io";
+
+    public const string PathAlreadyExists = "path.already_exists";
+    public const string EntryNotFound = "entry.not_found";
+    public const string NoteModifiedExternally = "note.modified_externally";
+    public const string NoteNotATask = "note.not_a_task";
+    public const string NoteFrontmatterInvalid = "note.frontmatter_invalid";
+    public const string MoveIntoItself = "entry.move_into_itself";
 
     public const string VaultAlreadyRegistered = "vault.already_registered";
     public const string VaultNotRegistered = "vault.not_registered";

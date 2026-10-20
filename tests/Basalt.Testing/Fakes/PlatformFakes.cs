@@ -1,4 +1,8 @@
+using Basalt.Application.Errors;
+using Basalt.Application.Ports.FileSystem;
 using Basalt.Application.Ports.Platform;
+using Basalt.Domain.Common;
+using Basalt.Domain.Notes;
 using Microsoft.Extensions.Time.Testing;
 
 namespace Basalt.Testing.Fakes;
@@ -46,4 +50,36 @@ public sealed class FakeDeviceInfo(string displayName = "Test Laptop") : IDevice
     public Guid DeviceId { get; } = new("0000000d-0000-0000-0000-000000000001");
 
     public string DisplayName { get; } = displayName;
+}
+
+/// <summary>A fixed culture (es-ES by default, the culture of the spec examples).</summary>
+public sealed class FakeCultureProvider(string name = "es-ES") : ICultureProvider
+{
+    public System.Globalization.CultureInfo Current { get; } = System.Globalization.CultureInfo.GetCultureInfo(name);
+}
+
+/// <summary>A recycle bin over an in-memory vault: trashed entries are deleted from the vault and remembered.</summary>
+public sealed class FakeSystemTrash(IVaultFileSystem vault, bool available = true) : ISystemTrash
+{
+    private readonly List<VaultPath> _trashed = [];
+
+    public bool IsAvailable => available;
+
+    public IReadOnlyList<VaultPath> Trashed => _trashed;
+
+    public async Task<Result<Unit>> MoveToTrashAsync(string rootLocation, VaultPath path, CancellationToken ct)
+    {
+        if (!available)
+        {
+            return new Error(ErrorCodes.FsTrashUnavailable, "This system has no recycle bin.");
+        }
+
+        var deleted = await vault.DeleteAsync(path, ct);
+        if (deleted.IsSuccess)
+        {
+            _trashed.Add(path);
+        }
+
+        return deleted;
+    }
 }

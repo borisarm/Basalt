@@ -34,7 +34,8 @@ public sealed class InMemoryVaultFileSystem : IVaultFileSystem
     /// <summary>Number of successful writes (for assertions).</summary>
     public int WriteCount { get; private set; }
 
-    /// <summary>The next write to <paramref name="path"/> fails with <paramref name="error"/> and changes nothing.</summary>
+    /// <summary>The next write, move (as source) or delete of <paramref name="path"/> fails with <paramref name="error"/> and
+    /// changes nothing.</summary>
     public void FailNextWrite(VaultPath path, Error error)
     {
         lock (_gate)
@@ -180,6 +181,11 @@ public sealed class InMemoryVaultFileSystem : IVaultFileSystem
                 return Task.FromResult(Result.Failure(NotFound(from)));
             }
 
+            if (TakeInjectedFailure(from) is { } failure)
+            {
+                return Task.FromResult(Result.Failure(failure));
+            }
+
             var caseOnly = Key(from) == Key(to);
             if (!caseOnly && (to.IsRoot || _entries.ContainsKey(Key(to))))
             {
@@ -214,7 +220,7 @@ public sealed class InMemoryVaultFileSystem : IVaultFileSystem
         ct.ThrowIfCancellationRequested();
         lock (_gate)
         {
-            return Task.FromResult(RemoveUnlocked(path));
+            return Task.FromResult(TakeInjectedFailure(path) is { } failure ? Result.Failure(failure) : RemoveUnlocked(path));
         }
     }
 

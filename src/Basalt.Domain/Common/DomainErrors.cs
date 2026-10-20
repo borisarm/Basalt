@@ -7,6 +7,7 @@ public static class DomainErrors
 
     public const string PathOutsideVault = "path.outside_vault";
     public const string PathInvalidSegment = "path.invalid_segment";
+    public const string PathCaseCollision = "path.case_collision";
 
     public const string VaultInvalidName = "vault.invalid_name";
     public const string VaultInvalidId = "vault.invalid_id";

@@ -22,7 +22,7 @@ Los tests se escriben **contra el contrato** (puerto o API pública del componen
 | Propiedades | En los dos anteriores (`[Property]`) | Invariantes algebraicos | — | Incluidas arriba (100 casos por defecto; 10 000 en nightly vía variable) |
 | Contrato | `Basalt.Testing/Contracts` + proyectos de adaptador | Que fake y real cumplen el mismo puerto | — | — |
 | Integración de adaptador | `Basalt.Adapters.*.Tests` | Adaptador real contra recurso real (disco, SQLite, HTTP a FakeGitHub) | Ninguno o FakeGitHub | < 60 s cada uno |
-| Snapshot | `Basalt.Adapters.Markdown.Tests`, Presentation | Salidas complejas (metadatos, modelo de render) | Verify | — |
+| Snapshot | `Basalt.Adapters.Markdown.Tests`, Presentation, UI | Salidas complejas (metadatos, modelo de render, capturas) | Helper propio (ADR-0009) | — |
 | ViewModel | `Basalt.Presentation.Tests` | Lógica de presentación, comandos, estados | Fakes + `ImmediateDispatcher` | < 15 s |
 | UI headless | `Basalt.UI.Tests` | Vistas Avalonia: bindings, interacción, atajos | Avalonia.Headless + ViewModels con fakes | < 90 s |
 | Extremo a extremo de sync | `Basalt.Sync.IntegrationTests` | Varios "dispositivos" con FS real + composición real del núcleo + FakeGitHub por HTTP | FakeGitHub | < 5 min (PR) |
@@ -92,7 +92,7 @@ Se construyen en la Fase 0–2 y crecen con el proyecto:
 ### 5.5 UI headless
 - Smoke de cada vista principal: se crea con su ViewModel, se renderiza sin excepciones, los bindings compilados funcionan.
 - Flujos clave con entrada simulada: abrir quick switcher con el atajo y abrir nota; crear nota desde explorador; alternar modo lectura; completar `[[` en el editor; asistente de sync hasta dry-run (con FakeGitHub).
-- Capturas de referencia (`Verify` de PNG de `CaptureRenderedFrame`) para tema claro/oscuro de 5 vistas clave — tolerancia de comparación configurada.
+- Capturas de referencia (`PngSnapshot` sobre `CaptureRenderedFrame`) para tema claro/oscuro de 5 vistas clave; tolerancia de comparación configurada y línea base por plataforma (ADR-0009).
 
 ## 6. Property-based testing (obligatorio en estos puntos)
 

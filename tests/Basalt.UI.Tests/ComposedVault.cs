@@ -64,7 +64,9 @@ internal sealed class ComposedVault : IAsyncDisposable
         services.AddSingleton(windows);
         services.AddBasaltUi();
         var provider = services.BuildServiceProvider();
-        LocalizationSource.Instance.Attach(new ResxLocalizer(CultureInfo.GetCultureInfo(culture)));
+        var localizer = provider.GetRequiredService<ILocalizer>();
+        localizer.Culture = CultureInfo.GetCultureInfo(culture);
+        LocalizationSource.Instance.Attach(localizer);
         var ct = TestContext.Current.CancellationToken;
 
         var created = await provider.GetRequiredService<ICommandHandler<CreateVault, VaultRegistration>>()

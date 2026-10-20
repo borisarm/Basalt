@@ -9,6 +9,7 @@ using Avalonia.VisualTree;
 using Basalt.Application.Settings;
 using Basalt.Application.Vaults;
 using Basalt.Composition;
+using Basalt.Presentation.Localization;
 using Basalt.Presentation.Settings;
 using Basalt.UI.Localization;
 using Basalt.UI.Views;
@@ -55,6 +56,8 @@ public sealed class SettingsViewTests
     {
         await using var v = await ComposedVault.CreateAsync(new Dictionary<string, string>());
         var (window, store) = await OpenSettingsAsync(v);
+        v.Services.GetRequiredService<ILocalizer>().Culture.Name.Should().Be("en");
+        LocalizationSource.Instance["Settings.Hotkeys"].Should().Be("Hotkeys");
         var view = window.GetVisualDescendants().OfType<SettingsView>().Single();
 
         Texts(view).Should().Contain(["General", "Editor", "Files and links", "Appearance", "Hotkeys", "Daily notes", "Templates", "About"]);

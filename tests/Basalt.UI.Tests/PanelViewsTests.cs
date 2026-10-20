@@ -1,3 +1,5 @@
+using Avalonia.Automation.Peers;
+using Avalonia.Automation.Provider;
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Input;
@@ -7,7 +9,9 @@ using Basalt.Application.Commands;
 using Basalt.Domain.Notes;
 using Basalt.Presentation.Common;
 using Basalt.Presentation.Panels;
+using Basalt.Presentation.Workspace;
 using Basalt.UI.Input;
+using Basalt.UI.Reading;
 using Basalt.UI.Views;
 using TextBlock = Avalonia.Controls.TextBlock;
 
@@ -186,5 +190,44 @@ public sealed class PanelViewsTests
         await SettleAsync();
 
         Texts(v.Window.GetVisualDescendants().OfType<TagsPanelView>().Single()).Should().Contain(["proyecto", "1"]);
+    });
+
+    [Fact]
+    [Trait("Spec", "F-011")]
+    public Task Explorer_CreatesANote_AndOpensIt() => Headless.RunAsync(async () =>
+    {
+        await using var v = await ComposedVault.CreateAsync(Files);
+        var explorer = v.Workspace.Panels!.Explorer;
+        await explorer.RefreshCommand.ExecuteAsync(null);
+        await SettleAsync();
+
+        var view = v.Window.GetVisualDescendants().OfType<FileExplorerView>().Single();
+        var newNote = view.GetVisualDescendants().OfType<Button>().Single(b => b.Name == "NewNote");
+        ((IInvokeProvider)ControlAutomationPeer.CreatePeerForElement(newNote)).Invoke();
+        await Task.Delay(50, TestContext.Current.CancellationToken);
+        await SettleAsync();
+
+        v.Workspace.ActiveFile.Should().Be(P("Untitled.md"));
+        File.Exists(Path.Combine(v.RootLocation, "Untitled.md")).Should().BeTrue();
+    });
+
+    [Fact]
+    [Trait("Spec", "F-003")]
+    public Task ReadingMode_TogglesWithTheShortcut() => Headless.RunAsync(async () =>
+    {
+        await using var v = await ComposedVault.CreateAsync(Files);
+        await v.Workspace.OpenAsync(new OpenRequest(P("A.md")), TestContext.Current.CancellationToken);
+        await SettleAsync();
+
+        Press(v, Key.E, RawInputModifiers.Control);
+        await SettleAsync();
+        var tab = v.Workspace.Layout.ActiveGroup.ActiveTab.Should().BeOfType<NoteTabViewModel>().Subject;
+        tab.IsReadingMode.Should().BeTrue();
+        v.Window.GetVisualDescendants().OfType<RenderDocumentView>().Single().IsVisible.Should().BeTrue();
+
+        Press(v, Key.E, RawInputModifiers.Control);
+        await SettleAsync();
+        tab.IsReadingMode.Should().BeFalse();
+        v.Window.GetVisualDescendants().OfType<RenderDocumentView>().Single().IsVisible.Should().BeFalse();
     });
 }

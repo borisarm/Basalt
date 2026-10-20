@@ -7,11 +7,11 @@
              x:DataType="settings:SettingsViewModel">
   <!-- Spec 04 F-014: settings sections; every change applies and is saved immediately. -->
   <ScrollViewer x:Name="Scroll">
-    <StackPanel Margin="{StaticResource BasaltSpacingXl}" Spacing="{StaticResource BasaltSpacingXl}" MaxWidth="760" HorizontalAlignment="Left">
-      <StackPanel Spacing="{StaticResource BasaltSpacingM}">
+    <StackPanel Margin="{StaticResource BasaltSpacingXl}" Spacing="20" MaxWidth="760" HorizontalAlignment="Left">
+      <StackPanel Spacing="8">
         <TextBlock x:Name="GeneralHeader" Text="{l:Loc Settings.General}" FontSize="{StaticResource BasaltFontSizeTitle}"
                    FontWeight="SemiBold" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
-        <Grid ColumnDefinitions="220,*" RowDefinitions="Auto,Auto" RowSpacing="{StaticResource BasaltSpacingS}">
+        <Grid ColumnDefinitions="220,*" RowDefinitions="Auto,Auto" RowSpacing="4">
           <TextBlock Text="{l:Loc Settings.General.Language}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
           <ComboBox Grid.Column="1" x:Name="Language" SelectionChanged="OnLanguageChanged">
             <ComboBoxItem Content="{l:Loc Settings.General.System}" />
@@ -23,10 +23,10 @@
         </Grid>
       </StackPanel>
 
-      <StackPanel Spacing="{StaticResource BasaltSpacingM}">
+      <StackPanel Spacing="8">
         <TextBlock x:Name="EditorHeader" Text="{l:Loc Settings.Editor}" FontSize="{StaticResource BasaltFontSizeTitle}"
                    FontWeight="SemiBold" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
-        <Grid ColumnDefinitions="220,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="{StaticResource BasaltSpacingS}">
+        <Grid ColumnDefinitions="220,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="4">
           <TextBlock Text="{l:Loc Settings.Editor.FontFamily}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
           <TextBox Grid.Column="1" x:Name="FontFamilyBox" Text="{Binding Editor.Settings.FontFamily}" LostFocus="OnEditorLostFocus" />
 
@@ -47,11 +47,11 @@
         </Grid>
       </StackPanel>
 
-      <StackPanel x:Name="FilesAndLinksSection" Spacing="{StaticResource BasaltSpacingM}"
+      <StackPanel x:Name="FilesAndLinksSection" Spacing="8"
                   IsVisible="{Binding FilesAndLinks, Converter={x:Static converters:ObjectConverters.IsNotNull}}">
         <TextBlock Text="{l:Loc Settings.FilesAndLinks}" FontSize="{StaticResource BasaltFontSizeTitle}"
                    FontWeight="SemiBold" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
-        <Grid ColumnDefinitions="220,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="{StaticResource BasaltSpacingS}">
+        <Grid ColumnDefinitions="220,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="4">
           <TextBlock Text="{l:Loc Settings.FilesLinks.AttachmentFolder}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
           <TextBox Grid.Column="1" x:Name="AttachmentFolder" Text="{Binding FilesAndLinks.Settings.AttachmentFolder}" LostFocus="OnVaultFoldersLostFocus" />
 
@@ -76,10 +76,10 @@
         </Grid>
       </StackPanel>
 
-      <StackPanel Spacing="{StaticResource BasaltSpacingM}">
+      <StackPanel Spacing="8">
         <TextBlock x:Name="AppearanceHeader" Text="{l:Loc Settings.Appearance}" FontSize="{StaticResource BasaltFontSizeTitle}"
                    FontWeight="SemiBold" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
-        <Grid ColumnDefinitions="220,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="{StaticResource BasaltSpacingS}">
+        <Grid ColumnDefinitions="220,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="4">
           <TextBlock Text="{l:Loc Settings.Appearance.Theme}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
           <ComboBox Grid.Column="1" x:Name="ThemeBox" HorizontalAlignment="Left" SelectionChanged="OnThemeChanged">
             <ComboBoxItem Content="{l:Loc Settings.Appearance.ThemeSystem}" />
@@ -97,14 +97,14 @@
         </Grid>
       </StackPanel>
 
-      <StackPanel x:Name="HotkeysSection" Spacing="{StaticResource BasaltSpacingM}">
+      <StackPanel x:Name="HotkeysSection" Spacing="8">
         <TextBlock x:Name="HotkeysHeader" Text="{l:Loc Settings.Hotkeys}" FontSize="{StaticResource BasaltFontSizeTitle}"
                    FontWeight="SemiBold" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
         <ListBox x:Name="HotkeysList" ItemsSource="{Binding Hotkeys.Rows}" MaxHeight="320"
                  Background="Transparent" BorderThickness="0">
           <ListBox.ItemTemplate>
             <DataTemplate x:DataType="settings:HotkeyRow">
-              <Grid ColumnDefinitions="*,200,90,90" RowDefinitions="Auto,Auto" ColumnSpacing="{StaticResource BasaltSpacingS}">
+              <Grid ColumnDefinitions="*,200,90,90" RowDefinitions="Auto,Auto" ColumnSpacing="4">
                 <TextBlock Text="{Binding Title}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
                 <TextBox Grid.Column="1" x:Name="GestureBox" Text="{Binding Gesture, Mode=OneWay}" />
                 <Button Grid.Column="2" Content="{l:Loc Settings.Hotkeys.Assign}" Click="OnAssignHotkey" />
@@ -119,11 +119,11 @@
         </ListBox>
       </StackPanel>
 
-      <StackPanel x:Name="DailyNotesSection" Spacing="{StaticResource BasaltSpacingM}"
+      <StackPanel x:Name="DailyNotesSection" Spacing="8"
                   IsVisible="{Binding DailyNotes, Converter={x:Static converters:ObjectConverters.IsNotNull}}">
         <TextBlock Text="{l:Loc Settings.DailyNotes}" FontSize="{StaticResource BasaltFontSizeTitle}"
                    FontWeight="SemiBold" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
-        <Grid ColumnDefinitions="220,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="{StaticResource BasaltSpacingS}">
+        <Grid ColumnDefinitions="220,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="4">
           <TextBlock Text="{l:Loc Settings.DailyNotes.Folder}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
           <TextBox Grid.Column="1" x:Name="DailyFolder" Text="{Binding DailyNotes.Settings.Folder}" LostFocus="OnDailyNotesLostFocus" />
 
@@ -139,7 +139,7 @@
         </Grid>
       </StackPanel>
 
-      <StackPanel x:Name="TemplatesSection" Spacing="{StaticResource BasaltSpacingM}"
+      <StackPanel x:Name="TemplatesSection" Spacing="8"
                   IsVisible="{Binding Templates, Converter={x:Static converters:ObjectConverters.IsNotNull}}">
         <TextBlock Text="{l:Loc Settings.Templates}" FontSize="{StaticResource BasaltFontSizeTitle}"
                    FontWeight="SemiBold" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
@@ -149,10 +149,10 @@
         </Grid>
       </StackPanel>
 
-      <StackPanel Spacing="{StaticResource BasaltSpacingM}">
+      <StackPanel Spacing="8">
         <TextBlock x:Name="AboutHeader" Text="{l:Loc Settings.About}" FontSize="{StaticResource BasaltFontSizeTitle}"
                    FontWeight="SemiBold" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
-        <Grid ColumnDefinitions="220,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="{StaticResource BasaltSpacingS}">
+        <Grid ColumnDefinitions="220,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="4">
           <TextBlock Text="{l:Loc Settings.About.Version}" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
           <TextBlock Grid.Column="1" Text="{Binding About.Version}" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
 

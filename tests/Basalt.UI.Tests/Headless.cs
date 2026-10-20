@@ -10,9 +10,30 @@ public static class Headless
 {
     private static readonly Lazy<HeadlessUnitTestSession> Session = new(() => HeadlessUnitTestSession.StartNew(typeof(TestAppBuilder)));
 
-    public static Task RunAsync(Action action) =>
-        Session.Value.Dispatch(action, TestContext.Current.CancellationToken);
+    // The headless session initialises its isolated application lazily on the first Dispatch. Two test classes
+    // dispatching at the same time race on the render loop, so bodies run one at a time (they share the UI thread
+    // anyway, and this also keeps the app-wide culture stable between tests).
+    private static readonly SemaphoreSlim Gate = new(1, 1);
 
-    public static Task RunAsync(Func<Task> action) =>
-        Session.Value.Dispatch(action, TestContext.Current.CancellationToken);
+    public static Task RunAsync(Action action) => DispatchAsync(() =>
+    {
+        action();
+        return Task.CompletedTask;
+    });
+
+    public static Task RunAsync(Func<Task> action) => DispatchAsync(action);
+
+    private static async Task DispatchAsync(Func<Task> action)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await Gate.WaitAsync(ct);
+        try
+        {
+            await Session.Value.Dispatch(action, ct);
+        }
+        finally
+        {
+            Gate.Release();
+        }
+    }
 }

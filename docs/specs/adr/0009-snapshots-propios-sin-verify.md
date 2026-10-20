@@ -9,6 +9,8 @@ La especificación (01 §6, 09 §3) propone `Verify.XunitV3` para tests de snaps
 ## Decisión
 Se implementa un helper mínimo de snapshots en `Basalt.Testing` (`Snapshot.Match`): serializa el valor a JSON canónico (indentado, LF), lo compara con `<Clase>.<Método>[.<caso>].verified.json` junto al fichero de test y, si difiere o no existe, escribe `*.received.json` y falla. Para aceptar un cambio se renombra/copia el `.received` a `.verified` (o se ejecuta con `BASALT_ACCEPT_SNAPSHOTS=1`).
 
+Las capturas de UI (09 §5.5) siguen el mismo criterio con `PngSnapshot` en `tests/Basalt.UI.Tests`: compara píxeles con tolerancia (8/255 por canal, ≤ 0,5 % de píxeles distintos) para absorber el antialiasing y guarda las referencias por plataforma (`<Vista>.<tema>.<so>.verified.png`) porque la rasterización de fuentes difiere entre Windows y macOS. En plataformas sin referencia todavía, el test no falla; Windows es la referencia de desarrollo (ADR-0008).
+
 ## Consecuencias
 - ✅ Sin dependencia con requisitos de licencia; misma convención de ficheros `*.verified.*` versionados.
 - ⚠️ Sin herramienta de diff integrada (se usa el diff del IDE o de git).

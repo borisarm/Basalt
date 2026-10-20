@@ -28,7 +28,7 @@ dotnet tool run reportgenerator -reports:**/*.cobertura.xml -targetdir:artifacts
 dotnet tool run dotnet-stryker   # desde tests/Basalt.Domain.Tests (stryker-config.json, runner mtp)
 bash build/cover.sh tests/Basalt.Domain.Tests   # cobertura + puerta de umbrales
 dotnet format --verify-no-changes
-dotnet run --project src/Basalt.Desktop
+dotnet run --project src/Basalt.Desktop -- --appdata <carpeta>   # datos de la app en otra carpeta (portable/pruebas)
 dotnet run --project tools/Basalt.VaultGenerator -- <carpeta> [--notes N]   # vault de referencia determinista
 ```
 

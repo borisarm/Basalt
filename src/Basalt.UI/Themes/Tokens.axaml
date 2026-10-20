@@ -1,0 +1,76 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- Design tokens (spec 07 §1): the only place with literal colours. Views use these keys. -->
+  <ResourceDictionary.ThemeDictionaries>
+    <ResourceDictionary x:Key="Light">
+      <Color x:Key="BasaltBackgroundColor">#FFFFFF</Color>
+      <Color x:Key="BasaltSurfaceColor">#F6F6F7</Color>
+      <Color x:Key="BasaltSurfaceAltColor">#ECECEF</Color>
+      <Color x:Key="BasaltBorderColor">#D9D9DE</Color>
+      <Color x:Key="BasaltTextPrimaryColor">#1F1F24</Color>
+      <Color x:Key="BasaltTextSecondaryColor">#5C5C66</Color>
+      <Color x:Key="BasaltTextMutedColor">#6E6E78</Color>
+      <Color x:Key="BasaltAccentColor">#6D3FD6</Color>
+      <Color x:Key="BasaltOnAccentColor">#FFFFFF</Color>
+      <Color x:Key="BasaltDangerColor">#B3261E</Color>
+      <Color x:Key="BasaltWarningColor">#8A5300</Color>
+      <Color x:Key="BasaltSuccessColor">#1E6B34</Color>
+      <Color x:Key="BasaltHighlightColor">#FFF2A8</Color>
+      <Color x:Key="BasaltLinkColor">#5B32C2</Color>
+      <Color x:Key="BasaltUnresolvedLinkColor">#8E7DBE</Color>
+      <Color x:Key="BasaltTagColor">#3E5FB8</Color>
+      <Color x:Key="BasaltCodeBackgroundColor">#F1F1F4</Color>
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="Dark">
+      <Color x:Key="BasaltBackgroundColor">#1C1C21</Color>
+      <Color x:Key="BasaltSurfaceColor">#24242A</Color>
+      <Color x:Key="BasaltSurfaceAltColor">#2D2D34</Color>
+      <Color x:Key="BasaltBorderColor">#3B3B44</Color>
+      <Color x:Key="BasaltTextPrimaryColor">#E8E8EC</Color>
+      <Color x:Key="BasaltTextSecondaryColor">#B4B4BD</Color>
+      <Color x:Key="BasaltTextMutedColor">#9A9AA4</Color>
+      <Color x:Key="BasaltAccentColor">#A88BFA</Color>
+      <Color x:Key="BasaltOnAccentColor">#14121A</Color>
+      <Color x:Key="BasaltDangerColor">#FF8A80</Color>
+      <Color x:Key="BasaltWarningColor">#F2C14E</Color>
+      <Color x:Key="BasaltSuccessColor">#7BD88F</Color>
+      <Color x:Key="BasaltHighlightColor">#5C4A00</Color>
+      <Color x:Key="BasaltLinkColor">#B9A2FF</Color>
+      <Color x:Key="BasaltUnresolvedLinkColor">#8C80B0</Color>
+      <Color x:Key="BasaltTagColor">#8FB0FF</Color>
+      <Color x:Key="BasaltCodeBackgroundColor">#2A2A31</Color>
+    </ResourceDictionary>
+  </ResourceDictionary.ThemeDictionaries>
+
+  <SolidColorBrush x:Key="BasaltBackgroundBrush" Color="{DynamicResource BasaltBackgroundColor}" />
+  <SolidColorBrush x:Key="BasaltSurfaceBrush" Color="{DynamicResource BasaltSurfaceColor}" />
+  <SolidColorBrush x:Key="BasaltSurfaceAltBrush" Color="{DynamicResource BasaltSurfaceAltColor}" />
+  <SolidColorBrush x:Key="BasaltBorderBrush" Color="{DynamicResource BasaltBorderColor}" />
+  <SolidColorBrush x:Key="BasaltTextPrimaryBrush" Color="{DynamicResource BasaltTextPrimaryColor}" />
+  <SolidColorBrush x:Key="BasaltTextSecondaryBrush" Color="{DynamicResource BasaltTextSecondaryColor}" />
+  <SolidColorBrush x:Key="BasaltTextMutedBrush" Color="{DynamicResource BasaltTextMutedColor}" />
+  <SolidColorBrush x:Key="BasaltAccentBrush" Color="{DynamicResource BasaltAccentColor}" />
+  <SolidColorBrush x:Key="BasaltOnAccentBrush" Color="{DynamicResource BasaltOnAccentColor}" />
+  <SolidColorBrush x:Key="BasaltDangerBrush" Color="{DynamicResource BasaltDangerColor}" />
+  <SolidColorBrush x:Key="BasaltWarningBrush" Color="{DynamicResource BasaltWarningColor}" />
+  <SolidColorBrush x:Key="BasaltSuccessBrush" Color="{DynamicResource BasaltSuccessColor}" />
+  <SolidColorBrush x:Key="BasaltHighlightBrush" Color="{DynamicResource BasaltHighlightColor}" />
+  <SolidColorBrush x:Key="BasaltLinkBrush" Color="{DynamicResource BasaltLinkColor}" />
+  <SolidColorBrush x:Key="BasaltUnresolvedLinkBrush" Color="{DynamicResource BasaltUnresolvedLinkColor}" />
+  <SolidColorBrush x:Key="BasaltTagBrush" Color="{DynamicResource BasaltTagColor}" />
+  <SolidColorBrush x:Key="BasaltCodeBackgroundBrush" Color="{DynamicResource BasaltCodeBackgroundColor}" />
+
+  <Thickness x:Key="BasaltSpacingXs">2</Thickness>
+  <Thickness x:Key="BasaltSpacingS">4</Thickness>
+  <Thickness x:Key="BasaltSpacingM">8</Thickness>
+  <Thickness x:Key="BasaltSpacingL">12</Thickness>
+  <Thickness x:Key="BasaltSpacingXl">20</Thickness>
+  <CornerRadius x:Key="BasaltRadiusS">4</CornerRadius>
+  <CornerRadius x:Key="BasaltRadiusM">6</CornerRadius>
+  <CornerRadius x:Key="BasaltRadiusL">10</CornerRadius>
+  <x:Double x:Key="BasaltFontSizeSmall">12</x:Double>
+  <x:Double x:Key="BasaltFontSizeBody">14</x:Double>
+  <x:Double x:Key="BasaltFontSizeTitle">18</x:Double>
+  <x:Double x:Key="BasaltFontSizeHeading">24</x:Double>
+  <x:Double x:Key="BasaltSidebarWidth">280</x:Double>
+</ResourceDictionary>

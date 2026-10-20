@@ -106,3 +106,13 @@ public abstract partial class TabViewModel(ViewModelServices services) : ViewMod
         GoForwardCommand.NotifyCanExecuteChanged();
     }
 }
+
+/// <summary>An <see cref="ITabFactory"/> from delegates.</summary>
+public sealed class DelegateTabFactory(string kind, Func<VaultPath, bool> canOpen, Func<TabViewModel> create) : ITabFactory
+{
+    public string Kind => kind;
+
+    public bool CanOpen(VaultPath path) => canOpen(path);
+
+    public TabViewModel Create() => create();
+}

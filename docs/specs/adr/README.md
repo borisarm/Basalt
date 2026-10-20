@@ -28,3 +28,4 @@ Formato de cada ADR (`NNNN-titulo-en-kebab-case.md`):
 | [0012](0012-sesiones-de-vault.md) | Sesiones de vault explícitas en lugar de scopes de DI | Aceptado |
 | [0013](0013-busqueda-por-subcadena-con-trigramas.md) | Búsqueda por subcadena: FTS5 `trigram` sobre texto plegado | Aceptado |
 | [0014](0014-json-invalido-se-aparta.md) | Un JSON compartido inválido se aparta antes de sobrescribirlo | Aceptado |
+| [0015](0015-registro-de-casos-de-uso-por-reflexion.md) | Registro de casos de uso por reflexión en la composición | Aceptado |

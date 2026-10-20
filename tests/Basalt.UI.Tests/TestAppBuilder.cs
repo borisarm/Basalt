@@ -1,16 +1,11 @@
 using Avalonia;
 using Avalonia.Headless;
-using Avalonia.Themes.Fluent;
 
 namespace Basalt.UI.Tests;
 
+/// <summary>The real <see cref="BasaltApp"/> (theme and design tokens) on the headless platform.</summary>
 public sealed class TestAppBuilder
 {
     public static AppBuilder BuildAvaloniaApp() =>
-        AppBuilder.Configure<TestApp>().UseHeadless(new AvaloniaHeadlessPlatformOptions());
-}
-
-public sealed class TestApp : Avalonia.Application
-{
-    public override void Initialize() => Styles.Add(new FluentTheme());
+        AppBuilder.Configure<BasaltApp>().UseHeadless(new AvaloniaHeadlessPlatformOptions());
 }

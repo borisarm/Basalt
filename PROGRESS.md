@@ -69,7 +69,7 @@ Registro de avance del plan (`docs/specs/10-plan-de-implementacion.md`). Platafo
 
 ## Fase 6 — UI de escritorio (Avalonia)
 
-- [ ] T6.1 Basalt.UI base
+- [x] T6.1 Basalt.UI base — 2026-10-19. Basalt.UI: BasaltApp (Fluent + Tokens.axaml claro/oscuro), AvaloniaUiDispatcher, DialogService (diálogos en código, probables), NotificationService (toasts), ThemeService, {l:Loc} + LocalizationSource, ViewLocator, MainWindow (shell + avisos; guarda el workspace al cerrar), DesktopWindowService (ventana por vault). Basalt.Composition: AddBasaltCore (casos de uso por reflexión con decoradores, ADR-0015) y AddBasaltPresentation (ShellFactory, WorkspaceFactory con paneles). Basalt.Desktop: raíz de composición, Serilog (7 días), --appdata. Puertos: adaptador DesktopDeviceInfo (device.json) y contratos de plataforma (reloj, ids, aleatorio, cultura, rutas, dispositivo, datos locales) pasados por fakes y adaptadores. Tests de arquitectura 09 §8 (ValidateOnBuild, todos los casos de uso, puertos con implementación, fake y contrato) y UI headless (tokens, Loc, diálogos, dispatcher, tema, ventana).
 - [ ] T6.2 Shell y vault picker; ventana por vault; menús nativos macOS
 - [ ] T6.3 Layout de workspace
 - [ ] T6.4 Editor de escritorio

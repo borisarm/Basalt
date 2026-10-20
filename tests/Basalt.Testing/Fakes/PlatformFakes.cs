@@ -83,3 +83,13 @@ public sealed class FakeSystemTrash(IVaultFileSystem vault, bool available = tru
         return deleted;
     }
 }
+
+/// <summary>Fixed, rooted, never-touched folders.</summary>
+public sealed class FakePlatformPaths : IPlatformPaths
+{
+    public string AppDataDirectory => "/fake/appdata";
+
+    public string DefaultVaultsDirectory => "/fake/vaults";
+
+    public string LogsDirectory => "/fake/logs";
+}

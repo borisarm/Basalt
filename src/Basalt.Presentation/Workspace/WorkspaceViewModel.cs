@@ -265,7 +265,7 @@ public sealed record WorkspaceUseCases(
 /// One open vault (spec 07 §2): its panes and tabs, navigation (<see cref="IWorkspaceNavigator"/>), recent files,
 /// reopening closed tabs and the per-device layout, restored on open and saved on close (F-013).
 /// </summary>
-public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNavigator, IClosable
+public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNavigator, IClosable, Application.Commands.ICommandHost
 {
     private readonly VaultSessionInfo _vault;
     private readonly WorkspaceUseCases _useCases;
@@ -303,6 +303,14 @@ public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNaviga
     }
 
     public string Title => _vault.Name;
+
+    public Domain.Vaults.VaultId VaultId => _vault.Id;
+
+    /// <summary>The file of the active tab.</summary>
+    public VaultPath? ActiveFile => _announced;
+
+    /// <summary>The side panels and overlays of this workspace (set by the composition root, disposed with it).</summary>
+    public WorkspacePanels? Panels { get; set; }
 
     public IWorkspaceMessenger Messenger { get; }
 
@@ -366,6 +374,9 @@ public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNaviga
 
     public void FocusPanel(string panelId) => FocusedPanel = panelId;
 
+    /// <summary><see cref="Application.Commands.ICommandHost"/>: commands open files like any navigation.</summary>
+    Task Application.Commands.ICommandHost.OpenAsync(VaultPath path, bool newTab, CancellationToken ct) => OpenFileAsync(new OpenRequest(path, newTab), ct);
+
     public WorkspaceState CaptureState() => new(
         [.. Layout.Groups.Select(g => g.Capture())],
         Layout.Groups.IndexOf(Layout.ActiveGroup),
@@ -383,6 +394,7 @@ public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNaviga
         if (disposing)
         {
             Layout.Dispose();
+            Panels?.Dispose();
         }
 
         base.Dispose(disposing);
@@ -452,6 +464,29 @@ public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNaviga
         {
             ReopenClosedTabCommand.NotifyCanExecuteChanged();
             await OpenFileAsync(request with { NewTab = true }, ct).ConfigureAwait(true);
+        }
+    }
+}
+
+/// <summary>Side panels and overlays of a workspace (spec 07 §2: left and right sidebars, quick switcher, palette).</summary>
+public sealed record WorkspacePanels(
+    Panels.FileExplorerViewModel Explorer,
+    Panels.SearchPanelViewModel Search,
+    Panels.BookmarksViewModel Bookmarks,
+    Panels.TagsPanelViewModel Tags,
+    Panels.BacklinksViewModel Backlinks,
+    Panels.OutgoingLinksViewModel Outgoing,
+    Panels.OutlineViewModel Outline,
+    Panels.PropertiesViewModel Properties,
+    Panels.LocalGraphViewModel LocalGraph,
+    Overlays.QuickSwitcherViewModel QuickSwitcher,
+    Overlays.CommandPaletteViewModel CommandPalette) : IDisposable
+{
+    public void Dispose()
+    {
+        foreach (var panel in new ViewModelBase[] { Explorer, Search, Bookmarks, Tags, Backlinks, Outgoing, Outline, Properties, LocalGraph, QuickSwitcher, CommandPalette })
+        {
+            panel.Dispose();
         }
     }
 }

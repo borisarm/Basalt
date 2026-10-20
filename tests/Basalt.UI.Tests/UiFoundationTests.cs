@@ -1,7 +1,6 @@
 using System.Globalization;
 using Avalonia.Controls;
 using Avalonia.Data;
-using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Styling;
 using Avalonia.VisualTree;
@@ -145,5 +144,5 @@ public sealed class UiFoundationTests
     });
 
     private static void Click(Window window, string name) =>
-        window.FindControl<Button>(name)!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        ((Avalonia.Automation.Provider.IInvokeProvider)Avalonia.Automation.Peers.ControlAutomationPeer.CreatePeerForElement(window.FindControl<Button>(name)!)).Invoke();
 }

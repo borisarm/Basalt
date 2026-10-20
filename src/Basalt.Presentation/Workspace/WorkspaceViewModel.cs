@@ -168,6 +168,11 @@ public sealed partial class PaneLayoutViewModel : ViewModelBase
     {
         ArgumentNullException.ThrowIfNull(groupFactory);
         _groupFactory = groupFactory;
+        Groups.CollectionChanged += (_, _) =>
+        {
+            OnPropertyChanged(nameof(Columns));
+            OnPropertyChanged(nameof(Rows));
+        };
         ActiveGroup = AddGroup();
     }
 
@@ -177,7 +182,14 @@ public sealed partial class PaneLayoutViewModel : ViewModelBase
     public partial TabGroupViewModel ActiveGroup { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Columns), nameof(Rows))]
     public partial SplitOrientation Orientation { get; set; }
+
+    /// <summary>Columns of the split grid (panes side by side).</summary>
+    public int Columns => Orientation == SplitOrientation.Vertical ? Math.Max(1, Groups.Count) : 1;
+
+    /// <summary>Rows of the split grid (panes stacked).</summary>
+    public int Rows => Orientation == SplitOrientation.Horizontal ? Math.Max(1, Groups.Count) : 1;
 
     /// <summary>Raised when any group closes a tab.</summary>
     public event EventHandler<OpenRequest>? TabClosed;
@@ -270,6 +282,7 @@ public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNaviga
     private readonly VaultSessionInfo _vault;
     private readonly WorkspaceUseCases _useCases;
     private readonly Stack<OpenRequest> _closed = new();
+    private WorkspacePanels? _panels;
     private TabGroupViewModel? _watchedGroup;
     private TabViewModel? _watchedTab;
     private VaultPath? _announced;
@@ -300,6 +313,20 @@ public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNaviga
             }
         };
         Watch(Layout.ActiveGroup);
+        LeftSidebar.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(SidebarViewModel.ActivePanel))
+            {
+                OnPropertyChanged(nameof(LeftContent));
+            }
+        };
+        RightSidebar.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(SidebarViewModel.ActivePanel))
+            {
+                OnPropertyChanged(nameof(RightContent));
+            }
+        };
     }
 
     public string Title => _vault.Name;
@@ -310,7 +337,36 @@ public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNaviga
     public VaultPath? ActiveFile => _announced;
 
     /// <summary>The side panels and overlays of this workspace (set by the composition root, disposed with it).</summary>
-    public WorkspacePanels? Panels { get; set; }
+    public WorkspacePanels? Panels
+    {
+        get => _panels;
+        set
+        {
+            _panels = value;
+            OnPropertyChanged(nameof(LeftContent));
+            OnPropertyChanged(nameof(RightContent));
+        }
+    }
+
+    /// <summary>The ViewModel of the left sidebar's active panel.</summary>
+    public object? LeftContent => PanelFor(LeftSidebar.ActivePanel);
+
+    /// <summary>The ViewModel of the right sidebar's active panel.</summary>
+    public object? RightContent => PanelFor(RightSidebar.ActivePanel);
+
+    public object? PanelFor(string panelId) => _panels is not { } panels ? null : panelId switch
+    {
+        Basalt.Presentation.Panels.PanelIds.Files => panels.Explorer,
+        Basalt.Presentation.Panels.PanelIds.Search => panels.Search,
+        Basalt.Presentation.Panels.PanelIds.Bookmarks => panels.Bookmarks,
+        Basalt.Presentation.Panels.PanelIds.Tags => panels.Tags,
+        Basalt.Presentation.Panels.PanelIds.Backlinks => panels.Backlinks,
+        Basalt.Presentation.Panels.PanelIds.Outgoing => panels.Outgoing,
+        Basalt.Presentation.Panels.PanelIds.Outline => panels.Outline,
+        Basalt.Presentation.Panels.PanelIds.LocalGraph => panels.LocalGraph,
+        Basalt.Presentation.Panels.PanelIds.Properties => panels.Properties,
+        _ => null,
+    };
 
     public IWorkspaceMessenger Messenger { get; }
 
@@ -319,11 +375,24 @@ public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNaviga
     [ObservableProperty]
     public partial string? FocusedPanel { get; private set; }
 
+    /// <summary>Explorer, search, bookmarks and tags (F-013).</summary>
+    public SidebarViewModel LeftSidebar { get; } = new(Basalt.Presentation.Panels.PanelIds.Files, [Basalt.Presentation.Panels.PanelIds.Files, Basalt.Presentation.Panels.PanelIds.Search, Basalt.Presentation.Panels.PanelIds.Bookmarks, Basalt.Presentation.Panels.PanelIds.Tags]);
+
+    /// <summary>Backlinks, outgoing links, outline, local graph and properties (F-013).</summary>
+    public SidebarViewModel RightSidebar { get; } = new(Basalt.Presentation.Panels.PanelIds.Backlinks, [Basalt.Presentation.Panels.PanelIds.Backlinks, Basalt.Presentation.Panels.PanelIds.Outgoing, Basalt.Presentation.Panels.PanelIds.Outline, Basalt.Presentation.Panels.PanelIds.LocalGraph, Basalt.Presentation.Panels.PanelIds.Properties]);
+
     /// <summary>Restores the layout saved on this device.</summary>
     public async Task InitializeAsync(CancellationToken ct)
     {
         var state = await RunAsync(token => _useCases.Load.HandleAsync(new LoadWorkspace(_vault.Id), token), notifyErrors: false).ConfigureAwait(true);
-        if (state.IsFailure || state.Value is not { Panes.Count: > 0 } saved)
+        if (state.IsFailure || state.Value is not { } saved)
+        {
+            return;
+        }
+
+        LeftSidebar.Restore(saved.Left);
+        RightSidebar.Restore(saved.Right);
+        if (saved.Panes.Count == 0)
         {
             return;
         }
@@ -372,7 +441,15 @@ public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNaviga
         return opened;
     }
 
-    public void FocusPanel(string panelId) => FocusedPanel = panelId;
+    /// <summary>Shows a panel in the sidebar that has it (opening the sidebar).</summary>
+    public void FocusPanel(string panelId)
+    {
+        FocusedPanel = panelId;
+        foreach (var sidebar in new[] { LeftSidebar, RightSidebar }.Where(s => s.Panels.Contains(panelId)))
+        {
+            sidebar.Show(panelId);
+        }
+    }
 
     /// <summary><see cref="Application.Commands.ICommandHost"/>: commands open files like any navigation.</summary>
     Task Application.Commands.ICommandHost.OpenAsync(VaultPath path, bool newTab, CancellationToken ct) => OpenFileAsync(new OpenRequest(path, newTab), ct);
@@ -380,7 +457,9 @@ public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNaviga
     public WorkspaceState CaptureState() => new(
         [.. Layout.Groups.Select(g => g.Capture())],
         Layout.Groups.IndexOf(Layout.ActiveGroup),
-        Layout.Orientation);
+        Layout.Orientation,
+        LeftSidebar.Capture(),
+        RightSidebar.Capture());
 
     /// <summary>Saves every tab and the layout (window close, vault close).</summary>
     public async Task CloseAsync(CancellationToken ct)
@@ -455,6 +534,15 @@ public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNaviga
         }
     }
 
+    [RelayCommand]
+    private Task ShowQuickSwitcherAsync() => Panels?.QuickSwitcher.ShowAsync() ?? Task.CompletedTask;
+
+    [RelayCommand]
+    private void ShowCommandPalette() => Panels?.CommandPalette.Show();
+
+    [RelayCommand]
+    private void ShowPanel(string panelId) => FocusPanel(panelId);
+
     private bool CanReopenClosedTab() => _closed.Count > 0;
 
     [RelayCommand(CanExecute = nameof(CanReopenClosedTab))]
@@ -489,4 +577,58 @@ public sealed record WorkspacePanels(
             panel.Dispose();
         }
     }
+}
+
+/// <summary>A collapsible, resizable sidebar showing one of its panels (F-013).</summary>
+public sealed partial class SidebarViewModel(string defaultPanel, IReadOnlyList<string> panels) : ObservableObject
+{
+    public const double MinWidth = 180;
+    public const double MaxWidth = 600;
+    public const double DefaultWidth = 280;
+
+    public IReadOnlyList<string> Panels { get; } = panels;
+
+    [ObservableProperty]
+    public partial bool IsOpen { get; set; } = true;
+
+    [ObservableProperty]
+    public partial string ActivePanel { get; set; } = defaultPanel;
+
+    [ObservableProperty]
+    public partial double Width { get; set; } = DefaultWidth;
+
+    public void Show(string panel)
+    {
+        ActivePanel = panel;
+        IsOpen = true;
+    }
+
+    public WorkspaceSidebar Capture() => new(IsOpen, Width, ActivePanel);
+
+    public void Restore(WorkspaceSidebar? saved)
+    {
+        if (saved is null)
+        {
+            return;
+        }
+
+        IsOpen = saved.Open;
+        Width = saved.Width;
+        if (saved.ActivePanel is { } panel && Panels.Contains(panel))
+        {
+            ActivePanel = panel;
+        }
+    }
+
+    partial void OnWidthChanged(double value)
+    {
+        var clamped = Math.Clamp(value, MinWidth, MaxWidth);
+        if (clamped != value)
+        {
+            Width = clamped;
+        }
+    }
+
+    [RelayCommand]
+    private void Toggle() => IsOpen = !IsOpen;
 }

@@ -76,6 +76,15 @@
   <data name="Menu.NewWindow" xml:space="preserve"><value>Nueva ventana</value></data>
   <data name="Menu.QuickSwitcher" xml:space="preserve"><value>Selector rápido…</value></data>
   <data name="Menu.View" xml:space="preserve"><value>Ver</value></data>
+  <data name="Panel.backlinks" xml:space="preserve"><value>Enlaces entrantes</value></data>
+  <data name="Panel.bookmarks" xml:space="preserve"><value>Marcadores</value></data>
+  <data name="Panel.files" xml:space="preserve"><value>Ficheros</value></data>
+  <data name="Panel.local-graph" xml:space="preserve"><value>Grafo local</value></data>
+  <data name="Panel.outgoing" xml:space="preserve"><value>Enlaces salientes</value></data>
+  <data name="Panel.outline" xml:space="preserve"><value>Esquema</value></data>
+  <data name="Panel.properties" xml:space="preserve"><value>Propiedades</value></data>
+  <data name="Panel.search" xml:space="preserve"><value>Buscar</value></data>
+  <data name="Panel.tags" xml:space="preserve"><value>Etiquetas</value></data>
   <data name="Properties.Invalid" xml:space="preserve"><value>Las propiedades no son YAML válido; edítalas en el modo código.</value></data>
   <data name="Settings.About" xml:space="preserve"><value>Acerca de</value></data>
   <data name="Settings.Appearance" xml:space="preserve"><value>Apariencia</value></data>
@@ -100,4 +109,11 @@
   <data name="VaultPicker.Remove" xml:space="preserve"><value>Quitar de la lista</value></data>
   <data name="VaultPicker.RemoveMessage" xml:space="preserve"><value>«{0}» se quitará de la lista. Sus ficheros no se borran.</value></data>
   <data name="VaultPicker.Title" xml:space="preserve"><value>Vaults</value></data>
+  <data name="Workspace.CloseTab" xml:space="preserve"><value>Cerrar pestaña</value></data>
+  <data name="Workspace.NoFile" xml:space="preserve"><value>Ningún fichero abierto</value></data>
+  <data name="Workspace.SplitDown" xml:space="preserve"><value>Dividir hacia abajo</value></data>
+  <data name="Workspace.SplitRight" xml:space="preserve"><value>Dividir a la derecha</value></data>
+  <data name="Workspace.ToggleLeftSidebar" xml:space="preserve"><value>Mostrar u ocultar la barra izquierda</value></data>
+  <data name="Workspace.ToggleRightSidebar" xml:space="preserve"><value>Mostrar u ocultar la barra derecha</value></data>
+  <data name="Workspace.Unsaved" xml:space="preserve"><value>Cambios sin guardar</value></data>
 </root>

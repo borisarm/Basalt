@@ -1,6 +1,5 @@
 using System.Globalization;
 using Avalonia.Controls;
-using Avalonia.Interactivity;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Basalt.Application.Abstractions;
@@ -48,6 +47,8 @@ public sealed class ShellViewsTests
         return (new MainWindow(shell, notifications), shell, dialogs, open);
     }
 
+    private static void Click(Button button) => ((Avalonia.Automation.Provider.IInvokeProvider)Avalonia.Automation.Peers.ControlAutomationPeer.CreatePeerForElement(button)).Invoke();
+
     private static T Find<T>(Control root, string name)
         where T : Control => root.GetVisualDescendants().OfType<T>().First(c => c.Name == name);
 
@@ -65,7 +66,7 @@ public sealed class ShellViewsTests
         Find<TextBlock>(window, "EmptyText").IsVisible.Should().BeFalse();
 
         var openButton = window.GetVisualDescendants().OfType<Button>().First(b => Equals(b.Content, "Open"));
-        openButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        Click(openButton);
         await Task.Delay(50, TestContext.Current.CancellationToken);
         Dispatcher.UIThread.RunJobs();
 
@@ -84,7 +85,7 @@ public sealed class ShellViewsTests
         Dispatcher.UIThread.RunJobs();
 
         Find<TextBlock>(window, "EmptyText").IsVisible.Should().BeTrue();
-        Find<Button>(window, "CreateButton").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        Click(Find<Button>(window, "CreateButton"));
         Dispatcher.UIThread.RunJobs();
 
         dialogs.Requests.OfType<PromptRequest>().Should().ContainSingle().Which.Label.Should().Be("Vault name");

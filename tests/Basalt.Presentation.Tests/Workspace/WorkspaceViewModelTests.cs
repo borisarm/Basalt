@@ -189,7 +189,9 @@ public sealed class WorkspaceViewModelTests : IAsyncLifetime
                 new WorkspacePane([new WorkspaceTab("note", "A.md", Pinned: true), new WorkspaceTab("note", "B.md")], ActiveTab: 1, Size: 0.5),
                 new WorkspacePane([new WorkspaceTab("note", "B.md")], ActiveTab: 0, Size: 0.5),
             ],
-            ActivePane: 1));
+            ActivePane: 1,
+            Left: new WorkspaceSidebar(true, SidebarViewModel.DefaultWidth, "files"),
+            Right: new WorkspaceSidebar(true, SidebarViewModel.DefaultWidth, "backlinks")));
 
         _load.HandleAsync(Arg.Any<LoadWorkspace>(), Arg.Any<CancellationToken>()).Returns(Result.Success<WorkspaceState?>(saved! with
         {
@@ -222,6 +224,60 @@ public sealed class WorkspaceViewModelTests : IAsyncLifetime
         await _workspace.Layout.ActiveGroup.CloseTabCommand.ExecuteAsync(_workspace.Layout.ActiveGroup.Tabs[0]);
 
         announced.Select(p => p?.ToString()).Should().Equal("A.md", "B.md", "C.md", "B.md", null);
+    }
+
+    [Fact]
+    [Trait("Spec", "F-013")]
+    public async Task Sidebars_ToggleShowPanels_AndArePersisted()
+    {
+        _workspace.LeftSidebar.ActivePanel.Should().Be("files");
+        _workspace.RightSidebar.ActivePanel.Should().Be("backlinks");
+
+        _workspace.LeftSidebar.ToggleCommand.Execute(null);
+        _workspace.FocusPanel("outline");
+        _workspace.RightSidebar.Width = 5000;
+        WorkspaceState? saved = null;
+        await _save.HandleAsync(Arg.Do<SaveWorkspace>(s => saved = s.State), Arg.Any<CancellationToken>());
+        await _workspace.CloseAsync(Ct);
+
+        _workspace.LeftSidebar.IsOpen.Should().BeFalse();
+        _workspace.RightSidebar.Should().BeEquivalentTo(new { IsOpen = true, ActivePanel = "outline", Width = SidebarViewModel.MaxWidth });
+        saved!.Left.Should().Be(new WorkspaceSidebar(false, 280, "files"));
+        saved.Right.Should().Be(new WorkspaceSidebar(true, SidebarViewModel.MaxWidth, "outline"));
+
+        _load.HandleAsync(Arg.Any<LoadWorkspace>(), Arg.Any<CancellationToken>()).Returns(Result.Success<WorkspaceState?>(saved with { Panes = [new WorkspacePane([new WorkspaceTab("note", "A.md")])] }));
+        using var restored = Create();
+        await restored.InitializeAsync(Ct);
+        restored.LeftSidebar.IsOpen.Should().BeFalse();
+        restored.RightSidebar.ActivePanel.Should().Be("outline");
+    }
+
+    [Fact]
+    public async Task SplitGrid_FollowsGroupsAndOrientation()
+    {
+        await _workspace.OpenAsync(new OpenRequest(P("A.md")), Ct);
+        (_workspace.Layout.Columns, _workspace.Layout.Rows).Should().Be((1, 1));
+
+        await _workspace.Layout.SplitCommand.ExecuteAsync(SplitOrientation.Vertical);
+        (_workspace.Layout.Columns, _workspace.Layout.Rows).Should().Be((2, 1));
+        _workspace.Layout.Orientation = SplitOrientation.Horizontal;
+        (_workspace.Layout.Columns, _workspace.Layout.Rows).Should().Be((1, 2));
+    }
+
+    [Fact]
+    public void SidebarContent_FollowsTheActivePanel()
+    {
+        _workspace.LeftContent.Should().BeNull("no panels attached");
+        _workspace.PanelFor("nope").Should().BeNull();
+        var changed = new List<string?>();
+        _workspace.PropertyChanged += (_, e) => changed.Add(e.PropertyName);
+
+        _workspace.ShowPanelCommand.Execute("search");
+        _workspace.ShowPanelCommand.Execute("properties");
+
+        changed.Should().Contain([nameof(WorkspaceViewModel.LeftContent), nameof(WorkspaceViewModel.RightContent)]);
+        _workspace.LeftSidebar.ActivePanel.Should().Be("search");
+        _workspace.RightSidebar.ActivePanel.Should().Be("properties");
     }
 
     [Fact]

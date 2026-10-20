@@ -1,8 +1,111 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:Basalt.Presentation.Workspace;assembly=Basalt.Presentation"
+             xmlns:app="clr-namespace:Basalt.Application.Workspace;assembly=Basalt.Application"
+             xmlns:l="clr-namespace:Basalt.UI.Localization"
+             xmlns:ui="clr-namespace:Basalt.UI"
              x:Class="Basalt.UI.Views.WorkspaceView"
              x:DataType="vm:WorkspaceViewModel">
-  <!-- The layout of an open vault (sidebars, tabs, splits) is built in T6.3. -->
-  <TextBlock x:Name="VaultTitle" Text="{Binding Title}" Margin="{StaticResource BasaltSpacingXl}" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
+  <!-- Spec 07 §3: ribbon | left sidebar | panes with tabs | right sidebar, status bar at the bottom. -->
+  <UserControl.DataTemplates>
+    <ui:ViewLocator />
+  </UserControl.DataTemplates>
+  <DockPanel>
+    <Border DockPanel.Dock="Bottom" x:Name="StatusBar" Background="{DynamicResource BasaltSurfaceBrush}"
+            BorderBrush="{DynamicResource BasaltBorderBrush}" BorderThickness="0,1,0,0" Padding="{StaticResource BasaltSpacingS}">
+      <TextBlock x:Name="ActiveFileText" Text="{Binding ActiveFile, FallbackValue=''}" FontSize="{StaticResource BasaltFontSizeSmall}"
+                 Foreground="{DynamicResource BasaltTextMutedBrush}" />
+    </Border>
+
+    <!-- Ribbon -->
+    <Border DockPanel.Dock="Left" Background="{DynamicResource BasaltSurfaceBrush}" BorderBrush="{DynamicResource BasaltBorderBrush}" BorderThickness="0,0,1,0">
+      <StackPanel Spacing="4" Margin="{StaticResource BasaltSpacingS}">
+        <Button x:Name="ToggleLeft" Content="☰" Command="{Binding LeftSidebar.ToggleCommand}"
+                AutomationProperties.Name="{l:Loc Workspace.ToggleLeftSidebar}" ToolTip.Tip="{l:Loc Workspace.ToggleLeftSidebar}" />
+        <Button x:Name="QuickSwitcherButton" Content="⌕" Command="{Binding ShowQuickSwitcherCommand}"
+                AutomationProperties.Name="{l:Loc Menu.QuickSwitcher}" ToolTip.Tip="{l:Loc Menu.QuickSwitcher}" />
+        <Button x:Name="PaletteButton" Content="⌘" Command="{Binding ShowCommandPaletteCommand}"
+                AutomationProperties.Name="{l:Loc Menu.CommandPalette}" ToolTip.Tip="{l:Loc Menu.CommandPalette}" />
+        <Button x:Name="ToggleRight" Content="◧" Command="{Binding RightSidebar.ToggleCommand}"
+                AutomationProperties.Name="{l:Loc Workspace.ToggleRightSidebar}" ToolTip.Tip="{l:Loc Workspace.ToggleRightSidebar}" />
+      </StackPanel>
+    </Border>
+
+    <Grid x:Name="Columns" ColumnDefinitions="280,4,*,4,280">
+      <!-- Left sidebar -->
+      <DockPanel Grid.Column="0" x:Name="LeftSidebar" IsVisible="{Binding LeftSidebar.IsOpen}" Background="{DynamicResource BasaltSurfaceBrush}">
+        <ItemsControl DockPanel.Dock="Top" ItemsSource="{Binding LeftSidebar.Panels}" Margin="{StaticResource BasaltSpacingS}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <WrapPanel />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="x:String">
+              <Button Content="{Binding Converter={x:Static ui:Converters.PanelTitle}}" Margin="0,0,4,4"
+                      Command="{Binding $parent[UserControl].((vm:WorkspaceViewModel)DataContext).ShowPanelCommand}" CommandParameter="{Binding}" />
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <ContentControl x:Name="LeftContent" Content="{Binding LeftContent}" />
+      </DockPanel>
+      <GridSplitter Grid.Column="1" x:Name="LeftSplitter" IsVisible="{Binding LeftSidebar.IsOpen}" Background="{DynamicResource BasaltBorderBrush}" ResizeDirection="Columns" />
+
+      <!-- Panes (splits) with their tabs -->
+      <ItemsControl Grid.Column="2" x:Name="Panes" ItemsSource="{Binding Layout.Groups}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <UniformGrid Columns="{Binding $parent[UserControl].((vm:WorkspaceViewModel)DataContext).Layout.Columns}"
+                         Rows="{Binding $parent[UserControl].((vm:WorkspaceViewModel)DataContext).Layout.Rows}" />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:TabGroupViewModel">
+            <DockPanel>
+              <ListBox DockPanel.Dock="Top" x:Name="Tabs" ItemsSource="{Binding Tabs}" SelectedItem="{Binding ActiveTab}"
+                       Background="{DynamicResource BasaltSurfaceAltBrush}">
+                <ListBox.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" />
+                  </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemTemplate>
+                  <DataTemplate x:DataType="vm:TabViewModel">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                      <TextBlock Text="{Binding Title}" VerticalAlignment="Center" />
+                      <TextBlock Text="●" IsVisible="{Binding IsDirty}" Foreground="{DynamicResource BasaltAccentBrush}"
+                                 VerticalAlignment="Center" ToolTip.Tip="{l:Loc Workspace.Unsaved}" />
+                      <Button Content="×" Padding="4,0" Classes="close-tab"
+                              AutomationProperties.Name="{l:Loc Workspace.CloseTab}"
+                              Command="{Binding $parent[ListBox].((vm:TabGroupViewModel)DataContext).CloseTabCommand}" CommandParameter="{Binding}" />
+                    </StackPanel>
+                  </DataTemplate>
+                </ListBox.ItemTemplate>
+              </ListBox>
+              <ContentControl Content="{Binding ActiveTab}" />
+            </DockPanel>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+
+      <GridSplitter Grid.Column="3" x:Name="RightSplitter" IsVisible="{Binding RightSidebar.IsOpen}" Background="{DynamicResource BasaltBorderBrush}" ResizeDirection="Columns" />
+      <!-- Right sidebar -->
+      <DockPanel Grid.Column="4" x:Name="RightSidebar" IsVisible="{Binding RightSidebar.IsOpen}" Background="{DynamicResource BasaltSurfaceBrush}">
+        <ItemsControl DockPanel.Dock="Top" ItemsSource="{Binding RightSidebar.Panels}" Margin="{StaticResource BasaltSpacingS}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <WrapPanel />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="x:String">
+              <Button Content="{Binding Converter={x:Static ui:Converters.PanelTitle}}" Margin="0,0,4,4"
+                      Command="{Binding $parent[UserControl].((vm:WorkspaceViewModel)DataContext).ShowPanelCommand}" CommandParameter="{Binding}" />
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <ContentControl x:Name="RightContent" Content="{Binding RightContent}" />
+      </DockPanel>
+    </Grid>
+  </DockPanel>
 </UserControl>

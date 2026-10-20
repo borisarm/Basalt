@@ -76,6 +76,15 @@
   <data name="Menu.NewWindow" xml:space="preserve"><value>New window</value></data>
   <data name="Menu.QuickSwitcher" xml:space="preserve"><value>Quick switcher…</value></data>
   <data name="Menu.View" xml:space="preserve"><value>View</value></data>
+  <data name="Panel.backlinks" xml:space="preserve"><value>Backlinks</value></data>
+  <data name="Panel.bookmarks" xml:space="preserve"><value>Bookmarks</value></data>
+  <data name="Panel.files" xml:space="preserve"><value>Files</value></data>
+  <data name="Panel.local-graph" xml:space="preserve"><value>Local graph</value></data>
+  <data name="Panel.outgoing" xml:space="preserve"><value>Outgoing links</value></data>
+  <data name="Panel.outline" xml:space="preserve"><value>Outline</value></data>
+  <data name="Panel.properties" xml:space="preserve"><value>Properties</value></data>
+  <data name="Panel.search" xml:space="preserve"><value>Search</value></data>
+  <data name="Panel.tags" xml:space="preserve"><value>Tags</value></data>
   <data name="Properties.Invalid" xml:space="preserve"><value>The properties are not valid YAML; edit them in source mode.</value></data>
   <data name="Settings.About" xml:space="preserve"><value>About</value></data>
   <data name="Settings.Appearance" xml:space="preserve"><value>Appearance</value></data>
@@ -100,4 +109,11 @@
   <data name="VaultPicker.Remove" xml:space="preserve"><value>Remove from list</value></data>
   <data name="VaultPicker.RemoveMessage" xml:space="preserve"><value>“{0}” will be removed from the list. Its files are not deleted.</value></data>
   <data name="VaultPicker.Title" xml:space="preserve"><value>Vaults</value></data>
+  <data name="Workspace.CloseTab" xml:space="preserve"><value>Close tab</value></data>
+  <data name="Workspace.NoFile" xml:space="preserve"><value>No file open</value></data>
+  <data name="Workspace.SplitDown" xml:space="preserve"><value>Split down</value></data>
+  <data name="Workspace.SplitRight" xml:space="preserve"><value>Split right</value></data>
+  <data name="Workspace.ToggleLeftSidebar" xml:space="preserve"><value>Toggle left sidebar</value></data>
+  <data name="Workspace.ToggleRightSidebar" xml:space="preserve"><value>Toggle right sidebar</value></data>
+  <data name="Workspace.Unsaved" xml:space="preserve"><value>Unsaved changes</value></data>
 </root>

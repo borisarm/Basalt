@@ -11,6 +11,28 @@ public sealed record RemoteRepositoryRef(GitHubHost Host, string Owner, string N
 /// <summary>A branch head and the tree it points to.</summary>
 public sealed record RemoteHead(CommitSha Commit, TreeSha Tree);
 
+/// <summary>
+/// Result of a conditional head request (spec 06 §6, step 2 and §9.2). A <c>304</c> sets
+/// <see cref="NotModified"/> and leaves <see cref="Head"/> null; the caller already knows the head.
+/// </summary>
+public sealed record RemoteHeadCheck(RemoteHead? Head, string? ETag, bool NotModified);
+
+/// <summary>Why a remote path is quarantined on this device (spec 06 §7.4 and §7.5).</summary>
+public static class RemoteQuarantineReasons
+{
+    public const string InvalidPath = "invalid_path";
+    public const string CaseCollision = "case_collision";
+}
+
+/// <summary>A file of a remote tree, before case-collision handling by the application.</summary>
+public sealed record RemoteTreeFile(VaultPath Path, BlobSha Sha, long Size);
+
+/// <summary>A remote path that cannot be represented in a local manifest, with the reason code.</summary>
+public sealed record RemotePathIssue(string Path, string Reason);
+
+/// <summary>Flattened remote tree: valid files plus the paths that must be quarantined.</summary>
+public sealed record RemoteTreeSnapshot(IReadOnlyList<RemoteTreeFile> Files, IReadOnlyList<RemotePathIssue> Quarantined);
+
 /// <summary>A single change applied on top of a base tree (spec 03 §1.4).</summary>
 public abstract record TreeChange(VaultPath Path)
 {
@@ -61,11 +83,14 @@ public static class RemoteErrors
 /// <summary>Read/write operations against one remote branch (spec 03 §1.4).</summary>
 public interface IRemoteRepository
 {
-    /// <summary>Returns null when the branch does not exist or the repository is empty.</summary>
-    Task<Result<RemoteHead?>> GetHeadAsync(CancellationToken ct);
+    /// <summary>
+    /// Returns a null head when the branch does not exist or the repository is empty. Sends
+    /// <paramref name="etag"/> as <c>If-None-Match</c>; an unchanged head comes back as <see cref="RemoteHeadCheck.NotModified"/>.
+    /// </summary>
+    Task<Result<RemoteHeadCheck>> GetHeadAsync(string? etag, CancellationToken ct);
 
-    /// <summary>Reads the whole tree recursively and flattens it into a manifest.</summary>
-    Task<Result<Manifest>> GetTreeAsync(TreeSha tree, CancellationToken ct);
+    /// <summary>Reads the whole tree recursively, flattening it and quarantining paths that are not valid vault paths.</summary>
+    Task<Result<RemoteTreeSnapshot>> GetTreeAsync(TreeSha tree, CancellationToken ct);
 
     Task<Result<byte[]>> GetBlobAsync(BlobSha sha, CancellationToken ct);
 

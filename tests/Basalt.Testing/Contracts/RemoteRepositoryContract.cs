@@ -14,10 +14,12 @@ public abstract class RemoteRepositoryContract : ContractTest<IRemoteRepository>
     [Trait("Spec", "REMOTE-PORT")]
     public async Task EmptyRepository_HasNoHead()
     {
-        var head = await Sut.GetHeadAsync(Ct);
+        var head = await Sut.GetHeadAsync(null, Ct);
 
         head.IsSuccess.Should().BeTrue();
-        head.Value.Should().BeNull();
+        head.Value.Head.Should().BeNull();
+        head.Value.ETag.Should().BeNull();
+        head.Value.NotModified.Should().BeFalse();
     }
 
     [Fact]
@@ -32,15 +34,40 @@ public abstract class RemoteRepositoryContract : ContractTest<IRemoteRepository>
 
         (await Sut.UpdateBranchAsync(commit, null, Ct)).IsSuccess.Should().BeTrue();
 
-        var head = (await Sut.GetHeadAsync(Ct)).Value!;
-        head.Commit.Should().Be(commit);
-        head.Tree.Should().Be(tree);
+        var check = (await Sut.GetHeadAsync(null, Ct)).Value;
+        check.Head!.Commit.Should().Be(commit);
+        check.Head.Tree.Should().Be(tree);
+        check.ETag.Should().NotBeNullOrEmpty();
 
-        var manifest = (await Sut.GetTreeAsync(tree, Ct)).Value;
-        manifest.Count.Should().Be(2);
-        manifest.Get(P("a.md"))!.Value.Sha.Should().Be(blobs["a.md"]);
-        manifest.Get(P("a.md"))!.Value.Size.Should().Be(4);
+        var treeSnapshot = (await Sut.GetTreeAsync(tree, Ct)).Value;
+        treeSnapshot.Files.Should().HaveCount(2);
+        treeSnapshot.Files.Single(file => file.Path == P("a.md")).Sha.Should().Be(blobs["a.md"]);
+        treeSnapshot.Files.Single(file => file.Path == P("a.md")).Size.Should().Be(4);
+        treeSnapshot.Quarantined.Should().BeEmpty();
         Encoding.UTF8.GetString((await Sut.GetBlobAsync(blobs["a.md"], Ct)).Value).Should().Be("# A\n");
+    }
+
+    [Fact]
+    [Trait("Spec", "REMOTE-PORT")]
+    public async Task ConditionalHead_ReturnsNotModifiedUntilTheBranchMoves()
+    {
+        var (_, tree, first) = await CommitAsync(Sut, new Dictionary<string, string> { ["a.md"] = "A" }, "First");
+        (await Sut.UpdateBranchAsync(first, null, Ct)).IsSuccess.Should().BeTrue();
+        var etag = (await Sut.GetHeadAsync(null, Ct)).Value.ETag!;
+
+        var unchanged = (await Sut.GetHeadAsync(etag, Ct)).Value;
+
+        unchanged.NotModified.Should().BeTrue();
+        unchanged.Head.Should().BeNull();
+        unchanged.ETag.Should().Be(etag);
+
+        var second = (await Sut.CreateCommitAsync("Second", tree, [first], Author, Ct)).Value;
+        (await Sut.UpdateBranchAsync(second, first, Ct)).IsSuccess.Should().BeTrue();
+        var moved = (await Sut.GetHeadAsync(etag, Ct)).Value;
+
+        moved.NotModified.Should().BeFalse();
+        moved.Head!.Commit.Should().Be(second);
+        moved.ETag.Should().NotBe(etag);
     }
 
     [Fact]
@@ -60,8 +87,8 @@ public abstract class RemoteRepositoryContract : ContractTest<IRemoteRepository>
             [new TreeChange.Upsert(P("dir/c.md"), c), new TreeChange.Delete(P("a.md"))],
             Ct)).Value;
 
-        var manifest = (await Sut.GetTreeAsync(tree, Ct)).Value;
-        manifest.Entries.Select(entry => entry.Path.ToString()).Should().BeEquivalentTo("b.md", "dir/c.md");
+        var treeSnapshot = (await Sut.GetTreeAsync(tree, Ct)).Value;
+        treeSnapshot.Files.Select(file => file.Path.ToString()).Should().BeEquivalentTo("b.md", "dir/c.md");
     }
 
     [Fact]
@@ -70,7 +97,7 @@ public abstract class RemoteRepositoryContract : ContractTest<IRemoteRepository>
     {
         var tree = (await Sut.CreateTreeAsync(null, [], Ct)).Value;
 
-        (await Sut.GetTreeAsync(tree, Ct)).Value.IsEmpty.Should().BeTrue();
+        (await Sut.GetTreeAsync(tree, Ct)).Value.Files.Should().BeEmpty();
     }
 
     [Fact]
@@ -85,10 +112,10 @@ public abstract class RemoteRepositoryContract : ContractTest<IRemoteRepository>
 
         (await Sut.UpdateBranchAsync(orphan, first, Ct)).Error.Code.Should().Be(RemoteErrors.NonFastForward);
         (await Sut.UpdateBranchAsync(first, second, Ct)).Error.Code.Should().Be(RemoteErrors.NonFastForward);
-        (await Sut.GetHeadAsync(Ct)).Value!.Commit.Should().Be(first);
+        (await Sut.GetHeadAsync(null, Ct)).Value.Head!.Commit.Should().Be(first);
 
         (await Sut.UpdateBranchAsync(second, first, Ct)).IsSuccess.Should().BeTrue();
-        (await Sut.GetHeadAsync(Ct)).Value!.Commit.Should().Be(second);
+        (await Sut.GetHeadAsync(null, Ct)).Value.Head!.Commit.Should().Be(second);
     }
 
     [Fact]

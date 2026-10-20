@@ -120,8 +120,10 @@ public sealed record RemoteRepositoryRef(GitHubHost Host, string Owner, string N
 
 public interface IRemoteRepository
 {
-    Task<Result<RemoteHead?>> GetHeadAsync(CancellationToken ct);                          // null si la rama no existe / repo vacío
-    Task<Result<Manifest>> GetTreeAsync(TreeSha tree, CancellationToken ct);               // recursivo; maneja 'truncated'
+    // Condicional (If-None-Match): 304 → NotModified, Head null. Head null sin NotModified = rama ausente / repo vacío.
+    Task<Result<RemoteHeadCheck>> GetHeadAsync(string? etag, CancellationToken ct);
+    // Recursivo; maneja 'truncated'. Devuelve ficheros y las rutas no materializables (cuarentena, 06 §7.4/§7.5).
+    Task<Result<RemoteTreeSnapshot>> GetTreeAsync(TreeSha tree, CancellationToken ct);
     Task<Result<byte[]>> GetBlobAsync(BlobSha sha, CancellationToken ct);
     Task<Result<BlobSha>> CreateBlobAsync(ReadOnlyMemory<byte> content, CancellationToken ct);
     Task<Result<TreeSha>> CreateTreeAsync(TreeSha? baseTree, IReadOnlyList<TreeChange> changes, CancellationToken ct); // TreeChange: Upsert(path, sha) | Delete(path)
@@ -132,6 +134,10 @@ public interface IRemoteRepository
     Task<Result<byte[]?>> GetFileAtCommitAsync(VaultPath path, CommitSha commit, CancellationToken ct);
 }
 public sealed record RemoteHead(CommitSha Commit, TreeSha Tree);
+public sealed record RemoteHeadCheck(RemoteHead? Head, string? ETag, bool NotModified);
+public sealed record RemoteTreeFile(VaultPath Path, BlobSha Sha, long Size);
+public sealed record RemotePathIssue(string Path, string Reason);          // invalid_path | case_collision
+public sealed record RemoteTreeSnapshot(IReadOnlyList<RemoteTreeFile> Files, IReadOnlyList<RemotePathIssue> Quarantined);
 
 public interface IRepositoryAdministration
 {

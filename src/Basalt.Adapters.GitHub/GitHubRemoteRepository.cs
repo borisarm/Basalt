@@ -25,29 +25,37 @@ internal sealed class GitHubRemoteRepository : IRemoteRepository
         _reference = reference;
     }
 
-    public async Task<Result<RemoteHead?>> GetHeadAsync(CancellationToken ct)
+    public async Task<Result<RemoteHeadCheck>> GetHeadAsync(string? etag, CancellationToken ct)
     {
-        var reference = await _client.GetRefAsync(null, ct).ConfigureAwait(false);
+        var reference = await _client.GetRefAsync(etag, ct).ConfigureAwait(false);
         if (reference.IsFailure)
         {
             return reference.Error.Code is RemoteErrors.NotFound or RemoteErrors.RepositoryEmpty
-                ? Result<RemoteHead?>.Success(null)
-                : Result<RemoteHead?>.Failure(reference.Error);
+                ? Result<RemoteHeadCheck>.Success(new RemoteHeadCheck(null, null, NotModified: false))
+                : Result<RemoteHeadCheck>.Failure(reference.Error);
+        }
+
+        if (reference.Value.NotModified)
+        {
+            return new RemoteHeadCheck(null, reference.Value.ETag ?? etag, NotModified: true);
         }
 
         var sha = CommitSha.Parse(reference.Value.Value!.Object.Sha).Value;
         var commit = await _client.GetCommitAsync(sha, ct).ConfigureAwait(false);
         return commit.IsSuccess
-            ? new RemoteHead(sha, TreeSha.Parse(commit.Value.Tree.Sha).Value)
-            : Result<RemoteHead?>.Failure(commit.Error);
+            ? new RemoteHeadCheck(
+                new RemoteHead(sha, TreeSha.Parse(commit.Value.Tree.Sha).Value),
+                reference.Value.ETag,
+                NotModified: false)
+            : Result<RemoteHeadCheck>.Failure(commit.Error);
     }
 
-    public async Task<Result<Manifest>> GetTreeAsync(TreeSha tree, CancellationToken ct)
+    public async Task<Result<RemoteTreeSnapshot>> GetTreeAsync(TreeSha tree, CancellationToken ct)
     {
         var root = await _client.GetTreeAsync(tree, recursive: true, ct).ConfigureAwait(false);
         if (root.IsFailure)
         {
-            return Result<Manifest>.Failure(root.Error);
+            return Result<RemoteTreeSnapshot>.Failure(root.Error);
         }
 
         var entries = new List<GitHubTreeEntryDto>();
@@ -56,7 +64,7 @@ internal sealed class GitHubRemoteRepository : IRemoteRepository
             var walked = await WalkTreeAsync(tree, string.Empty, entries, ct).ConfigureAwait(false);
             if (walked.IsFailure)
             {
-                return Result<Manifest>.Failure(walked.Error);
+                return Result<RemoteTreeSnapshot>.Failure(walked.Error);
             }
         }
         else
@@ -64,7 +72,8 @@ internal sealed class GitHubRemoteRepository : IRemoteRepository
             entries.AddRange(root.Value.Tree);
         }
 
-        var manifest = new List<ManifestEntry>(entries.Count);
+        var files = new List<RemoteTreeFile>(entries.Count);
+        var quarantined = new List<RemotePathIssue>();
         foreach (var entry in entries)
         {
             if (entry.Type != "blob")
@@ -75,7 +84,14 @@ internal sealed class GitHubRemoteRepository : IRemoteRepository
             var sha = BlobSha.Parse(entry.Sha);
             if (sha.IsFailure)
             {
-                return Result<Manifest>.Failure(sha.Error);
+                return Result<RemoteTreeSnapshot>.Failure(sha.Error);
+            }
+
+            var path = VaultPath.Create(entry.Path);
+            if (path.IsFailure)
+            {
+                quarantined.Add(new RemotePathIssue(entry.Path, RemoteQuarantineReasons.InvalidPath));
+                continue;
             }
 
             var size = entry.Size;
@@ -84,22 +100,16 @@ internal sealed class GitHubRemoteRepository : IRemoteRepository
                 var blob = await _client.GetBlobAsync(sha.Value, ct).ConfigureAwait(false);
                 if (blob.IsFailure)
                 {
-                    return Result<Manifest>.Failure(blob.Error);
+                    return Result<RemoteTreeSnapshot>.Failure(blob.Error);
                 }
 
                 size = blob.Value.Length;
             }
 
-            var path = VaultPath.Create(entry.Path);
-            if (path.IsFailure)
-            {
-                return Result<Manifest>.Failure(path.Error);
-            }
-
-            manifest.Add(new ManifestEntry(path.Value, sha.Value, size.Value));
+            files.Add(new RemoteTreeFile(path.Value, sha.Value, size.Value));
         }
 
-        return Manifest.Create(manifest);
+        return new RemoteTreeSnapshot(files, quarantined);
     }
 
     public async Task<Result<byte[]>> GetBlobAsync(BlobSha sha, CancellationToken ct) =>
@@ -156,18 +166,18 @@ internal sealed class GitHubRemoteRepository : IRemoteRepository
 
     public async Task<Result<Unit>> UpdateBranchAsync(CommitSha newHead, CommitSha? expectedOld, CancellationToken ct)
     {
-        var head = await GetHeadAsync(ct).ConfigureAwait(false);
+        var head = await GetHeadAsync(null, ct).ConfigureAwait(false);
         if (head.IsFailure)
         {
             return Result<Unit>.Failure(head.Error);
         }
 
-        if (expectedOld is { } expected && head.Value?.Commit != expected)
+        if (expectedOld is { } expected && head.Value.Head?.Commit != expected)
         {
             return Result<Unit>.Failure(NonFastForward());
         }
 
-        if (head.Value is null)
+        if (head.Value.Head is null)
         {
             var created = await _client.CreateRefAsync(_reference.Branch, newHead, ct).ConfigureAwait(false);
             return created.IsSuccess ? Result<Unit>.Success(Unit.Value) : Result<Unit>.Failure(created.Error);

@@ -26,33 +26,47 @@ public sealed class InMemoryRemoteRepository : IRemoteRepository
 
     public RemoteRepositoryRef Reference { get; }
 
-    public Task<Result<RemoteHead?>> GetHeadAsync(CancellationToken ct)
+    public Task<Result<RemoteHeadCheck>> GetHeadAsync(string? etag, CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
         lock (_gate)
         {
             if (_head is null || !_commits.TryGetValue(_head, out var commit))
             {
-                return Task.FromResult(Result<RemoteHead?>.Success(null));
+                return Task.FromResult(Result<RemoteHeadCheck>.Success(
+                    new RemoteHeadCheck(null, null, NotModified: false)));
             }
 
-            return Task.FromResult(Result<RemoteHead?>.Success(new RemoteHead(
-                CommitSha.Parse(commit.Sha).Value, TreeSha.Parse(commit.Tree).Value)));
+            var currentETag = "\"" + commit.Sha + "\"";
+            if (etag == currentETag)
+            {
+                return Task.FromResult(Result<RemoteHeadCheck>.Success(
+                    new RemoteHeadCheck(null, currentETag, NotModified: true)));
+            }
+
+            return Task.FromResult(Result<RemoteHeadCheck>.Success(new RemoteHeadCheck(
+                new RemoteHead(CommitSha.Parse(commit.Sha).Value, TreeSha.Parse(commit.Tree).Value),
+                currentETag,
+                NotModified: false)));
         }
     }
 
-    public Task<Result<Manifest>> GetTreeAsync(TreeSha tree, CancellationToken ct)
+    public Task<Result<RemoteTreeSnapshot>> GetTreeAsync(TreeSha tree, CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
         lock (_gate)
         {
             if (!_trees.TryGetValue(tree.ToString(), out var files))
             {
-                return Task.FromResult(Result<Manifest>.Failure(NotFound($"Tree {tree} does not exist.")));
+                return Task.FromResult(Result<RemoteTreeSnapshot>.Failure(NotFound($"Tree {tree} does not exist.")));
             }
 
-            var entries = files.Select(pair => new ManifestEntry(pair.Key, pair.Value, _blobs[pair.Value.ToString()].Length));
-            return Task.FromResult(Manifest.Create(entries));
+            var entries = files
+                .Select(pair => new RemoteTreeFile(pair.Key, pair.Value, _blobs[pair.Value.ToString()].Length))
+                .OrderBy(file => file.Path)
+                .ToList();
+            return Task.FromResult(Result<RemoteTreeSnapshot>.Success(
+                new RemoteTreeSnapshot(entries, [])));
         }
     }
 

@@ -41,12 +41,28 @@ public sealed class GitHubRemoteRepositoryTests : RemoteRepositoryContract
         var reference = new RemoteRepositoryRef(GitHubHost.ForTesting(new Uri(server.BaseAddress)), "acme", "vault", "main");
         var repository = new GitHubRemoteRepository(new GitHubApiClient(http, reference), reference);
 
-        var head = await repository.GetHeadAsync(Ct);
-        var manifest = await repository.GetTreeAsync(head.Value!.Tree, Ct);
+        var head = await repository.GetHeadAsync(null, Ct);
+        var manifest = await repository.GetTreeAsync(head.Value.Head!.Tree, Ct);
 
         manifest.IsSuccess.Should().BeTrue();
-        manifest.Value.Entries.Select(entry => entry.Path.ToString())
+        manifest.Value.Files.Select(file => file.Path.ToString())
             .Should().BeEquivalentTo("a.md", "dir/b.md", "dir/sub/c.md");
+    }
+
+    [Fact]
+    [Trait("Spec", "GITHUB-REMOTE")]
+    public async Task InvalidRemotePaths_AreQuarantinedInsteadOfFailingTheTree()
+    {
+        using var http = new HttpClient(new InvalidPathTreeHandler()) { BaseAddress = new Uri("http://localhost") };
+        var reference = new RemoteRepositoryRef(GitHubHost.GitHubDotCom, "acme", "vault", "main");
+        var repository = new GitHubRemoteRepository(new GitHubApiClient(http, reference), reference);
+        var head = await repository.GetHeadAsync(null, Ct);
+
+        var tree = await repository.GetTreeAsync(head.Value.Head!.Tree, Ct);
+
+        tree.Value.Files.Select(file => file.Path.ToString()).Should().Equal("ok.md");
+        tree.Value.Quarantined.Should().ContainSingle(issue =>
+            issue.Path == "aux.md" && issue.Reason == RemoteQuarantineReasons.InvalidPath);
     }
 
     [Fact]
@@ -62,9 +78,9 @@ public sealed class GitHubRemoteRepositoryTests : RemoteRepositoryContract
         using var http = new HttpClient(CreateHandler(server)) { BaseAddress = new Uri(server.BaseAddress) };
         var reference = new RemoteRepositoryRef(GitHubHost.ForTesting(new Uri(server.BaseAddress)), "acme", "vault", "main");
         var repository = new GitHubRemoteRepository(new GitHubApiClient(http, reference), reference);
-        var head = await repository.GetHeadAsync(Ct);
+        var head = await repository.GetHeadAsync(null, Ct);
 
-        var files = await repository.GetZipballFilesAsync(head.Value!.Commit, Ct);
+        var files = await repository.GetZipballFilesAsync(head.Value.Head!.Commit, Ct);
 
         files.IsSuccess.Should().BeTrue();
         System.Text.Encoding.UTF8.GetString(files.Value[VaultPath.Create("dir/b.md").Value]).Should().Be("b");
@@ -101,12 +117,36 @@ public sealed class GitHubRemoteRepositoryTests : RemoteRepositoryContract
         var manifest = await repository.GetTreeAsync(tree.Value, Ct);
 
         tree.IsSuccess.Should().BeTrue();
-        manifest.Value.Count.Should().Be(1_500);
+        manifest.Value.Files.Should().HaveCount(1_500);
         server.Requests.Count(request => request.Method == "POST" && request.Path.EndsWith("/git/trees", StringComparison.Ordinal))
             .Should().Be(2);
     }
 
     private static CommitSha ParseCommit(string sha) => CommitSha.Parse(sha).Value;
+
+    private sealed class InvalidPathTreeHandler : HttpMessageHandler
+    {
+        private const string CommitSha = "1111111111111111111111111111111111111111";
+        private const string TreeSha = "2222222222222222222222222222222222222222";
+        private const string BlobSha = "3333333333333333333333333333333333333333";
+
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            var path = request.RequestUri!.AbsolutePath;
+            var json = path.EndsWith("/git/ref/heads/main", StringComparison.Ordinal)
+                ? "{\"ref\":\"refs/heads/main\",\"object\":{\"sha\":\"" + CommitSha + "\",\"type\":\"commit\"}}"
+                : path.Contains("/git/commits/", StringComparison.Ordinal)
+                    ? "{\"sha\":\"" + CommitSha + "\",\"message\":\"raw\",\"tree\":{\"sha\":\"" + TreeSha + "\"},\"parents\":[]}"
+                    : "{\"sha\":\"" + TreeSha + "\",\"truncated\":false,\"tree\":["
+                        + "{\"path\":\"aux.md\",\"mode\":\"100644\",\"type\":\"blob\",\"sha\":\"" + BlobSha + "\",\"size\":1},"
+                        + "{\"path\":\"ok.md\",\"mode\":\"100644\",\"type\":\"blob\",\"sha\":\"" + BlobSha + "\",\"size\":2}]}";
+
+            return Task.FromResult(new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+            {
+                Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json"),
+            });
+        }
+    }
 
     private sealed class MaliciousZipHandler : HttpMessageHandler
     {
@@ -153,9 +193,9 @@ public sealed class GitHubRemoteRepositoryTests : RemoteRepositoryContract
     private sealed class RepositorySut(IRemoteRepository inner, FakeGitHubServer server, HttpClient http)
         : IRemoteRepository, IAsyncDisposable
     {
-        public Task<Result<RemoteHead?>> GetHeadAsync(CancellationToken ct) => inner.GetHeadAsync(ct);
+        public Task<Result<RemoteHeadCheck>> GetHeadAsync(string? etag, CancellationToken ct) => inner.GetHeadAsync(etag, ct);
 
-        public Task<Result<Manifest>> GetTreeAsync(TreeSha tree, CancellationToken ct) => inner.GetTreeAsync(tree, ct);
+        public Task<Result<RemoteTreeSnapshot>> GetTreeAsync(TreeSha tree, CancellationToken ct) => inner.GetTreeAsync(tree, ct);
 
         public Task<Result<byte[]>> GetBlobAsync(BlobSha sha, CancellationToken ct) => inner.GetBlobAsync(sha, ct);
 

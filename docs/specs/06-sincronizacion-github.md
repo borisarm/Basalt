@@ -211,7 +211,7 @@ Se modelan como borrado + alta (Git no tiene renombrados). Optimización en `Loc
 Si en un lado `a` es fichero y en el otro `a/` es carpeta: el **fichero** se renombra a `a (conflict … Dispositivo)` en ambos lados y la carpeta se mantiene.
 
 ### 7.4 Colisiones de mayúsculas
-Si R contiene rutas que difieren solo en mayúsculas (`Nota.md`, `nota.md`) y el FS local es insensible: se materializa la primera en orden ordinal; las demás van a **cuarentena** con motivo `case_collision`. La UI de sincronización lista las rutas en cuarentena con la sugerencia de renombrarlas en GitHub. Las rutas en cuarentena nunca generan `DeleteRemote`.
+Si R contiene rutas que difieren solo en mayúsculas (`Nota.md`, `nota.md`) y el FS local es insensible: se materializa la primera en orden ordinal; las demás van a **cuarentena** con motivo `case_collision`. Como `Manifest` exige portabilidad y rechaza dos rutas con la misma `CaseFoldKey` (02 §11), la cuarentena se aplica en todos los SO, no solo en los sensibles a mayúsculas: es la opción conservadora y la ruta remota nunca se borra. La UI de sincronización lista las rutas en cuarentena con la sugerencia de renombrarlas en GitHub. Las rutas en cuarentena nunca generan `DeleteRemote`.
 
 ### 7.5 Rutas no válidas en esta plataforma
 Rutas remotas que violan `VaultPath` en este SO (p. ej. `aux.md`, `a:b.md`, segmentos terminados en punto en Windows) → cuarentena con motivo `invalid_path`. Igual tratamiento.

@@ -1,13 +1,16 @@
 using Basalt.Application.Abstractions;
 using Basalt.Application.Errors;
+using Basalt.Application.Links;
 using Basalt.Application.Notes;
 using Basalt.Application.Ports.Events;
+using Basalt.Application.Tags;
 using Basalt.Domain.Common;
 using Basalt.Domain.Notes;
 using Basalt.Domain.Sync;
 using Basalt.Domain.Text;
 using Basalt.Domain.Vaults;
 using Basalt.Presentation.Common;
+using Basalt.Presentation.Editor;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -28,6 +31,13 @@ public interface IEditorBridge
 
 public sealed record NoteTabUseCases(IQueryHandler<ReadNote, NoteDocument> Read, ICommandHandler<SaveNote, BlobSha> Save);
 
+/// <summary>The use cases behind editor completion and image paste (F-004.1–F-004.3, F-003.5).</summary>
+public sealed record NoteEditingUseCases(
+    IQueryHandler<SuggestLinkTargets, IReadOnlyList<LinkSuggestion>> Links,
+    IQueryHandler<SuggestTags, IReadOnlyList<TagSuggestion>> Tags,
+    ICommandHandler<EnsureBlockId, BlockId> EnsureBlockId,
+    ICommandHandler<ImportAttachment, ImportedAttachment> Import);
+
 /// <summary>Local edits and a disk version that do not merge cleanly (F-003.3).</summary>
 public sealed record ExternalConflict(string Mine, string Disk, BlobSha? DiskSha);
 
@@ -45,6 +55,7 @@ public sealed partial class NoteTabViewModel : TabViewModel
     public static readonly TimeSpan AutosaveDelay = TimeSpan.FromSeconds(2);
 
     private readonly NoteTabUseCases _useCases;
+    private readonly NoteEditingUseCases? _editing;
     private readonly IWorkspaceMessenger _messenger;
     private readonly VaultId _vault;
     private readonly IDisposable[] _subscriptions;
@@ -57,11 +68,20 @@ public sealed partial class NoteTabViewModel : TabViewModel
     private ITimer? _autosave;
     private Task _lastSave = Task.CompletedTask;
 
-    public NoteTabViewModel(ViewModelServices services, NoteTabUseCases useCases, IEventBus events, IWorkspaceMessenger messenger, VaultId vault)
+    public NoteTabViewModel(
+        ViewModelServices services,
+        NoteTabUseCases useCases,
+        IEventBus events,
+        IWorkspaceMessenger messenger,
+        VaultId vault,
+        NoteEditingUseCases? editing = null,
+        IEditorCommands? editorCommands = null)
         : base(services)
     {
         ArgumentNullException.ThrowIfNull(events);
         _useCases = useCases;
+        _editing = editing;
+        Editing = editorCommands ?? new EditorCommandsService();
         _messenger = messenger;
         _vault = vault;
         _subscriptions =
@@ -72,6 +92,9 @@ public sealed partial class NoteTabViewModel : TabViewModel
     }
 
     public override string Kind => "note";
+
+    /// <summary>The pure editor behaviours the view applies on keys (spec 07 §5.2).</summary>
+    public IEditorCommands Editing { get; }
 
     [ObservableProperty]
     public partial bool IsReadingMode { get; private set; }
@@ -106,6 +129,82 @@ public sealed partial class NoteTabViewModel : TabViewModel
         IsDirty = true;
         RestartAutosave();
     }
+
+    /// <summary>Called by the view when the caret moves to another line (the outline highlights its section).</summary>
+    public void OnCaretLineChanged(int line)
+    {
+        if (Path is { } path)
+        {
+            _messenger.Send(new CaretLineChanged(path, line));
+        }
+    }
+
+    /// <summary>Suggestions for the link or tag being typed at the caret (F-004.1–F-004.3).</summary>
+    public async Task<IReadOnlyList<CompletionItem>> GetCompletionsAsync(TextBufferState state, CancellationToken ct)
+    {
+        if (_editing is null || Path is not { } path || CompletionTrigger.Detect(state.Text, state.SelectionStart) is not { } context)
+        {
+            return [];
+        }
+
+        if (context.Kind == CompletionKind.Link)
+        {
+            var links = await _editing.Links.HandleAsync(new SuggestLinkTargets(_vault, path, context.Partial), ct).ConfigureAwait(true);
+            return links.IsFailure ? [] : [.. links.Value.Select(l => new CompletionItem(l.Display, l.Kind == LinkSuggestionKind.Note ? l.Path.ToString() : null, CompletionKind.Link, l))];
+        }
+
+        var tags = await _editing.Tags.HandleAsync(new SuggestTags(_vault, context.Partial), ct).ConfigureAwait(true);
+        return tags.IsFailure ? [] : [.. tags.Value.Select(t => new CompletionItem(t.Name, t.Count.ToString(System.Globalization.CultureInfo.InvariantCulture), CompletionKind.Tag, t))];
+    }
+
+    /// <summary>The edit that replaces the typed partial with the accepted suggestion; a block without id gets one first.</summary>
+    public async Task<Result<Editor.TextEdit>> AcceptCompletionAsync(TextBufferState state, CompletionItem item, CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(item);
+        if (_editing is null || CompletionTrigger.Detect(state.Text, state.SelectionStart) is not { } context)
+        {
+            return Unavailable();
+        }
+
+        string insert;
+        switch (item.Source)
+        {
+            case LinkSuggestion { Kind: LinkSuggestionKind.Block, Subpath: null, Line: { } line } block:
+                var id = await RunAsync(token => _editing.EnsureBlockId.HandleAsync(new EnsureBlockId(_vault, block.Path, line), token)).ConfigureAwait(true);
+                if (id.IsFailure)
+                {
+                    return id.Error;
+                }
+
+                insert = $"{block.Target}#^{id.Value}";
+                break;
+            case LinkSuggestion link:
+                insert = link.Target + (link.Subpath is { } subpath ? "#" + subpath : string.Empty) + (link.Alias is { } alias ? "|" + alias : string.Empty);
+                break;
+            case TagSuggestion tag:
+                insert = tag.Name;
+                break;
+            default:
+                return Unavailable();
+        }
+
+        return new Editor.TextEdit(context.Start, state.SelectionStart - context.Start, insert);
+    }
+
+    /// <summary>Saves a pasted image as an attachment and returns the embed to insert at the caret (F-003.5).</summary>
+    public async Task<Result<string>> PasteImageAsync(byte[] bytes, string extension, CancellationToken ct)
+    {
+        if (_editing is null || Path is not { } path)
+        {
+            return Unavailable();
+        }
+
+        var name = $"Pasted image {Services.Time.GetLocalNow():yyyyMMddHHmmss}.{extension}";
+        var imported = await RunAsync(token => _editing.Import.HandleAsync(new ImportAttachment(_vault, path, name, bytes), token)).ConfigureAwait(true);
+        return imported.Map(i => i.EmbedText);
+    }
+
+    private static Error Unavailable() => new(ErrorCodes.CommandUnavailable, "Not available in this tab.");
 
     /// <summary>Completes when the save in progress (if any) has finished.</summary>
     public Task WhenSavedAsync() => _lastSave;

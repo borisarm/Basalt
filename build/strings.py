@@ -55,6 +55,11 @@ STRINGS = {
     "Panel.outline": ("Outline", "Esquema"),
     "Panel.local-graph": ("Local graph", "Grafo local"),
     "Panel.properties": ("Properties", "Propiedades"),
+    # Note tab (F-003.3)
+    "Conflict.Message": ("This note changed on disk and the changes conflict with your edits.", "La nota cambió en el disco y los cambios chocan con tus ediciones."),
+    "Conflict.KeepMine": ("Keep mine", "Mantener el mío"),
+    "Conflict.UseDisk": ("Use the disk version", "Usar el de disco"),
+    "Conflict.ShowDiff": ("Show differences", "Ver diferencias"),
     # Panels
     "Explorer.NewFolder": ("New folder", "Nueva carpeta"),
     "Explorer.FolderName": ("Folder name", "Nombre de la carpeta"),

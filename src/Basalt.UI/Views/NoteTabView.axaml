@@ -1,0 +1,28 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Basalt.Presentation.Workspace;assembly=Basalt.Presentation"
+             xmlns:editor="clr-namespace:Basalt.UI.Editor"
+             xmlns:l="clr-namespace:Basalt.UI.Localization"
+             x:Class="Basalt.UI.Views.NoteTabView"
+             x:DataType="vm:NoteTabViewModel">
+  <DockPanel>
+    <!-- F-003.3: a conflicting external change waits for the user's decision. -->
+    <Border DockPanel.Dock="Top" x:Name="ConflictBanner" IsVisible="{Binding Conflict, Converter={x:Static ObjectConverters.IsNotNull}}"
+            Background="{DynamicResource BasaltSurfaceAltBrush}" BorderBrush="{DynamicResource BasaltWarningBrush}" BorderThickness="0,0,0,2"
+            Padding="{StaticResource BasaltSpacingM}">
+      <DockPanel>
+        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8">
+          <Button x:Name="ShowDiff" Content="{l:Loc Conflict.ShowDiff}" Command="{Binding ShowConflictDiffCommand}" />
+          <Button x:Name="UseDisk" Content="{l:Loc Conflict.UseDisk}" Command="{Binding UseDiskCommand}" />
+          <Button x:Name="KeepMine" Content="{l:Loc Conflict.KeepMine}" Command="{Binding KeepMineCommand}" Classes="accent" />
+        </StackPanel>
+        <TextBlock Text="{l:Loc Conflict.Message}" VerticalAlignment="Center" TextWrapping="Wrap" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
+      </DockPanel>
+    </Border>
+    <Panel>
+      <editor:MarkdownEditorControl x:Name="SourceEditor" IsVisible="{Binding !IsReadingMode}" />
+      <!-- Reading mode (rendered document) arrives with T6.5. -->
+      <ContentControl x:Name="ReadingView" IsVisible="{Binding IsReadingMode}" />
+    </Panel>
+  </DockPanel>
+</UserControl>

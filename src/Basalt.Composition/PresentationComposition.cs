@@ -117,10 +117,15 @@ public sealed class WorkspaceFactory(IServiceProvider services)
         var events = Get<IEventBus>();
         var messenger = new WorkspaceMessenger();
         var noteTabs = new NoteTabUseCases(Get<IQueryHandler<ReadNote, NoteDocument>>(), Get<ICommandHandler<SaveNote, Domain.Sync.BlobSha>>());
+        var editing = new NoteEditingUseCases(
+            Get<IQueryHandler<SuggestLinkTargets, IReadOnlyList<LinkSuggestion>>>(),
+            Get<IQueryHandler<SuggestTags, IReadOnlyList<TagSuggestion>>>(),
+            Get<ICommandHandler<EnsureBlockId, BlockId>>(),
+            Get<ICommandHandler<ImportAttachment, ImportedAttachment>>());
         var workspace = new WorkspaceViewModel(
             common,
             vault,
-            [new DelegateTabFactory("note", p => FileClassifier.Classify(p) == FileKind.Note, () => new NoteTabViewModel(common, noteTabs, events, messenger, vault.Id))],
+            [new DelegateTabFactory("note", p => FileClassifier.Classify(p) == FileKind.Note, () => new NoteTabViewModel(common, noteTabs, events, messenger, vault.Id, editing, Get<IEditorCommands>()))],
             messenger,
             new WorkspaceUseCases(Get<ICommandHandler<RecordRecentFile, Unit>>(), Get<IQueryHandler<LoadWorkspace, WorkspaceState?>>(), Get<ICommandHandler<SaveWorkspace, Unit>>()));
 

@@ -16,6 +16,10 @@
   <data name="Common.OK" xml:space="preserve"><value>OK</value></data>
   <data name="Common.Retry" xml:space="preserve"><value>Retry</value></data>
   <data name="Common.Yes" xml:space="preserve"><value>Yes</value></data>
+  <data name="Conflict.KeepMine" xml:space="preserve"><value>Keep mine</value></data>
+  <data name="Conflict.Message" xml:space="preserve"><value>This note changed on disk and the changes conflict with your edits.</value></data>
+  <data name="Conflict.ShowDiff" xml:space="preserve"><value>Show differences</value></data>
+  <data name="Conflict.UseDisk" xml:space="preserve"><value>Use the disk version</value></data>
   <data name="Errors.account.invalid_host" xml:space="preserve"><value>The GitHub host is not valid.</value></data>
   <data name="Errors.account.not_found" xml:space="preserve"><value>The account does not exist.</value></data>
   <data name="Errors.block.invalid_id" xml:space="preserve"><value>The block id is not valid.</value></data>

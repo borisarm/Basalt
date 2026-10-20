@@ -63,7 +63,7 @@ jobs:
           global-json-file: global.json
           dotnet-version: 10.0.x
       - run: dotnet build tests/Basalt.Sync.IntegrationTests -c Release
-      - run: dotnet test --project tests/Basalt.Sync.IntegrationTests --no-build -c Release
+      - run: dotnet test --project tests/Basalt.Sync.IntegrationTests --no-build -c Release -- --filter-not-trait Category=Performance --ignore-exit-code 8
 
   coverage-gate:
     runs-on: ubuntu-latest

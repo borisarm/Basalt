@@ -176,38 +176,60 @@ internal sealed class SqliteNoteIndex : INoteIndex
 
         var builder = new FtsQueryBuilder();
         var condition = builder.Build(query);
-        await using var connection = await ConnectAsync(ct).ConfigureAwait(false);
-        var candidates = await ReadFilesAsync(connection, condition, builder.Parameters, includeBody: true, ct).ConfigureAwait(false);
-        if (candidates.Count == 0)
+        var (low, high) = await IdRangeAsync(ct).ConfigureAwait(false);
+        if (high < low)
         {
             return [];
         }
 
-        var details = NeedsMetadata(query.Root!) ? await ReadDetailsAsync(connection, null, ct).ConfigureAwait(false) : null;
+        IReadOnlyDictionary<long, FileDetails>? details = null;
+        if (NeedsMetadata(query.Root!))
+        {
+            await using var connection = await ConnectAsync(ct).ConfigureAwait(false);
+            details = (await ReadDetailsAsync(connection, null, ct).ConfigureAwait(false)).All;
+        }
 
-        // Matching is CPU-bound (folding and scanning every candidate): spread it over the cores, one matcher per worker.
+        // Reading the candidates' text and matching it dominate: each worker reads one slice of ids on its own
+        // connection (WAL allows concurrent readers) and matches it with its own matcher.
+        var slices = Math.Clamp(Environment.ProcessorCount, 1, 8);
+        var width = ((high - low) / slices) + 1;
         var hits = new ConcurrentBag<SearchHit>();
-        Parallel.ForEach(
-            Partitioner.Create(0, candidates.Count, 256),
-            new ParallelOptions { CancellationToken = ct },
-            () => NoteMatcher.Create(query, options.MatchCase),
-            (range, _, matcher) =>
+        await Parallel.ForEachAsync(Enumerable.Range(0, slices), new ParallelOptions { CancellationToken = ct, MaxDegreeOfParallelism = slices }, async (slice, token) =>
+        {
+            var from = low + (slice * width);
+            var to = Math.Min(high, from + width - 1);
+            if (from > high)
             {
-                for (var i = range.Item1; i < range.Item2; i++)
-                {
-                    var row = candidates[i];
-                    var metadata = details is null ? NoteMetadata.Empty with { WordCount = row.WordCount, Frontmatter = row.Frontmatter } : Metadata(row, details.For(row.Id));
-                    if (matcher.Match(new SearchableNote(row.Path, row.Body ?? string.Empty, metadata)) is { } match)
-                    {
-                        hits.Add(new SearchHit(row.Path, row.Kind, row.Stamp.LastWriteUtc, match.Ranges, SearchRanking.Score(match)));
-                    }
-                }
+                return;
+            }
 
-                return matcher;
-            },
-            _ => { });
+            await using var connection = await ConnectAsync(token).ConfigureAwait(false);
+            var range = $"f.id BETWEEN {from.ToString(CultureInfo.InvariantCulture)} AND {to.ToString(CultureInfo.InvariantCulture)}";
+            var candidates = await ReadFilesAsync(connection, condition is null ? range : $"{range} AND {condition}", builder.Parameters, includeBody: true, token).ConfigureAwait(false);
+            var matcher = NoteMatcher.Create(query, options.MatchCase);
+            foreach (var row in candidates)
+            {
+                token.ThrowIfCancellationRequested();
+                var metadata = details is null
+                    ? NoteMetadata.Empty with { WordCount = row.WordCount, Frontmatter = row.Frontmatter }
+                    : Metadata(row, details.GetValueOrDefault(row.Id) ?? new FileDetails());
+                if (matcher.Match(new SearchableNote(row.Path, row.Body ?? string.Empty, metadata)) is { } match)
+                {
+                    hits.Add(new SearchHit(row.Path, row.Kind, row.Stamp.LastWriteUtc, match.Ranges, SearchRanking.Score(match)));
+                }
+            }
+        }).ConfigureAwait(false);
 
         return SearchRanking.Order(hits, options);
+    }
+
+    private async Task<(long Low, long High)> IdRangeAsync(CancellationToken ct)
+    {
+        await using var connection = await ConnectAsync(ct).ConfigureAwait(false);
+        await using var command = Command(connection, null, "SELECT coalesce(min(id), 1), coalesce(max(id), 0) FROM files");
+        await using var reader = await command.ExecuteReaderAsync(ct).ConfigureAwait(false);
+        await reader.ReadAsync(ct).ConfigureAwait(false);
+        return (reader.GetInt64(0), reader.GetInt64(1));
     }
 
     /// <summary>Whether evaluating the query reads tags, headings or tasks (frontmatter comes with the file row).</summary>
@@ -522,5 +544,7 @@ internal sealed class SqliteNoteIndex : INoteIndex
         }
 
         public FileDetails For(long id) => _byFile.GetValueOrDefault(id) ?? Empty;
+
+        public IReadOnlyDictionary<long, FileDetails> All => _byFile;
     }
 }

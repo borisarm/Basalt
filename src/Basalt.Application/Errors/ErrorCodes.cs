@@ -38,6 +38,7 @@ public static class ErrorCodes
     public const string VaultLocationExists = "vault.location_exists";
     public const string VaultLocationMissing = "vault.location_missing";
     public const string VaultConfigInvalid = "vault.config_invalid";
+    public const string VaultIdMismatch = "vault.id_mismatch";
 
     public const string AccountNotFound = "account.not_found";
 

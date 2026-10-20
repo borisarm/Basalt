@@ -1,4 +1,5 @@
 using Basalt.Application.Abstractions;
+using Basalt.Application.Errors;
 using Basalt.Application.Ports.Events;
 using Basalt.Application.Ports.FileSystem;
 using Basalt.Application.Ports.Storage;
@@ -97,3 +98,40 @@ public sealed class UpdateVaultSettingsHandler(IVaultSessions sessions, IVaultCo
         return Result.Success();
     }
 }
+
+/// <summary>
+/// Points a registered vault at the folder it was moved to (F-001.6 "Localizar…"). A folder whose <c>vault.json</c>
+/// belongs to another vault is refused; one without it is accepted (opening recreates it with this identity).
+/// </summary>
+/// <returns><c>vault.not_registered</c>, <c>vault.location_missing</c>, <c>vault.id_mismatch</c>.</returns>
+public sealed record RelocateVault(VaultId VaultId, string NewLocation) : ICommand<VaultRegistration>;
+
+public sealed class RelocateVaultHandler(IVaultRegistry registry, IVaultFileSystemFactory fileSystems, IVaultConfigStore configs) : ICommandHandler<RelocateVault, VaultRegistration>
+{
+    public async Task<Result<VaultRegistration>> HandleAsync(RelocateVault command, CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(command);
+        var registration = (await registry.GetAllAsync(ct).ConfigureAwait(false)).FirstOrDefault(r => r.Id == command.VaultId);
+        if (registration is null)
+        {
+            return new Error(ErrorCodes.VaultNotRegistered, "The vault is not registered.");
+        }
+
+        var fs = await fileSystems.OpenAsync(command.NewLocation, ct).ConfigureAwait(false);
+        if (fs.IsFailure)
+        {
+            return fs.Error.Code == ErrorCodes.FsNotFound ? OpenFolderAsVaultHandler.LocationMissing(command.NewLocation) : fs.Error;
+        }
+
+        var config = await configs.LoadVaultConfigAsync(fs.Value, ct).ConfigureAwait(false);
+        if (config.Value is { } found && found.Id != command.VaultId)
+        {
+            return new Error(ErrorCodes.VaultIdMismatch, "The folder belongs to another vault.").With("location", command.NewLocation);
+        }
+
+        var updated = registration with { RootLocation = command.NewLocation };
+        var saved = await registry.UpdateAsync(updated, ct).ConfigureAwait(false);
+        return saved.Map(_ => updated);
+    }
+}
+

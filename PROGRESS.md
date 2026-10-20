@@ -60,7 +60,7 @@ Registro de avance del plan (`docs/specs/10-plan-de-implementacion.md`). Platafo
 ## Fase 5 — Presentación (ViewModels)
 
 - [x] T5.1 Base — 2026-10-19. Presentation (sin Avalonia): ViewModelBase (ocupado tras 100 ms, cancelar tras 2 s con TimeProvider; errores localizados vía INotificationService; operation.cancelled silencioso), IUiDispatcher, IDialogService, INotificationService, IWorkspaceNavigator, IWorkspaceMessenger (WeakReferenceMessenger privado). ILocalizer/ResxLocalizer con Strings.resx (en) y Strings.es.resx (es): marcadores {nombre} desde los metadatos del error. Tests: claves en ambos idiomas, todo código de error traducido, títulos de comandos. Fakes en Basalt.Testing (ImmediateDispatcher, FakeDialogService, FakeNotificationService).
-- [ ] T5.2 VaultPickerViewModel, ShellViewModel
+- [x] T5.2 VaultPickerViewModel, ShellViewModel — 2026-10-19. VaultPickerViewModel (listar, crear con nombre+ubicación, abrir carpeta, quitar con confirmación sin borrar ficheros, vault no encontrado → Localizar…/Quitar de la lista) y ShellViewModel (picker ↔ workspace, título, ventana nueva para un segundo vault en escritorio F-001.7, sustitución en iOS, cerrar vault). Caso de uso RelocateVault (vault.id_mismatch) + spec 03. IDialogService.ChooseAsync. Textos en build/strings.py → resx en/es.
 - [ ] T5.3 WorkspaceViewModel, PaneLayoutViewModel, TabGroupViewModel, NoteTabViewModel
 - [ ] T5.4 EditorCommandsService
 - [ ] T5.5 Paneles

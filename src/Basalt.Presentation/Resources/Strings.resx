@@ -55,10 +55,25 @@
   <data name="Errors.vault.already_open" xml:space="preserve"><value>The vault is already open.</value></data>
   <data name="Errors.vault.already_registered" xml:space="preserve"><value>The vault is already in the list.</value></data>
   <data name="Errors.vault.config_invalid" xml:space="preserve"><value>The vault settings file is not valid.</value></data>
+  <data name="Errors.vault.id_mismatch" xml:space="preserve"><value>That folder belongs to another vault.</value></data>
   <data name="Errors.vault.invalid_id" xml:space="preserve"><value>The vault identifier is not valid.</value></data>
   <data name="Errors.vault.invalid_name" xml:space="preserve"><value>The vault name is not valid.</value></data>
   <data name="Errors.vault.location_exists" xml:space="preserve"><value>The folder already exists.</value></data>
   <data name="Errors.vault.location_missing" xml:space="preserve"><value>The vault folder cannot be found.</value></data>
   <data name="Errors.vault.not_open" xml:space="preserve"><value>The vault is not open.</value></data>
   <data name="Errors.vault.not_registered" xml:space="preserve"><value>The vault is not in the list.</value></data>
+  <data name="Shell.Title" xml:space="preserve"><value>Basalt</value></data>
+  <data name="Shell.TitleWithVault" xml:space="preserve"><value>{0} — Basalt</value></data>
+  <data name="VaultPicker.ChooseLocation" xml:space="preserve"><value>Choose where to create the vault</value></data>
+  <data name="VaultPicker.Create" xml:space="preserve"><value>Create vault</value></data>
+  <data name="VaultPicker.Empty" xml:space="preserve"><value>No vaults yet. Create one or open a folder.</value></data>
+  <data name="VaultPicker.Locate" xml:space="preserve"><value>Locate…</value></data>
+  <data name="VaultPicker.LocateTitle" xml:space="preserve"><value>Locate the folder of “{0}”</value></data>
+  <data name="VaultPicker.MissingMessage" xml:space="preserve"><value>The folder of “{0}” cannot be found: {1}</value></data>
+  <data name="VaultPicker.MissingTitle" xml:space="preserve"><value>Vault not found</value></data>
+  <data name="VaultPicker.NameLabel" xml:space="preserve"><value>Vault name</value></data>
+  <data name="VaultPicker.OpenFolder" xml:space="preserve"><value>Open folder as vault</value></data>
+  <data name="VaultPicker.Remove" xml:space="preserve"><value>Remove from list</value></data>
+  <data name="VaultPicker.RemoveMessage" xml:space="preserve"><value>“{0}” will be removed from the list. Its files are not deleted.</value></data>
+  <data name="VaultPicker.Title" xml:space="preserve"><value>Vaults</value></data>
 </root>

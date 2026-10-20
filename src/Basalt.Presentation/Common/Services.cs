@@ -36,6 +36,9 @@ public sealed record ConfirmRequest(string Title, string Message, string Confirm
 
 public sealed record PromptRequest(string Title, string Label, string? InitialValue = null);
 
+/// <summary>A question with several answers (plus cancel).</summary>
+public sealed record ChoiceRequest(string Title, string Message, IReadOnlyList<string> Options);
+
 /// <summary>Modal dialogs. Texts arrive already localized.</summary>
 public interface IDialogService
 {
@@ -43,6 +46,9 @@ public interface IDialogService
 
     /// <returns>The text entered, or null when cancelled.</returns>
     Task<string?> PromptAsync(PromptRequest request, CancellationToken ct);
+
+    /// <returns>The index of the chosen option, or null when cancelled.</returns>
+    Task<int?> ChooseAsync(ChoiceRequest request, CancellationToken ct);
 
     /// <returns>The chosen folder, or null when cancelled (desktop).</returns>
     Task<string?> PickFolderAsync(string title, CancellationToken ct);

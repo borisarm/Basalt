@@ -46,6 +46,11 @@ public sealed class FakeDialogService : IDialogService
 
     public string? FolderAnswer { get; set; }
 
+    public int? ChoiceAnswer { get; set; }
+
+    /// <summary>Answers for successive prompts (then <see cref="PromptAnswer"/>).</summary>
+    public Queue<string?> PromptAnswers { get; } = new();
+
     public List<object> Requests { get; } = [];
 
     public Task<bool> ConfirmAsync(ConfirmRequest request, CancellationToken ct)
@@ -57,7 +62,13 @@ public sealed class FakeDialogService : IDialogService
     public Task<string?> PromptAsync(PromptRequest request, CancellationToken ct)
     {
         Requests.Add(request);
-        return Task.FromResult(PromptAnswer);
+        return Task.FromResult(PromptAnswers.Count > 0 ? PromptAnswers.Dequeue() : PromptAnswer);
+    }
+
+    public Task<int?> ChooseAsync(ChoiceRequest request, CancellationToken ct)
+    {
+        Requests.Add(request);
+        return Task.FromResult(ChoiceAnswer);
     }
 
     public Task<string?> PickFolderAsync(string title, CancellationToken ct)

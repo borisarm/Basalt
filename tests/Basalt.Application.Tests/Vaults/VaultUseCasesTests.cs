@@ -284,4 +284,34 @@ public sealed class VaultUseCasesTests : IAsyncDisposable
         public Task<Result<Unit>> InitializeAsync(VaultSession session, CancellationToken ct) =>
             Task.FromResult(Result.Failure(new Error("test.init", "boom")));
     }
+
+    private RelocateVaultHandler Relocate => new(_registry, _fileSystems, _configs);
+
+    [Fact]
+    [Trait("Spec", "F-001.6")]
+    public async Task Relocate_PointsTheRegistrationAtTheMovedFolder()
+    {
+        var created = (await Create.HandleAsync(new CreateVault("Notas", "/home"), Ct)).Value;
+        var moved = (await _fileSystems.CreateAsync("/otro/Notas", Ct)).Value;
+        await _configs.SaveVaultConfigAsync(moved, new VaultConfig(created.Id, VaultSettings.Default), Ct);
+
+        var result = await Relocate.HandleAsync(new RelocateVault(created.Id, "/otro/Notas"), Ct);
+
+        result.IsSuccess.Should().BeTrue();
+        (await _registry.GetAllAsync(Ct)).Single().RootLocation.Should().Be("/otro/Notas");
+    }
+
+    [Fact]
+    public async Task Relocate_ToAFolderWithoutConfig_IsAccepted_AndToAnotherVault_IsRefused()
+    {
+        var created = (await Create.HandleAsync(new CreateVault("Notas", "/home"), Ct)).Value;
+        await _fileSystems.CreateAsync("/sin-config", Ct);
+        var other = (await _fileSystems.CreateAsync("/otro-vault", Ct)).Value;
+        await _configs.SaveVaultConfigAsync(other, new VaultConfig(new VaultId(Guid.Parse("99999999-0000-4000-8000-000000000000")), VaultSettings.Default), Ct);
+
+        (await Relocate.HandleAsync(new RelocateVault(created.Id, "/otro-vault"), Ct)).Error.Code.Should().Be(ErrorCodes.VaultIdMismatch);
+        (await Relocate.HandleAsync(new RelocateVault(created.Id, "/no-existe"), Ct)).Error.Code.Should().Be(ErrorCodes.VaultLocationMissing);
+        (await Relocate.HandleAsync(new RelocateVault(new VaultId(Guid.Parse("88888888-0000-4000-8000-000000000000")), "/sin-config"), Ct)).Error.Code.Should().Be(ErrorCodes.VaultNotRegistered);
+        (await Relocate.HandleAsync(new RelocateVault(created.Id, "/sin-config"), Ct)).IsSuccess.Should().BeTrue();
+    }
 }

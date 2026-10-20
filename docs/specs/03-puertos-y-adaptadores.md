@@ -270,6 +270,9 @@ Cada caso de uso es un `record` comando/consulta + un handler. Lista completa (l
 ### Productividad
 `OpenDailyNote(VaultId, Date?)` (crea si no existe desde plantilla; hoy en la zona local por defecto; plantilla configurada inexistente → `entry.not_found` sin crear nada), `InsertTemplate(VaultId, TemplatePath, TargetPath, CurrentText, Cursor)` → `TemplateInsertion(Text, Cursor)`: devuelve el texto completo del editor con el cuerpo insertado en el cursor y las propiedades de la plantilla añadidas al frontmatter (prevalecen las de la nota); **no escribe en disco** (el editor aplica el resultado a su búfer y guarda como siempre, sin pisar ediciones sin guardar), `ListTemplates`, `AddBookmark/RemoveBookmark/ListBookmarks` (los marcadores siguen renombrados y movimientos; los de ficheros borrados se conservan), `RecordRecentFile/ListRecentFiles` (50 por vault y dispositivo; siguen renombrados y quitan borrados), `GetOutline`, `SaveWorkspace/LoadWorkspace(VaultId)` (pestañas, paneles, nota activa, por dispositivo), `ExecuteCommand(CommandId)` vía `ICommandRegistry`.
 
+### Vaults (añadido)
+`RelocateVault(VaultId, NewLocation)` (F-001.6 "Localizar…"): apunta el registro a la carpeta movida; una carpeta cuyo `vault.json` es de otro vault → `vault.id_mismatch`; sin `vault.json` se acepta (al abrir se recrea con esta identidad).
+
 ### Cuentas y sincronización
 | Caso de uso | Notas |
 |-------------|-------|

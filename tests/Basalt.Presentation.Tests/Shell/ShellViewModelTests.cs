@@ -140,4 +140,18 @@ public sealed class ShellViewModelTests
 
         shell.Content.Should().BeOfType<VaultPickerViewModel>();
     }
+
+    [Fact]
+    public async Task OpeningAVault_IsAnnounced_AndNewWindowsCanBeOpened()
+    {
+        var shell = Shell();
+        var opened = new List<VaultId>();
+        shell.VaultOpened += (_, id) => opened.Add(id);
+
+        await shell.InitializeAsync(IdA, Ct);
+        shell.NewWindowCommand.Execute(null);
+
+        opened.Should().Equal(IdA);
+        _windows.Received(1).OpenNewWindow();
+    }
 }

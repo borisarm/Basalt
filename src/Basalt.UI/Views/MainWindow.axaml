@@ -3,11 +3,23 @@
         xmlns:shell="clr-namespace:Basalt.Presentation.Shell;assembly=Basalt.Presentation"
         xmlns:common="clr-namespace:Basalt.Presentation.Common;assembly=Basalt.Presentation"
         xmlns:ui="clr-namespace:Basalt.UI"
+        xmlns:l="clr-namespace:Basalt.UI.Localization"
         x:Class="Basalt.UI.Views.MainWindow"
         x:DataType="shell:ShellViewModel"
         Title="{Binding Title}"
         Width="1280" Height="800" MinWidth="640" MinHeight="400"
         Background="{DynamicResource BasaltBackgroundBrush}">
+  <!-- Native menu bar on macOS (and menu in the window elsewhere when shown). -->
+  <NativeMenu.Menu>
+    <NativeMenu>
+      <NativeMenuItem Header="{l:Loc Menu.File}">
+        <NativeMenu>
+          <NativeMenuItem Header="{l:Loc Menu.NewWindow}" Command="{Binding NewWindowCommand}" Gesture="Ctrl+Shift+N" />
+          <NativeMenuItem Header="{l:Loc Menu.CloseVault}" Command="{Binding CloseVaultCommand}" />
+        </NativeMenu>
+      </NativeMenuItem>
+    </NativeMenu>
+  </NativeMenu.Menu>
   <Window.DataTemplates>
     <ui:ViewLocator />
   </Window.DataTemplates>

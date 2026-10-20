@@ -41,6 +41,8 @@ public sealed class DesktopWindowService(Func<ShellViewModel> createShell, Notif
 
     public void OpenVaultWindow(VaultId vault) => _ = OpenWindowAsync(vault);
 
+    public void OpenNewWindow() => _ = OpenWindowAsync(null);
+
     /// <summary>Makes the first window the desktop lifetime's main window.</summary>
     public async Task StartAsync(IClassicDesktopStyleApplicationLifetime desktop, VaultId? vault)
     {

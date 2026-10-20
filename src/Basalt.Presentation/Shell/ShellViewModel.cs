@@ -16,6 +16,9 @@ public sealed record ShellOptions(bool MultipleWindows);
 public interface IWindowService
 {
     void OpenVaultWindow(VaultId vault);
+
+    /// <summary>A new window showing the vault picker.</summary>
+    void OpenNewWindow();
 }
 
 /// <summary>
@@ -52,6 +55,9 @@ public sealed partial class ShellViewModel : ViewModelBase, IVaultOpener
     }
 
     public VaultPickerViewModel Picker { get; }
+
+    /// <summary>Raised after a vault opens in this shell (the app remembers it for "open last vault").</summary>
+    public event EventHandler<VaultId>? VaultOpened;
 
     [ObservableProperty]
     public partial ViewModelBase Content { get; private set; }
@@ -100,8 +106,12 @@ public sealed partial class ShellViewModel : ViewModelBase, IVaultOpener
         Content = _workspaceFactory(opened.Value);
         ActiveVault = vault;
         Title = Localizer.Format("Shell.TitleWithVault", opened.Value.Name);
+        VaultOpened?.Invoke(this, vault);
         return Result.Success();
     }
+
+    [RelayCommand]
+    private void NewWindow() => _windows.OpenNewWindow();
 
     private bool HasVault() => ActiveVault is not null;
 

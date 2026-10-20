@@ -70,7 +70,7 @@ public sealed class ShellFactory(IServiceProvider services)
     {
         var common = services.GetRequiredService<ViewModelServices>();
         var workspaces = services.GetRequiredService<WorkspaceFactory>();
-        return new ShellViewModel(
+        var shell = new ShellViewModel(
             common,
             services.GetRequiredService<ShellOptions>(),
             services.GetRequiredService<ICommandHandler<OpenVault, VaultSessionInfo>>(),
@@ -87,6 +87,17 @@ public sealed class ShellFactory(IServiceProvider services)
                 services.GetRequiredService<IDialogService>(),
                 opener),
             workspaces.Create);
+
+        // F-014 "open last vault": remember the vault opened most recently.
+        var settings = services.GetRequiredService<Application.Settings.IAppSettingsStore>();
+        shell.VaultOpened += (_, vault) => _ = RememberAsync(settings, vault);
+        return shell;
+    }
+
+    private static async Task RememberAsync(Application.Settings.IAppSettingsStore settings, Domain.Vaults.VaultId vault)
+    {
+        var current = await settings.GetAsync(CancellationToken.None).ConfigureAwait(false);
+        await settings.SaveAsync(current with { LastVaultId = vault }, CancellationToken.None).ConfigureAwait(false);
     }
 
     public SettingsViewModel CreateSettings(VaultSessionInfo? vault) =>

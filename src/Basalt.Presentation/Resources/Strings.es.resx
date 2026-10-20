@@ -70,6 +70,12 @@
   <data name="Explorer.NewFolder" xml:space="preserve"><value>Nueva carpeta</value></data>
   <data name="Explorer.NewName" xml:space="preserve"><value>Nuevo nombre</value></data>
   <data name="Explorer.Rename" xml:space="preserve"><value>Renombrar</value></data>
+  <data name="Menu.CloseVault" xml:space="preserve"><value>Cerrar vault</value></data>
+  <data name="Menu.CommandPalette" xml:space="preserve"><value>Paleta de comandos…</value></data>
+  <data name="Menu.File" xml:space="preserve"><value>Archivo</value></data>
+  <data name="Menu.NewWindow" xml:space="preserve"><value>Nueva ventana</value></data>
+  <data name="Menu.QuickSwitcher" xml:space="preserve"><value>Selector rápido…</value></data>
+  <data name="Menu.View" xml:space="preserve"><value>Ver</value></data>
   <data name="Properties.Invalid" xml:space="preserve"><value>Las propiedades no son YAML válido; edítalas en el modo código.</value></data>
   <data name="Settings.About" xml:space="preserve"><value>Acerca de</value></data>
   <data name="Settings.Appearance" xml:space="preserve"><value>Apariencia</value></data>
@@ -89,6 +95,7 @@
   <data name="VaultPicker.MissingMessage" xml:space="preserve"><value>No se encuentra la carpeta de «{0}»: {1}</value></data>
   <data name="VaultPicker.MissingTitle" xml:space="preserve"><value>Vault no encontrado</value></data>
   <data name="VaultPicker.NameLabel" xml:space="preserve"><value>Nombre del vault</value></data>
+  <data name="VaultPicker.Open" xml:space="preserve"><value>Abrir</value></data>
   <data name="VaultPicker.OpenFolder" xml:space="preserve"><value>Abrir carpeta como vault</value></data>
   <data name="VaultPicker.Remove" xml:space="preserve"><value>Quitar de la lista</value></data>
   <data name="VaultPicker.RemoveMessage" xml:space="preserve"><value>«{0}» se quitará de la lista. Sus ficheros no se borran.</value></data>

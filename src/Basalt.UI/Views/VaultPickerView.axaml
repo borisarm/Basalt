@@ -1,0 +1,38 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Basalt.Presentation.Vaults;assembly=Basalt.Presentation"
+             xmlns:l="clr-namespace:Basalt.UI.Localization"
+             x:Class="Basalt.UI.Views.VaultPickerView"
+             x:DataType="vm:VaultPickerViewModel">
+  <!-- F-001: the start screen. -->
+  <Grid RowDefinitions="Auto,*,Auto" MaxWidth="720" Margin="{StaticResource BasaltSpacingXl}" HorizontalAlignment="Center">
+    <TextBlock Grid.Row="0" Text="{l:Loc VaultPicker.Title}" FontSize="{StaticResource BasaltFontSizeHeading}" FontWeight="SemiBold"
+               Foreground="{DynamicResource BasaltTextPrimaryBrush}" Margin="0,0,0,16" />
+
+    <Panel Grid.Row="1">
+      <TextBlock x:Name="EmptyText" Text="{l:Loc VaultPicker.Empty}" IsVisible="{Binding IsEmpty}"
+                 Foreground="{DynamicResource BasaltTextSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+      <ListBox x:Name="VaultList" ItemsSource="{Binding Vaults}" Background="Transparent">
+        <ListBox.ItemTemplate>
+          <DataTemplate x:DataType="vm:VaultItemViewModel">
+            <Grid ColumnDefinitions="*,Auto,Auto" Margin="{StaticResource BasaltSpacingS}">
+              <StackPanel Grid.Column="0" Spacing="2">
+                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
+                <TextBlock Text="{Binding Location}" FontSize="{StaticResource BasaltFontSizeSmall}" Foreground="{DynamicResource BasaltTextMutedBrush}" />
+              </StackPanel>
+              <Button Grid.Column="1" Content="{l:Loc VaultPicker.Open}" Margin="8,0,0,0"
+                      Command="{Binding $parent[ListBox].((vm:VaultPickerViewModel)DataContext).OpenCommand}" CommandParameter="{Binding}" />
+              <Button Grid.Column="2" Content="{l:Loc VaultPicker.Remove}" Margin="8,0,0,0"
+                      Command="{Binding $parent[ListBox].((vm:VaultPickerViewModel)DataContext).RemoveCommand}" CommandParameter="{Binding}" />
+            </Grid>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </Panel>
+
+    <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8" Margin="0,16,0,0" HorizontalAlignment="Right">
+      <Button x:Name="OpenFolderButton" Content="{l:Loc VaultPicker.OpenFolder}" Command="{Binding OpenFolderCommand}" />
+      <Button x:Name="CreateButton" Content="{l:Loc VaultPicker.Create}" Command="{Binding CreateVaultCommand}" Classes="accent" />
+    </StackPanel>
+  </Grid>
+</UserControl>

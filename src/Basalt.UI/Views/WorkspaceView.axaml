@@ -1,0 +1,8 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Basalt.Presentation.Workspace;assembly=Basalt.Presentation"
+             x:Class="Basalt.UI.Views.WorkspaceView"
+             x:DataType="vm:WorkspaceViewModel">
+  <!-- The layout of an open vault (sidebars, tabs, splits) is built in T6.3. -->
+  <TextBlock x:Name="VaultTitle" Text="{Binding Title}" Margin="{StaticResource BasaltSpacingXl}" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
+</UserControl>

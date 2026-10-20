@@ -29,7 +29,15 @@ STRINGS = {
     "VaultPicker.MissingMessage": ("The folder of “{0}” cannot be found: {1}", "No se encuentra la carpeta de «{0}»: {1}"),
     "VaultPicker.Locate": ("Locate…", "Localizar…"),
     "VaultPicker.LocateTitle": ("Locate the folder of “{0}”", "Localiza la carpeta de «{0}»"),
+    "VaultPicker.Open": ("Open", "Abrir"),
     "VaultPicker.Empty": ("No vaults yet. Create one or open a folder.", "Aún no hay vaults. Crea uno o abre una carpeta."),
+    # Menus
+    "Menu.File": ("File", "Archivo"),
+    "Menu.NewWindow": ("New window", "Nueva ventana"),
+    "Menu.CloseVault": ("Close vault", "Cerrar vault"),
+    "Menu.View": ("View", "Ver"),
+    "Menu.CommandPalette": ("Command palette…", "Paleta de comandos…"),
+    "Menu.QuickSwitcher": ("Quick switcher…", "Selector rápido…"),
     # Panels
     "Explorer.NewFolder": ("New folder", "Nueva carpeta"),
     "Explorer.FolderName": ("Folder name", "Nombre de la carpeta"),

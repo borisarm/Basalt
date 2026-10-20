@@ -19,6 +19,8 @@ namespace Basalt.Adapters.Markdown;
 /// <summary>Markdig-based <see cref="IMarkdownAnalyzer"/> (spec 05).</summary>
 internal sealed partial class MarkdigAnalyzer : IMarkdownAnalyzer
 {
+    public int Version => 1;
+
     public NoteMetadata Analyze(string content)
     {
         ArgumentNullException.ThrowIfNull(content);

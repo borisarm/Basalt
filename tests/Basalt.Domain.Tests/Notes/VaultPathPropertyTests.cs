@@ -33,7 +33,7 @@ public sealed class VaultPathPropertyTests
     [Fact]
     public void Generator_ProducesNonTrivialPaths()
     {
-        var samples = BasaltArbitraries.VaultPath().Generator.Sample(200, 50);
+        var samples = BasaltArbitraries.VaultPath().Generator.Sample(200, new FsCheck.Rnd(20261019), 50);
 
         samples.Should().Contain(p => p.Segments.Count > 1);
         samples.Should().OnlyContain(p => VaultPath.Create(p.ToString()).IsSuccess);

@@ -78,7 +78,7 @@ public sealed partial class LinkRewriterPropertyTests
     [Fact]
     public void Generator_ProducesScenariosThatActuallyRewriteLinks()
     {
-        var scenarios = RewriteScenario.Generator().Sample(20, 200);
+        var scenarios = RewriteScenario.Generator().Sample(20, new FsCheck.Rnd(20261019), 200);
 
         scenarios.Count(s => Run(s).Result.ChangedLinks > 0).Should().BeGreaterThan(4);
         scenarios.Should().Contain(s => s.Renames.Count == 0);

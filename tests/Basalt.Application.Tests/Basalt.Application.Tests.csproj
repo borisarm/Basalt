@@ -3,10 +3,12 @@
     <ProjectReference Include="../../src/Basalt.Application/Basalt.Application.csproj" />
     <ProjectReference Include="../../src/Basalt.Domain/Basalt.Domain.csproj" />
     <ProjectReference Include="../Basalt.Testing/Basalt.Testing.csproj" />
+    <ProjectReference Include="../../src/Basalt.Adapters.Markdown/Basalt.Adapters.Markdown.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="NSubstitute" />
     <PackageReference Include="FsCheck.Xunit.v3" />
     <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
   </ItemGroup>
 </Project>

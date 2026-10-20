@@ -244,7 +244,7 @@ public sealed class ThreeWayTextMergerTests
     [Fact]
     public void Generator_ProducesBothCleanAndConflictedMerges()
     {
-        var samples = Triple().Sample(10, 300).Select(x => ThreeWayTextMerger.Merge(x.Base, x.Ours, x.Theirs)).ToList();
+        var samples = Triple().Sample(10, new FsCheck.Rnd(20261019), 300).Select(x => ThreeWayTextMerger.Merge(x.Base, x.Ours, x.Theirs)).ToList();
 
         samples.Should().Contain(r => r.IsClean).And.Contain(r => !r.IsClean);
     }

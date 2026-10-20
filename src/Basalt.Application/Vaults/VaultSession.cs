@@ -14,6 +14,7 @@ namespace Basalt.Application.Vaults;
 public sealed class VaultSession : IAsyncDisposable
 {
     private readonly List<IAsyncDisposable> _resources = [];
+    private readonly ConcurrentDictionary<Type, object> _components = new();
 
     public VaultSession(VaultId id, string name, IVaultFileSystem fileSystem, VaultSettings settings)
     {
@@ -38,6 +39,17 @@ public sealed class VaultSession : IAsyncDisposable
 
     /// <summary>Registers a per-vault resource disposed with the session.</summary>
     public void Own(IAsyncDisposable resource) => _resources.Add(resource);
+
+    /// <summary>Attaches a per-vault component (index, metadata cache, indexer...).</summary>
+    public void Set<T>(T component)
+        where T : class => _components[typeof(T)] = component ?? throw new ArgumentNullException(nameof(component));
+
+    /// <summary>The component of type <typeparamref name="T"/>; throws if the initializer providing it did not run.</summary>
+    public T Get<T>()
+        where T : class => TryGet<T>() ?? throw new InvalidOperationException($"The vault session has no {typeof(T).Name}.");
+
+    public T? TryGet<T>()
+        where T : class => _components.TryGetValue(typeof(T), out var component) ? (T)component : null;
 
     public async ValueTask DisposeAsync()
     {

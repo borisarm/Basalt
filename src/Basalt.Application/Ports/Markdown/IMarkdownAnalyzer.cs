@@ -8,6 +8,9 @@ namespace Basalt.Application.Ports.Markdown;
 /// </summary>
 public interface IMarkdownAnalyzer
 {
+    /// <summary>Version of the analysis rules; a different version than the index's triggers a full re-index.</summary>
+    int Version { get; }
+
     /// <summary>Analyzes a whole note. Never throws for malformed Markdown or YAML (invalid frontmatter is reported in
     /// <see cref="Frontmatter.Error"/>).</summary>
     NoteMetadata Analyze(string content);

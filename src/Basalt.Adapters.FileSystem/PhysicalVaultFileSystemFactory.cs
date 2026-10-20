@@ -30,6 +30,34 @@ internal sealed class PhysicalVaultFileSystemFactory : IVaultFileSystemFactory
         }
     }
 
+    public async Task<Result<IVaultFileSystem>> CreateAsync(string rootLocation, CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(rootLocation);
+        try
+        {
+            if (File.Exists(rootLocation) || (Directory.Exists(rootLocation) && Directory.EnumerateFileSystemEntries(rootLocation).Any()))
+            {
+                return new Error(ErrorCodes.FsAlreadyExists, "The location already exists and is not an empty folder.");
+            }
+
+            Directory.CreateDirectory(rootLocation);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return new Error(ErrorCodes.FsAccessDenied, ex.Message);
+        }
+        catch (IOException ex)
+        {
+            return new Error(ErrorCodes.FsIo, ex.Message);
+        }
+
+        return await OpenAsync(rootLocation, ct).ConfigureAwait(false);
+    }
+
+    public string Combine(string parentLocation, string name) => Path.Combine(parentLocation, name);
+
+    public string NameOf(string location) => Path.GetFileName(Path.TrimEndingDirectorySeparator(location));
+
     // Creates a lower-case probe file and checks whether its upper-case name resolves to it.
     internal static bool ProbeCaseSensitivity(string root)
     {

@@ -39,7 +39,7 @@ Registro de avance del plan (`docs/specs/10-plan-de-implementacion.md`). Platafo
 ## Fase 3 — Aplicación: vaults, notas e índice
 
 - [x] T3.1 Infraestructura de aplicación — 2026-10-19. ICommand/IQuery + handlers, IValidator, decoradores Logging (sin datos de la petición)/Validation/VaultLock; AsyncReaderWriterLock (preferencia de escritores, cancelable) y VaultLocks; InMemoryEventBus (cola ordenada por vault, aislamiento de suscriptores, WaitForIdleAsync); VaultSession/IVaultSessions (ADR-0012); puertos IClock/IIdGenerator/IRandom/IDeviceInfo con implementaciones de sistema y fakes.
-- [ ] T3.2 Casos de uso de vaults
+- [x] T3.2 Casos de uso de vaults — 2026-10-19. CreateVault, OpenVault (sesión + inicializadores IVaultSessionInitializer, vault.json ilegible → ajustes por defecto sin sobrescribir, ausente → recreado con el id registrado), OpenFolderAsVault (conserva VaultId ajeno, sigue carpetas movidas, vault.json ilegible → vault.config_invalid), CloseVault, RemoveVaultFromList (borra datos locales, nunca ficheros), ListVaults, UpdateVaultSettings + eventos. Puertos: IVaultFileSystemFactory.CreateAsync/Combine/NameOf, IVaultLocalDataStore. F-001.1–F-001.6 con fakes + integración en disco real. Cobertura Aplicación 95 %.
 - [ ] T3.3 Puerto de índice + InMemoryNoteIndex + NoteIndexContract
 - [ ] T3.4 SqliteNoteIndex
 - [ ] T3.5 IMetadataCache + indexación incremental al abrir y en caliente

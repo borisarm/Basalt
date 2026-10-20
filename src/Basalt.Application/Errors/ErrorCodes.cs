@@ -20,6 +20,9 @@ public static class ErrorCodes
     public const string VaultNotRegistered = "vault.not_registered";
     public const string VaultNotOpen = "vault.not_open";
     public const string VaultAlreadyOpen = "vault.already_open";
+    public const string VaultLocationExists = "vault.location_exists";
+    public const string VaultLocationMissing = "vault.location_missing";
+    public const string VaultConfigInvalid = "vault.config_invalid";
 
     public const string AccountNotFound = "account.not_found";
 

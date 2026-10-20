@@ -29,6 +29,26 @@ public interface IVaultFileSystemFactory
 {
     /// <returns><c>fs.not_found</c> when the location does not exist.</returns>
     Task<Result<IVaultFileSystem>> OpenAsync(string rootLocation, CancellationToken ct);
+
+    /// <summary>Creates the folder (and parents) and opens it.</summary>
+    /// <returns><c>fs.already_exists</c> when the location exists and is not an empty folder.</returns>
+    Task<Result<IVaultFileSystem>> CreateAsync(string rootLocation, CancellationToken ct);
+
+    /// <summary>Platform-specific location of a child folder.</summary>
+    string Combine(string parentLocation, string name);
+
+    /// <summary>The folder name of a location (default vault name when opening a folder).</summary>
+    string NameOf(string location);
+}
+
+/// <summary>Device-local data of a vault outside the vault folder (<c>{AppData}/vaults/{id}/</c>: index, sync state).</summary>
+public interface IVaultLocalDataStore
+{
+    /// <summary>Deletes all local data of the vault; never touches the vault folder.</summary>
+    Task<Result<Unit>> DeleteAsync(Domain.Vaults.VaultId vault, CancellationToken ct);
+
+    /// <summary>Folder for the vault's local data (created on demand).</summary>
+    string DirectoryOf(Domain.Vaults.VaultId vault);
 }
 
 /// <summary>Read access to vault files. Paths are relative to the vault root.</summary>

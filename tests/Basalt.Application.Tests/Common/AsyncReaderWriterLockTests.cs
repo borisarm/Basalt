@@ -65,6 +65,76 @@ public sealed class AsyncReaderWriterLockTests
     }
 
     [Fact]
+    public async Task QueuedReaders_AreGrantedTogetherAfterTheWriter()
+    {
+        using var rw = new AsyncReaderWriterLock();
+        var writer = await rw.WriteAsync(Ct);
+        var r1 = rw.ReadAsync(Ct);
+        var r2 = rw.ReadAsync(Ct);
+        var w2 = rw.WriteAsync(Ct);
+
+        writer.Dispose();
+        var lease1 = await r1;
+        var lease2 = await r2;
+        w2.IsCompleted.Should().BeFalse();
+
+        lease1.Dispose();
+        lease2.Dispose();
+        (await w2).Dispose();
+    }
+
+    [Fact]
+    public async Task CancelledReader_InTheQueue_DoesNotBlockOthers()
+    {
+        using var rw = new AsyncReaderWriterLock();
+        var writer = await rw.WriteAsync(Ct);
+        using var cts = new CancellationTokenSource();
+        var cancelled = rw.ReadAsync(cts.Token);
+        var next = rw.WriteAsync(Ct);
+
+        await cts.CancelAsync();
+        writer.Dispose();
+
+        await FluentActions.Awaiting(() => cancelled).Should().ThrowAsync<OperationCanceledException>();
+        (await next).Dispose();
+    }
+
+    [Fact]
+    public async Task AlreadyCancelledToken_Throws()
+    {
+        using var rw = new AsyncReaderWriterLock();
+
+        await FluentActions.Awaiting(() => rw.ReadAsync(new CancellationToken(true))).Should().ThrowAsync<OperationCanceledException>();
+    }
+
+    [Fact]
+    public async Task Dispose_CancelsWaiters()
+    {
+        var rw = new AsyncReaderWriterLock();
+        var writer = await rw.WriteAsync(Ct);
+        var waiting = rw.ReadAsync(Ct);
+
+        rw.Dispose();
+
+        await FluentActions.Awaiting(() => waiting).Should().ThrowAsync<OperationCanceledException>();
+        writer.Dispose();
+    }
+
+    [Fact]
+    public async Task VaultLocks_ProvideReadAndWritePerVault()
+    {
+        using var locks = new VaultLocks();
+        var vault = new Domain.Vaults.VaultId(Guid.Parse("00000000-0000-0000-0000-000000000001"));
+
+        using (await locks.ReadAsync(vault, Ct))
+        {
+            (await locks.ReadAsync(vault, Ct)).Dispose();
+        }
+
+        (await locks.WriteAsync(vault, Ct)).Dispose();
+    }
+
+    [Fact]
     public async Task DisposingALeaseTwice_IsHarmless()
     {
         using var rw = new AsyncReaderWriterLock();

@@ -69,7 +69,8 @@ public abstract class FileWatcherContract : ContractTest<IVaultFileSystem>
         await ExternalWriteAsync("m.md", "v2");
 
         var changes = await CollectAsync(watcher, c => c.Any(x => x.Path == P("m.md")));
-        changes.Should().Contain(c => c.Path == P("m.md") && c.Kind == FileSystemChangeKind.Changed);
+        // Created is also acceptable: FSEvents may still be reporting the file's recent creation.
+        changes.Should().Contain(c => c.Path == P("m.md") && (c.Kind == FileSystemChangeKind.Changed || c.Kind == FileSystemChangeKind.Created));
     }
 
     [Fact]

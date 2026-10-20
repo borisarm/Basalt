@@ -92,23 +92,16 @@ internal sealed class ChangeCoalescer
             return;
         }
 
-        var merged = (previous.Kind, kind) switch
+        // Created+Deleted is reported as Deleted, not dropped: some platforms (FSEvents) deliver the creation of a file
+        // that existed before watching started late, and dropping would hide a real deletion.
+        _pending[path] = (previous.Kind, kind) switch
         {
-            (FileSystemChangeKind.Created, FileSystemChangeKind.Deleted) => ((FileSystemChangeKind Kind, VaultPath? OldPath)?)null,
+            (FileSystemChangeKind.Created, FileSystemChangeKind.Deleted) => (FileSystemChangeKind.Deleted, null),
             (FileSystemChangeKind.Created, _) => (FileSystemChangeKind.Created, null),
             (FileSystemChangeKind.Deleted, FileSystemChangeKind.Created) => (FileSystemChangeKind.Changed, null),
             (FileSystemChangeKind.Renamed, FileSystemChangeKind.Changed) => previous,
             _ => (kind, oldPath),
         };
-
-        if (merged is null)
-        {
-            Remove(path);
-        }
-        else
-        {
-            _pending[path] = merged.Value;
-        }
     }
 
     private void Remove(VaultPath path)

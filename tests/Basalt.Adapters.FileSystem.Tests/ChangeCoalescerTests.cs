@@ -20,12 +20,12 @@ public sealed class ChangeCoalescerTests
     }
 
     [Fact]
-    public void CreatedThenDeleted_Disappears()
+    public void CreatedThenDeleted_IsDeleted()
     {
         _coalescer.Add(Created, "a.md");
         _coalescer.Add(Deleted, "a.md");
 
-        _coalescer.Flush().Should().BeEmpty();
+        _coalescer.Flush().Should().Equal(new FileSystemChange(Deleted, P("a.md")));
         _coalescer.HasPending.Should().BeFalse();
     }
 

@@ -55,7 +55,7 @@ public abstract class NoteIndexContract : ContractTest<INoteIndex>
 
         await Sut.UpsertAsync(note, Ct);
 
-        (await Sut.GetAsync(P("Notas/A.md"), Ct)).Should().BeEquivalentTo(note, o => o.ComparingByMembers<NoteMetadata>());
+        (await Sut.GetAsync(P("Notas/A.md"), Ct)).Should().BeEquivalentTo(note, o => o.ComparingByMembers<NoteMetadata>().ComparingByValue<VaultPath>().ComparingByValue<Tag>());
     }
 
     [Fact]
@@ -96,7 +96,7 @@ public abstract class NoteIndexContract : ContractTest<INoteIndex>
         var summaries = await Sut.GetAllSummariesAsync(Ct);
 
         summaries.Select(s => s.Path.ToString()).Order(StringComparer.Ordinal).Should().Equal("a.md", "b/c.md", "d.pdf");
-        summaries.Single(s => s.Path == P("a.md")).Metadata.Should().BeEquivalentTo(RichMetadata(), o => o.ComparingByMembers<NoteMetadata>());
+        summaries.Single(s => s.Path == P("a.md")).Metadata.Should().BeEquivalentTo(RichMetadata(), o => o.ComparingByMembers<NoteMetadata>().ComparingByValue<VaultPath>().ComparingByValue<Tag>());
     }
 
     [Fact]
@@ -120,7 +120,7 @@ public abstract class NoteIndexContract : ContractTest<INoteIndex>
         (await Sut.GetAsync(P("old.md"), Ct)).Should().BeNull();
         var moved = await Sut.GetAsync(P("Dir/new.md"), Ct);
         moved!.Text.Should().Be("text");
-        moved.Metadata.Should().BeEquivalentTo(RichMetadata(), o => o.ComparingByMembers<NoteMetadata>());
+        moved.Metadata.Should().BeEquivalentTo(RichMetadata(), o => o.ComparingByMembers<NoteMetadata>().ComparingByValue<VaultPath>().ComparingByValue<Tag>());
     }
 
     [Fact]

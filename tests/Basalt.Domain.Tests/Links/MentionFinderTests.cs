@@ -1,4 +1,5 @@
 using Basalt.Domain.Links;
+using Basalt.Domain.Notes;
 using Basalt.Testing.Generators;
 using FsCheck;
 using FsCheck.Fluent;

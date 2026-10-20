@@ -1,14 +1,7 @@
 using System.Globalization;
+using Basalt.Domain.Notes;
 
 namespace Basalt.Domain.Links;
-
-/// <summary>A UTF-16 range of a text.</summary>
-public readonly record struct TextRange(int Start, int Length)
-{
-    public int End => Start + Length;
-
-    public bool Overlaps(TextRange other) => Start < other.End && other.Start < End;
-}
 
 /// <summary>An unlinked mention: where it is and which of the target's names it spells.</summary>
 public sealed record Mention(TextRange Range, string Name);

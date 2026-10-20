@@ -3,6 +3,7 @@ using Basalt.Application.Links;
 using Basalt.Application.Notes;
 using Basalt.Application.Tests.TestSupport;
 using Basalt.Domain.Links;
+using Basalt.Domain.Notes;
 using Basalt.Domain.Vaults;
 using static Basalt.Application.Tests.TestSupport.VaultFixture;
 

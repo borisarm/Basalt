@@ -62,6 +62,7 @@
   <data name="Errors.note.not_a_task" xml:space="preserve"><value>That line is not a task.</value></data>
   <data name="Errors.operation.cancelled" xml:space="preserve"><value>Cancelled.</value></data>
   <data name="Errors.path.already_exists" xml:space="preserve"><value>“{path}” already exists.</value></data>
+  <data name="Errors.path.case_collision" xml:space="preserve"><value>Two files differ only in upper/lower case and cannot coexist on this device.</value></data>
   <data name="Errors.path.invalid_segment" xml:space="preserve"><value>The name contains characters that are not allowed.</value></data>
   <data name="Errors.path.outside_vault" xml:space="preserve"><value>The path is outside the vault.</value></data>
   <data name="Errors.result.uninitialized" xml:space="preserve"><value>Internal error: the result was not initialized.</value></data>

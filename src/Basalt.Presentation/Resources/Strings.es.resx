@@ -62,6 +62,7 @@
   <data name="Errors.note.not_a_task" xml:space="preserve"><value>Esa línea no es una tarea.</value></data>
   <data name="Errors.operation.cancelled" xml:space="preserve"><value>Cancelado.</value></data>
   <data name="Errors.path.already_exists" xml:space="preserve"><value>Ya existe «{path}».</value></data>
+  <data name="Errors.path.case_collision" xml:space="preserve"><value>Dos ficheros solo difieren en mayúsculas/minúsculas y no pueden coexistir en este dispositivo.</value></data>
   <data name="Errors.path.invalid_segment" xml:space="preserve"><value>El nombre contiene caracteres no permitidos.</value></data>
   <data name="Errors.path.outside_vault" xml:space="preserve"><value>La ruta está fuera del vault.</value></data>
   <data name="Errors.result.uninitialized" xml:space="preserve"><value>Error interno: el resultado no se inicializó.</value></data>

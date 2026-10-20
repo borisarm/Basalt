@@ -4,6 +4,7 @@ using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Basalt.Application.Abstractions;
 using Basalt.Application.Vaults;
+using Basalt.Application.Workspace;
 using Basalt.Domain.Common;
 using Basalt.Domain.Vaults;
 using Basalt.Presentation.Common;
@@ -36,6 +37,10 @@ public sealed class ShellViewsTests
         var open = Substitute.For<ICommandHandler<OpenVault, VaultSessionInfo>>();
         open.HandleAsync(Arg.Any<OpenVault>(), Arg.Any<CancellationToken>()).Returns(new VaultSessionInfo(Id, "Notas", "C:/v/Notas", VaultSettings.Default, null));
         var dialogs = new FakeDialogService();
+        var useCases = new Presentation.Workspace.WorkspaceUseCases(
+            Substitute.For<ICommandHandler<RecordRecentFile, Unit>>(),
+            Substitute.For<IQueryHandler<LoadWorkspace, WorkspaceState?>>(),
+            Substitute.For<ICommandHandler<SaveWorkspace, Unit>>());
         var shell = new ShellViewModel(
             services,
             new ShellOptions(true),
@@ -43,7 +48,7 @@ public sealed class ShellViewsTests
             Substitute.For<ICommandHandler<CloseVault, Unit>>(),
             Substitute.For<IWindowService>(),
             opener => new VaultPickerViewModel(services, new VaultPickerUseCases(list, null!, null!, null!, null!), dialogs, opener),
-            info => new Presentation.Workspace.WorkspaceViewModel(services, info, [], new WorkspaceMessenger(), null!, Substitute.For<IWindowService>()));
+            info => new Presentation.Workspace.WorkspaceViewModel(services, info, [], new WorkspaceMessenger(), useCases, Substitute.For<IWindowService>()));
         return (new MainWindow(shell, notifications), shell, dialogs, open);
     }
 

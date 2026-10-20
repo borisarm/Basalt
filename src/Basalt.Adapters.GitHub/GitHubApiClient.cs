@@ -4,7 +4,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
-using Basalt.Application.Ports.Auth;
+using Basalt.Application.Auth;
 using Basalt.Application.Ports.Remote;
 using Basalt.Domain.Common;
 using Basalt.Domain.Notes;
@@ -213,14 +213,14 @@ internal sealed class GitHubApiClient
         return await SendBytesAsync(request, ct).ConfigureAwait(false);
     }
 
-    public Task<Result<GitHubPage<GitHubCommitDto>>> GetFileHistoryAsync(
+    public Task<Result<GitHubPage<GitHubCommitListItemDto>>> GetFileHistoryAsync(
         VaultPath path,
         int max,
         CancellationToken ct)
     {
         var query = $"?path={Uri.EscapeDataString(path.ToString())}&sha={Escape(_repository.Branch)}"
             + $"&per_page={max.ToString(CultureInfo.InvariantCulture)}";
-        return SendPageAsync<GitHubCommitDto>($"{RepositoryPath}/commits{query}", ct);
+        return SendPageAsync<GitHubCommitListItemDto>($"{RepositoryPath}/commits{query}", ct);
     }
 
     public Task<Result<GitHubContentDto>> PutContentsAsync(

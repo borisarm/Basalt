@@ -1,5 +1,5 @@
 using System.Text;
-using Basalt.Application.Ports.Auth;
+using Basalt.Application.Auth;
 using Basalt.Application.Ports.Remote;
 using Basalt.Domain.Accounts;
 using Basalt.Domain.Common;
@@ -54,7 +54,7 @@ public sealed class GitHubApiClientTests
         server.CreateRepo("acme", "empty");
         var (emptyApi, emptyHttp, _) = Create(server, repositoryName: "empty");
         using var _emptyHttp = emptyHttp;
-        (await emptyApi.GetCommitAsync(ParseCommit("0000000000000000000000000000000000000000"), Ct)).Error.Code
+        (await emptyApi.GetRefAsync(null, Ct)).Error.Code
             .Should().Be(RemoteErrors.RepositoryEmpty);
 
         (await api.UpdateRefAsync("main", ParseCommit("0000000000000000000000000000000000000000"), false, Ct)).Error.Code

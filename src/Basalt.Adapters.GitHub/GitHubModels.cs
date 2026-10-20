@@ -51,6 +51,15 @@ internal sealed record GitHubCommitDto(
     [property: JsonPropertyName("author")] GitHubSignatureDto? Author,
     [property: JsonPropertyName("committer")] GitHubSignatureDto? Committer);
 
+internal sealed record GitHubCommitDetailsDto(
+    [property: JsonPropertyName("message")] string Message,
+    [property: JsonPropertyName("author")] GitHubSignatureDto? Author,
+    [property: JsonPropertyName("committer")] GitHubSignatureDto? Committer);
+
+internal sealed record GitHubCommitListItemDto(
+    [property: JsonPropertyName("sha")] string Sha,
+    [property: JsonPropertyName("commit")] GitHubCommitDetailsDto Commit);
+
 internal sealed record GitHubTreeEntryDto(
     [property: JsonPropertyName("path")] string Path,
     [property: JsonPropertyName("mode")] string Mode,
@@ -162,6 +171,7 @@ internal sealed record AccessTokenRequest(
 [JsonSerializable(typeof(GitHubBlobDto))]
 [JsonSerializable(typeof(GitHubContentDto))]
 [JsonSerializable(typeof(IReadOnlyList<GitHubCommitDto>))]
+[JsonSerializable(typeof(IReadOnlyList<GitHubCommitListItemDto>))]
 [JsonSerializable(typeof(GitHubErrorDto))]
 [JsonSerializable(typeof(GitHubDeviceCodeDto))]
 [JsonSerializable(typeof(GitHubAccessTokenDto))]

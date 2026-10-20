@@ -1,7 +1,7 @@
 using Basalt.Domain.Accounts;
 using Basalt.Domain.Common;
 
-namespace Basalt.Application.Ports.Auth;
+namespace Basalt.Application.Auth;
 
 /// <summary>An OAuth access token and, for GitHub Apps, its refresh data (spec 06 §9.1).</summary>
 public sealed record GitHubToken(string Value, DateTimeOffset? ExpiresAt = null, string? RefreshToken = null);

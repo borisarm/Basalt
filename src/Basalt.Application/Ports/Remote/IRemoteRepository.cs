@@ -58,11 +58,6 @@ public static class RemoteErrors
     public const string RepositoryEmpty = "remote.repository_empty";
 }
 
-public interface IRemoteRepositoryFactory
-{
-    IRemoteRepository Create(RemoteRepositoryRef repository, GitHubAccountId account);
-}
-
 /// <summary>Read/write operations against one remote branch (spec 03 §1.4).</summary>
 public interface IRemoteRepository
 {
@@ -91,24 +86,4 @@ public interface IRemoteRepository
     Task<Result<IReadOnlyList<RemoteCommitInfo>>> GetFileHistoryAsync(VaultPath path, int max, CancellationToken ct);
 
     Task<Result<byte[]?>> GetFileAtCommitAsync(VaultPath path, CommitSha commit, CancellationToken ct);
-}
-
-public interface IRepositoryAdministration
-{
-    Task<Result<IReadOnlyList<RemoteRepositoryInfo>>> ListAccessibleRepositoriesAsync(
-        GitHubAccountId account,
-        CancellationToken ct);
-
-    Task<Result<RemoteRepositoryInfo>> CreateRepositoryAsync(
-        GitHubAccountId account,
-        string? org,
-        string name,
-        bool isPrivate,
-        CancellationToken ct);
-
-    Task<Result<RemoteRepositoryInfo>> GetRepositoryAsync(
-        GitHubAccountId account,
-        string owner,
-        string name,
-        CancellationToken ct);
 }

@@ -1,7 +1,7 @@
 using Basalt.Application.Ports.Remote;
 using Basalt.Domain.Accounts;
 using Basalt.Testing.Contracts;
-using Basalt.Testing.Remote;
+using Basalt.Testing.Fakes;
 using Microsoft.Extensions.Time.Testing;
 
 namespace Basalt.Adapters.GitHub.Tests;

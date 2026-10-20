@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Http.Headers;
-using Basalt.Application.Ports.Auth;
+using Basalt.Application.Auth;
 using Basalt.Domain.Accounts;
 using Microsoft.Extensions.Logging;
 

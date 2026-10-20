@@ -3,7 +3,7 @@ using Basalt.Domain.Common;
 using Basalt.Domain.Notes;
 using Basalt.Domain.Sync;
 
-namespace Basalt.Testing.Remote;
+namespace Basalt.Testing.Fakes;
 
 /// <summary>
 /// In-memory <see cref="IRemoteRepository"/> with real Git object SHAs (spec 03 §1.4, 06 §14). Used by application and

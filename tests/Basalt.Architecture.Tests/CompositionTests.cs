@@ -2,6 +2,7 @@ using Basalt.Application.Commands;
 using Basalt.Application.Ports.Events;
 using Basalt.Application.Ports.FileSystem;
 using Basalt.Application.Ports.Index;
+using Basalt.Application.Ports.Remote;
 using Basalt.Application.Vaults;
 using Basalt.Composition;
 using Basalt.Domain.Vaults;
@@ -74,7 +75,7 @@ public sealed class CompositionTests : IAsyncDisposable
     }
 
     /// <summary>Ports whose implementations are created per vault session by a registered factory.</summary>
-    private static readonly Type[] PerSession = [typeof(IVaultFileSystem), typeof(IFileWatcher), typeof(INoteIndex)];
+    private static readonly Type[] PerSession = [typeof(IVaultFileSystem), typeof(IFileWatcher), typeof(INoteIndex), typeof(IRemoteRepository)];
 
     /// <summary>Ports that only aggregate others (their parts are checked through the composite).</summary>
     private static readonly Type[] Aggregated = [typeof(IFileReader), typeof(IFileWriter), typeof(IFileEnumerator), typeof(INoteIndexReader), typeof(INoteIndexWriter)];

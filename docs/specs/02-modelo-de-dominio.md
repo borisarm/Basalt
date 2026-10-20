@@ -112,7 +112,8 @@ Proyección inmutable `fuente → destinos` y `destino → fuentes` (backlinks),
 
 - `GraphModel`: nodos (`Note`, `Attachment`, `Unresolved`, `Tag`) y aristas (`Link`, `Embed`, `TagEdge`).
 - `GraphBuilder` aplica filtros: `ShowOrphans`, `ShowAttachments`, `ShowUnresolved`, `ShowTags`, filtro por `SearchQuery`, profundidad (grafo local, BFS a N saltos desde una nota, por enlaces entrantes y/o salientes).
-- `ForceLayout`: simulación Fruchterman-Reingold con aproximación Barnes-Hut (quadtree) para > 500 nodos. Parámetros: repulsión, fuerza de enlace, distancia de enlace, gravedad al centro. **Determinista** dada una semilla (se recibe un `IRandom` sembrado). Expone `Step(dt)` y `IsStable` (energía cinética < umbral). La animación la dirige la UI.
+- `ForceLayout`: simulación Fruchterman-Reingold con aproximación Barnes-Hut (quadtree) para > 500 nodos. Parámetros (`ForceSettings`): repulsión, fuerza de enlace, distancia de enlace, gravedad al centro, amortiguación, θ, umbral de Barnes-Hut, velocidad máxima por paso. **Determinista** dada una fuente aleatoria sembrada: como el dominio no conoce el puerto `IRandom` de Aplicación, recibe un `Func<double>` (Aplicación pasa `IRandom.NextDouble`); solo se usa para las posiciones iniciales. Expone `Step(dt)`, `IsStable` (energía cinética < umbral × nodos) y `Pin`/`Unpin` para arrastrar nodos. La animación la dirige la UI.
+- El filtro por `SearchQuery` y los grupos de color llegan a `GraphBuilder` como **conjuntos de rutas** ya evaluados por Aplicación con el índice (el módulo `Graph` no depende de `Search`, ver matriz de [09](09-estrategia-de-pruebas.md) §8).
 
 ## 9. Plantillas y notas diarias (`Domain.Templates`)
 

@@ -29,6 +29,7 @@ dotnet tool run dotnet-stryker   # desde tests/Basalt.Domain.Tests (stryker-conf
 bash build/cover.sh tests/Basalt.Domain.Tests   # cobertura + puerta de umbrales
 dotnet format --verify-no-changes
 dotnet run --project src/Basalt.Desktop
+dotnet run --project tools/Basalt.VaultGenerator -- <carpeta> [--notes N]   # vault de referencia determinista
 ```
 
 (Si la sintaxis exacta de `dotnet test`/filtros cambia con la versión del SDK o del runner, actualiza esta sección.)

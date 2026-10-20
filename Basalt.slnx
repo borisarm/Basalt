@@ -30,4 +30,7 @@
     <Project Path="tests/Basalt.Testing/Basalt.Testing.csproj" />
     <Project Path="tests/Basalt.UI.Tests/Basalt.UI.Tests.csproj" />
   </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/Basalt.VaultGenerator/Basalt.VaultGenerator.csproj" />
+  </Folder>
 </Solution>

@@ -134,6 +134,8 @@ Cada comportamiento es una función pura `TextBufferState → TextEdit[]` con te
 ## 9. Comandos y atajos
 
 - `ICommandRegistry` (Application) con `CommandDescriptor { Id, TitleKey, Category, DefaultGesture(Windows/macOS), CanExecute(context), ExecuteAsync(context) }`. Los módulos aportan comandos mediante `ICommandContribution` (Open/Closed).
+  - `DefaultGesture` es una cadena con notación `Mod` (`Mod+Shift+T`): `Mod` = Ctrl en Windows y Cmd en macOS, de modo que un único valor sirve para ambas plataformas; `Gesture.Parse(texto, plataforma)` la resuelve. Ids duplicados → error de programación al construir el registro.
+  - `CommandContext(Vault?, ActiveFile?, Host)`: `ICommandHost` es lo que un comando puede pedir a la UI (abrir una nota); lo implementa Presentation. Los comandos de Aplicación (`CoreCommands`: nueva nota, nota diaria de hoy, marcar fichero activo) ejecutan casos de uso; los que actúan sobre vistas los aporta Presentation.
 - `KeyBindingService` (Presentation) resuelve gestos → comandos con preferencia de las asignaciones del usuario (`IAppSettingsStore`), detecta conflictos.
 - La vista traduce `KeyEventArgs` → `KeyGesture` neutral (`Basalt.Presentation.Input.Gesture`) para mantener Presentation sin Avalonia.
 

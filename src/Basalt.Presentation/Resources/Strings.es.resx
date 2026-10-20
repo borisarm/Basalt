@@ -71,6 +71,14 @@
   <data name="Explorer.NewName" xml:space="preserve"><value>Nuevo nombre</value></data>
   <data name="Explorer.Rename" xml:space="preserve"><value>Renombrar</value></data>
   <data name="Properties.Invalid" xml:space="preserve"><value>Las propiedades no son YAML válido; edítalas en el modo código.</value></data>
+  <data name="Settings.About" xml:space="preserve"><value>Acerca de</value></data>
+  <data name="Settings.Appearance" xml:space="preserve"><value>Apariencia</value></data>
+  <data name="Settings.DailyNotes" xml:space="preserve"><value>Notas diarias</value></data>
+  <data name="Settings.Editor" xml:space="preserve"><value>Editor</value></data>
+  <data name="Settings.FilesAndLinks" xml:space="preserve"><value>Ficheros y enlaces</value></data>
+  <data name="Settings.General" xml:space="preserve"><value>General</value></data>
+  <data name="Settings.Hotkeys" xml:space="preserve"><value>Atajos de teclado</value></data>
+  <data name="Settings.Templates" xml:space="preserve"><value>Plantillas</value></data>
   <data name="Shell.Title" xml:space="preserve"><value>Basalt</value></data>
   <data name="Shell.TitleWithVault" xml:space="preserve"><value>{0} — Basalt</value></data>
   <data name="VaultPicker.ChooseLocation" xml:space="preserve"><value>Elige dónde crear el vault</value></data>

@@ -39,6 +39,15 @@ STRINGS = {
     "Explorer.DeleteMessage": ("“{0}” will be moved to the vault trash.", "«{0}» se moverá a la papelera del vault."),
     "Bookmarks.Invalid": ("The bookmarks file could not be read; it will be kept aside when you change a bookmark.", "No se pudo leer el fichero de marcadores; se apartará cuando cambies un marcador."),
     "Properties.Invalid": ("The properties are not valid YAML; edit them in source mode.", "Las propiedades no son YAML válido; edítalas en el modo código."),
+    # Settings (F-014)
+    "Settings.General": ("General", "General"),
+    "Settings.Editor": ("Editor", "Editor"),
+    "Settings.FilesAndLinks": ("Files and links", "Ficheros y enlaces"),
+    "Settings.Appearance": ("Appearance", "Apariencia"),
+    "Settings.Hotkeys": ("Hotkeys", "Atajos de teclado"),
+    "Settings.DailyNotes": ("Daily notes", "Notas diarias"),
+    "Settings.Templates": ("Templates", "Plantillas"),
+    "Settings.About": ("About", "Acerca de"),
     # Commands
     "Commands.NewNote": ("New note", "Nueva nota"),
     "Commands.OpenDailyNote": ("Open today's daily note", "Abrir la nota diaria de hoy"),

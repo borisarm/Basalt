@@ -1,4 +1,5 @@
 using Basalt.Adapters.FileSystem;
+using Basalt.Adapters.GitHub;
 using Basalt.Adapters.Index;
 using Basalt.Adapters.Markdown;
 using Basalt.Adapters.Platform;
@@ -13,6 +14,7 @@ using Basalt.Application.Notes;
 using Basalt.Application.Ports.Events;
 using Basalt.Application.Settings;
 using Basalt.Application.Vaults;
+using Basalt.Domain.Accounts;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -32,6 +34,7 @@ public static class CompositionServiceCollectionExtensions
         services.AddBasaltMarkdownAdapter();
         services.AddBasaltIndexAdapter();
         services.AddBasaltPlatformAdapter(appDataOverride);
+        services.AddBasaltGitHubAdapter(GitHubHost.GitHubDotCom);
 
         services.TryAddSingleton<IEventBus, InMemoryEventBus>();
         services.TryAddSingleton<VaultSessions>();

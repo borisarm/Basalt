@@ -87,3 +87,32 @@ public interface IRemoteRepository
 
     Task<Result<byte[]?>> GetFileAtCommitAsync(VaultPath path, CommitSha commit, CancellationToken ct);
 }
+
+/// <summary>Repository-level operations used while configuring sync (spec 03 §1.4, 06 §10).</summary>
+public interface IRepositoryAdministration
+{
+    Task<Result<IReadOnlyList<RemoteRepositoryInfo>>> ListAccessibleRepositoriesAsync(
+        GitHubAccountId account,
+        CancellationToken ct);
+
+    Task<Result<RemoteRepositoryInfo>> CreateRepositoryAsync(
+        GitHubAccountId account,
+        string? org,
+        string name,
+        bool isPrivate,
+        CancellationToken ct);
+
+    Task<Result<RemoteRepositoryInfo>> GetRepositoryAsync(
+        GitHubAccountId account,
+        string owner,
+        string name,
+        CancellationToken ct);
+
+    /// <summary>Creates a branch at the current head of the default branch.</summary>
+    Task<Result<Unit>> CreateBranchAsync(
+        GitHubAccountId account,
+        string owner,
+        string name,
+        string branch,
+        CancellationToken ct);
+}

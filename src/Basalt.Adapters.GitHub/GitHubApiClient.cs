@@ -504,7 +504,7 @@ internal sealed class GitHubApiClient
 
     private static HttpRequestMessage CreateRequest(HttpMethod method, string path)
     {
-        var request = new HttpRequestMessage(method, path);
+        var request = new HttpRequestMessage(method, path.TrimStart('/'));
         request.Headers.Accept.ParseAdd(JsonMediaType);
         request.Headers.TryAddWithoutValidation("X-GitHub-Api-Version", ApiVersion);
         return request;

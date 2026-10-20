@@ -59,7 +59,7 @@ Registro de avance del plan (`docs/specs/10-plan-de-implementacion.md`). Platafo
 
 ## Fase 5 — Presentación (ViewModels)
 
-- [ ] T5.1 Base
+- [x] T5.1 Base — 2026-10-19. Presentation (sin Avalonia): ViewModelBase (ocupado tras 100 ms, cancelar tras 2 s con TimeProvider; errores localizados vía INotificationService; operation.cancelled silencioso), IUiDispatcher, IDialogService, INotificationService, IWorkspaceNavigator, IWorkspaceMessenger (WeakReferenceMessenger privado). ILocalizer/ResxLocalizer con Strings.resx (en) y Strings.es.resx (es): marcadores {nombre} desde los metadatos del error. Tests: claves en ambos idiomas, todo código de error traducido, títulos de comandos. Fakes en Basalt.Testing (ImmediateDispatcher, FakeDialogService, FakeNotificationService).
 - [ ] T5.2 VaultPickerViewModel, ShellViewModel
 - [ ] T5.3 WorkspaceViewModel, PaneLayoutViewModel, TabGroupViewModel, NoteTabViewModel
 - [ ] T5.4 EditorCommandsService

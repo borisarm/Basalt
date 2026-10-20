@@ -3,6 +3,7 @@
     <IsTestProject>false</IsTestProject>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="../../src/Basalt.Presentation/Basalt.Presentation.csproj" />
     <ProjectReference Include="../../src/Basalt.Application/Basalt.Application.csproj" />
     <ProjectReference Include="../../src/Basalt.Domain/Basalt.Domain.csproj" />
   </ItemGroup>

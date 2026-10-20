@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Commands.BookmarkActiveFile" xml:space="preserve"><value>Añadir el fichero actual a marcadores</value></data>
+  <data name="Commands.NewNote" xml:space="preserve"><value>Nueva nota</value></data>
+  <data name="Commands.OpenDailyNote" xml:space="preserve"><value>Abrir la nota diaria de hoy</value></data>
+  <data name="Common.Busy" xml:space="preserve"><value>Trabajando…</value></data>
+  <data name="Common.Cancel" xml:space="preserve"><value>Cancelar</value></data>
+  <data name="Common.Close" xml:space="preserve"><value>Cerrar</value></data>
+  <data name="Common.ItemsCount" xml:space="preserve"><value>{0:N0} elementos</value></data>
+  <data name="Common.No" xml:space="preserve"><value>No</value></data>
+  <data name="Common.OK" xml:space="preserve"><value>Aceptar</value></data>
+  <data name="Common.Retry" xml:space="preserve"><value>Reintentar</value></data>
+  <data name="Common.Yes" xml:space="preserve"><value>Sí</value></data>
+  <data name="Errors.account.invalid_host" xml:space="preserve"><value>El servidor de GitHub no es válido.</value></data>
+  <data name="Errors.account.not_found" xml:space="preserve"><value>La cuenta no existe.</value></data>
+  <data name="Errors.block.invalid_id" xml:space="preserve"><value>El id de bloque no es válido.</value></data>
+  <data name="Errors.block.not_found" xml:space="preserve"><value>No hay ningún bloque en esa línea.</value></data>
+  <data name="Errors.bookmark.not_found" xml:space="preserve"><value>El marcador ya no existe.</value></data>
+  <data name="Errors.command.not_found" xml:space="preserve"><value>Comando desconocido.</value></data>
+  <data name="Errors.command.unavailable" xml:space="preserve"><value>El comando no está disponible ahora.</value></data>
+  <data name="Errors.daily_note.invalid_format" xml:space="preserve"><value>El formato de nota diaria no es válido.</value></data>
+  <data name="Errors.entry.move_into_itself" xml:space="preserve"><value>Una carpeta no se puede mover dentro de sí misma.</value></data>
+  <data name="Errors.entry.not_found" xml:space="preserve"><value>No existe «{path}».</value></data>
+  <data name="Errors.frontmatter.invalid_yaml" xml:space="preserve"><value>Las propiedades no son YAML válido.</value></data>
+  <data name="Errors.frontmatter.not_a_mapping" xml:space="preserve"><value>Las propiedades deben ser pares clave: valor.</value></data>
+  <data name="Errors.frontmatter.too_large" xml:space="preserve"><value>El bloque de propiedades es demasiado grande.</value></data>
+  <data name="Errors.fs.access_denied" xml:space="preserve"><value>Acceso denegado.</value></data>
+  <data name="Errors.fs.already_exists" xml:space="preserve"><value>El fichero ya existe.</value></data>
+  <data name="Errors.fs.concurrent_modification" xml:space="preserve"><value>El fichero cambió en el disco mientras tanto.</value></data>
+  <data name="Errors.fs.io" xml:space="preserve"><value>No se pudo leer o escribir el fichero.</value></data>
+  <data name="Errors.fs.is_directory" xml:space="preserve"><value>Es una carpeta, no un fichero.</value></data>
+  <data name="Errors.fs.not_a_directory" xml:space="preserve"><value>Es un fichero, no una carpeta.</value></data>
+  <data name="Errors.fs.not_found" xml:space="preserve"><value>El fichero no existe.</value></data>
+  <data name="Errors.fs.trash_unavailable" xml:space="preserve"><value>Este sistema no tiene papelera de reciclaje.</value></data>
+  <data name="Errors.gesture.invalid" xml:space="preserve"><value>«{gesture}» no es un atajo válido.</value></data>
+  <data name="Errors.heading.invalid_level" xml:space="preserve"><value>Los encabezados van del nivel 1 al 6.</value></data>
+  <data name="Errors.mention.not_found" xml:space="preserve"><value>La mención ya no está.</value></data>
+  <data name="Errors.note.frontmatter_invalid" xml:space="preserve"><value>Las propiedades (frontmatter) no son YAML válido; corrígelas en el editor de código.</value></data>
+  <data name="Errors.note.modified_externally" xml:space="preserve"><value>La nota cambió en el disco mientras la editabas.</value></data>
+  <data name="Errors.note.not_a_task" xml:space="preserve"><value>Esa línea no es una tarea.</value></data>
+  <data name="Errors.operation.cancelled" xml:space="preserve"><value>Cancelado.</value></data>
+  <data name="Errors.path.already_exists" xml:space="preserve"><value>Ya existe «{path}».</value></data>
+  <data name="Errors.path.invalid_segment" xml:space="preserve"><value>El nombre contiene caracteres no permitidos.</value></data>
+  <data name="Errors.path.outside_vault" xml:space="preserve"><value>La ruta está fuera del vault.</value></data>
+  <data name="Errors.result.uninitialized" xml:space="preserve"><value>Error interno: el resultado no se inicializó.</value></data>
+  <data name="Errors.search.invalid_regex" xml:space="preserve"><value>La expresión regular no es válida.</value></data>
+  <data name="Errors.search.too_complex" xml:space="preserve"><value>La consulta es demasiado compleja.</value></data>
+  <data name="Errors.sha.invalid" xml:space="preserve"><value>Hash de contenido no válido.</value></data>
+  <data name="Errors.storage.io" xml:space="preserve"><value>No se pudieron guardar los ajustes.</value></data>
+  <data name="Errors.tag.invalid" xml:space="preserve"><value>La etiqueta no es válida.</value></data>
+  <data name="Errors.vault.already_open" xml:space="preserve"><value>El vault ya está abierto.</value></data>
+  <data name="Errors.vault.already_registered" xml:space="preserve"><value>El vault ya está en la lista.</value></data>
+  <data name="Errors.vault.config_invalid" xml:space="preserve"><value>El fichero de ajustes del vault no es válido.</value></data>
+  <data name="Errors.vault.invalid_id" xml:space="preserve"><value>El identificador del vault no es válido.</value></data>
+  <data name="Errors.vault.invalid_name" xml:space="preserve"><value>El nombre del vault no es válido.</value></data>
+  <data name="Errors.vault.location_exists" xml:space="preserve"><value>La carpeta ya existe.</value></data>
+  <data name="Errors.vault.location_missing" xml:space="preserve"><value>No se encuentra la carpeta del vault.</value></data>
+  <data name="Errors.vault.not_open" xml:space="preserve"><value>El vault no está abierto.</value></data>
+  <data name="Errors.vault.not_registered" xml:space="preserve"><value>El vault no está en la lista.</value></data>
+</root>

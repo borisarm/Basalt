@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Commands.BookmarkActiveFile" xml:space="preserve"><value>Bookmark current file</value></data>
+  <data name="Commands.NewNote" xml:space="preserve"><value>New note</value></data>
+  <data name="Commands.OpenDailyNote" xml:space="preserve"><value>Open today's daily note</value></data>
+  <data name="Common.Busy" xml:space="preserve"><value>Working…</value></data>
+  <data name="Common.Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Common.Close" xml:space="preserve"><value>Close</value></data>
+  <data name="Common.ItemsCount" xml:space="preserve"><value>{0:N0} items</value></data>
+  <data name="Common.No" xml:space="preserve"><value>No</value></data>
+  <data name="Common.OK" xml:space="preserve"><value>OK</value></data>
+  <data name="Common.Retry" xml:space="preserve"><value>Retry</value></data>
+  <data name="Common.Yes" xml:space="preserve"><value>Yes</value></data>
+  <data name="Errors.account.invalid_host" xml:space="preserve"><value>The GitHub host is not valid.</value></data>
+  <data name="Errors.account.not_found" xml:space="preserve"><value>The account does not exist.</value></data>
+  <data name="Errors.block.invalid_id" xml:space="preserve"><value>The block id is not valid.</value></data>
+  <data name="Errors.block.not_found" xml:space="preserve"><value>There is no block on that line.</value></data>
+  <data name="Errors.bookmark.not_found" xml:space="preserve"><value>The bookmark no longer exists.</value></data>
+  <data name="Errors.command.not_found" xml:space="preserve"><value>Unknown command.</value></data>
+  <data name="Errors.command.unavailable" xml:space="preserve"><value>The command is not available right now.</value></data>
+  <data name="Errors.daily_note.invalid_format" xml:space="preserve"><value>The daily note format is not valid.</value></data>
+  <data name="Errors.entry.move_into_itself" xml:space="preserve"><value>A folder cannot be moved into itself.</value></data>
+  <data name="Errors.entry.not_found" xml:space="preserve"><value>“{path}” does not exist.</value></data>
+  <data name="Errors.frontmatter.invalid_yaml" xml:space="preserve"><value>The properties are not valid YAML.</value></data>
+  <data name="Errors.frontmatter.not_a_mapping" xml:space="preserve"><value>The properties must be key: value pairs.</value></data>
+  <data name="Errors.frontmatter.too_large" xml:space="preserve"><value>The properties block is too large.</value></data>
+  <data name="Errors.fs.access_denied" xml:space="preserve"><value>Access denied.</value></data>
+  <data name="Errors.fs.already_exists" xml:space="preserve"><value>The file already exists.</value></data>
+  <data name="Errors.fs.concurrent_modification" xml:space="preserve"><value>The file changed on disk meanwhile.</value></data>
+  <data name="Errors.fs.io" xml:space="preserve"><value>The file could not be read or written.</value></data>
+  <data name="Errors.fs.is_directory" xml:space="preserve"><value>It is a folder, not a file.</value></data>
+  <data name="Errors.fs.not_a_directory" xml:space="preserve"><value>It is a file, not a folder.</value></data>
+  <data name="Errors.fs.not_found" xml:space="preserve"><value>The file does not exist.</value></data>
+  <data name="Errors.fs.trash_unavailable" xml:space="preserve"><value>This system has no recycle bin.</value></data>
+  <data name="Errors.gesture.invalid" xml:space="preserve"><value>“{gesture}” is not a valid shortcut.</value></data>
+  <data name="Errors.heading.invalid_level" xml:space="preserve"><value>Headings go from level 1 to 6.</value></data>
+  <data name="Errors.mention.not_found" xml:space="preserve"><value>The mention is no longer there.</value></data>
+  <data name="Errors.note.frontmatter_invalid" xml:space="preserve"><value>The properties (frontmatter) are not valid YAML; fix them in the source editor.</value></data>
+  <data name="Errors.note.modified_externally" xml:space="preserve"><value>The note changed on disk while you were editing it.</value></data>
+  <data name="Errors.note.not_a_task" xml:space="preserve"><value>That line is not a task.</value></data>
+  <data name="Errors.operation.cancelled" xml:space="preserve"><value>Cancelled.</value></data>
+  <data name="Errors.path.already_exists" xml:space="preserve"><value>“{path}” already exists.</value></data>
+  <data name="Errors.path.invalid_segment" xml:space="preserve"><value>The name contains characters that are not allowed.</value></data>
+  <data name="Errors.path.outside_vault" xml:space="preserve"><value>The path is outside the vault.</value></data>
+  <data name="Errors.result.uninitialized" xml:space="preserve"><value>Internal error: the result was not initialized.</value></data>
+  <data name="Errors.search.invalid_regex" xml:space="preserve"><value>The regular expression is not valid.</value></data>
+  <data name="Errors.search.too_complex" xml:space="preserve"><value>The query is too complex.</value></data>
+  <data name="Errors.sha.invalid" xml:space="preserve"><value>Invalid content hash.</value></data>
+  <data name="Errors.storage.io" xml:space="preserve"><value>The settings could not be saved.</value></data>
+  <data name="Errors.tag.invalid" xml:space="preserve"><value>The tag is not valid.</value></data>
+  <data name="Errors.vault.already_open" xml:space="preserve"><value>The vault is already open.</value></data>
+  <data name="Errors.vault.already_registered" xml:space="preserve"><value>The vault is already in the list.</value></data>
+  <data name="Errors.vault.config_invalid" xml:space="preserve"><value>The vault settings file is not valid.</value></data>
+  <data name="Errors.vault.invalid_id" xml:space="preserve"><value>The vault identifier is not valid.</value></data>
+  <data name="Errors.vault.invalid_name" xml:space="preserve"><value>The vault name is not valid.</value></data>
+  <data name="Errors.vault.location_exists" xml:space="preserve"><value>The folder already exists.</value></data>
+  <data name="Errors.vault.location_missing" xml:space="preserve"><value>The vault folder cannot be found.</value></data>
+  <data name="Errors.vault.not_open" xml:space="preserve"><value>The vault is not open.</value></data>
+  <data name="Errors.vault.not_registered" xml:space="preserve"><value>The vault is not in the list.</value></data>
+</root>

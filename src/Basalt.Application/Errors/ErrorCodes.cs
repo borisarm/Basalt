@@ -29,6 +29,7 @@ public static class ErrorCodes
     public const string CommandNotFound = "command.not_found";
     public const string CommandUnavailable = "command.unavailable";
     public const string GestureInvalid = "gesture.invalid";
+    public const string OperationCancelled = "operation.cancelled";
 
     public const string VaultAlreadyRegistered = "vault.already_registered";
     public const string VaultNotRegistered = "vault.not_registered";

@@ -1,6 +1,7 @@
 using Basalt.Adapters.Platform.Json;
 using Basalt.Application.Accounts;
 using Basalt.Application.Ports.Platform;
+using Basalt.Application.Ports.Security;
 using Basalt.Application.Ports.Storage;
 using Basalt.Application.Settings;
 using Basalt.Application.Vaults;
@@ -29,6 +30,7 @@ public static class PlatformServiceCollectionExtensions
         services.AddSingleton<IVaultConfigStore, JsonVaultConfigStore>();
         services.AddSingleton<IRecentFilesStore, JsonRecentFilesStore>();
         services.AddSingleton<Application.Ports.FileSystem.IVaultLocalDataStore, VaultLocalDataStore>();
+        services.TryAddSingleton<ISecretStore, PlatformSecretStore>();
         return services;
     }
 

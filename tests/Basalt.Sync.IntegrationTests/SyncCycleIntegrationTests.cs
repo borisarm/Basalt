@@ -130,6 +130,22 @@ public sealed class SyncCycleIntegrationTests : IAsyncLifetime
         files.Should().Contain(path => path.Contains(" (conflict ", StringComparison.Ordinal));
     }
 
+    [Fact]
+    [Trait("Spec", "SYNC-DELETE-LOCAL")]
+    public async Task LocalDeletion_IsPublished()
+    {
+        var path = VaultPath.Create("Notes/E.md").Value;
+        await WriteAsync("Notes/E.md", "# E");
+        await CycleAsync();
+        (await _files.DeleteAsync(path, Ct)).IsSuccess.Should().BeTrue();
+
+        var result = await CycleAsync();
+
+        result.Status.Should().Be(SyncCycleStatus.Published);
+        var head = (await _remote.GetHeadAsync(null, Ct)).Value.Head!;
+        var tree = await _remote.GetTreeAsync(head.Tree, Ct);
+        tree.Value.Files.Should().NotContain(file => file.Path == path);
+    }
     private Task<SyncCycleResult> CycleAsync() =>
         _engine.RunAsync(
             new SyncCycleRequest(_profile, true, true, new CommitAuthor("Test", "test@example.com"), "Vault"),
@@ -141,6 +157,15 @@ public sealed class SyncCycleIntegrationTests : IAsyncLifetime
             .IsSuccess.Should().BeTrue();
     }
 
+    private async Task CommitChangesAsync(params TreeChange[] changes)
+    {
+        var head = (await _remote.GetHeadAsync(null, Ct)).Value.Head;
+        var tree = (await _remote.CreateTreeAsync(head?.Tree, changes, Ct)).Value;
+        var commit = (await _remote.CreateCommitAsync(
+            "remote change", tree, head is null ? [] : [head.Commit],
+            new CommitAuthor("Other", "other@example.com"), Ct)).Value;
+        (await _remote.UpdateBranchAsync(commit, head?.Commit, Ct)).IsSuccess.Should().BeTrue();
+    }
     private async Task CommitRemoteAsync(params (string Path, string Content)[] files)
     {
         var head = (await _remote.GetHeadAsync(null, Ct)).Value.Head;

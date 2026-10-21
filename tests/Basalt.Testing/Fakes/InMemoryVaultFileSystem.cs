@@ -254,6 +254,27 @@ public sealed class InMemoryVaultFileSystem : IVaultFileSystem
         }
     }
 
+    public Task<Result<Unit>> DeleteIfUnchangedAsync(VaultPath path, BlobSha expectedSha, CancellationToken ct)
+    {
+        ct.ThrowIfCancellationRequested();
+        lock (_gate)
+        {
+            if (!_entries.TryGetValue(Key(path), out var entry))
+            {
+                return Task.FromResult(Result.Failure(NotFound(path)));
+            }
+
+            if (entry.IsDirectory)
+            {
+                return Task.FromResult(Result.Failure(new Error(ErrorCodes.FsIsDirectory, "The path is a directory.")));
+            }
+
+            return Task.FromResult(GitBlobHasher.Compute(entry.Content) == expectedSha
+                ? RemoveUnlocked(path)
+                : Result.Failure(new Error(ErrorCodes.FsConcurrentModification, "The file changed since it was read.")));
+        }
+    }
+
     public Task<Result<Unit>> DeleteDirectoryIfEmptyAsync(VaultPath path, CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();

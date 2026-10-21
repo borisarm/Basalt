@@ -205,6 +205,33 @@ internal sealed class PhysicalVaultFileSystem : IVaultFileSystem
             return Task.FromResult(Result.Success());
         });
 
+    public Task<Result<Unit>> DeleteIfUnchangedAsync(VaultPath path, BlobSha expectedSha, CancellationToken ct) =>
+        Guard(async () =>
+        {
+            var full = Resolve(path);
+            if (Directory.Exists(full))
+            {
+                return Result.Failure(IsDirectoryError());
+            }
+
+            if (!File.Exists(full))
+            {
+                return Result.Failure(NotFound(path));
+            }
+
+            using (var stream = new FileStream(full, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                var actual = await GitBlobHasher.ComputeAsync(stream, stream.Length, ct).ConfigureAwait(false);
+                if (actual != expectedSha)
+                {
+                    return Result.Failure(ConcurrentModification(path));
+                }
+            }
+
+            File.Delete(full);
+            return Result.Success();
+        });
+
     public Task<Result<Unit>> DeleteDirectoryIfEmptyAsync(VaultPath path, CancellationToken ct) =>
         Guard(() =>
         {
@@ -394,6 +421,9 @@ internal sealed class PhysicalVaultFileSystem : IVaultFileSystem
         new Error(ErrorCodes.FsNotFound, "The file or folder does not exist.").With("path", path.ToString());
 
     private static Error AlreadyExists() => new(ErrorCodes.FsAlreadyExists, "The target already exists.");
+
+    private static Error ConcurrentModification(VaultPath path) =>
+        new Error(ErrorCodes.FsConcurrentModification, "The file changed since it was read.").With("path", path.ToString());
 
     private static Error IsDirectoryError() => new(ErrorCodes.FsIsDirectory, "The path is a directory.");
 }

@@ -230,6 +230,22 @@ public abstract class VaultFileSystemContract : ContractTest<IVaultFileSystem>
     }
 
     [Fact]
+    public async Task DeleteIfUnchanged_OnlyDeletesWhenTheContentMatches()
+    {
+        await Write("a.md", "one");
+        var changed = GitBlobHasher.Compute("two"u8);
+        var current = GitBlobHasher.Compute("one"u8);
+
+        (await Sut.DeleteIfUnchangedAsync(P("a.md"), changed, Ct)).Error.Code
+            .Should().Be(ErrorCodes.FsConcurrentModification);
+        (await Sut.ExistsAsync(P("a.md"), Ct)).Should().BeTrue();
+
+        (await Sut.DeleteIfUnchangedAsync(P("a.md"), current, Ct)).IsSuccess.Should().BeTrue();
+        (await Sut.ExistsAsync(P("a.md"), Ct)).Should().BeFalse();
+        (await Sut.DeleteIfUnchangedAsync(P("a.md"), current, Ct)).Error.Code.Should().Be(ErrorCodes.FsNotFound);
+    }
+
+    [Fact]
     public async Task DeleteDirectoryIfEmpty_OnlyDeletesEmptyFolders()
     {
         await Sut.CreateDirectoryAsync(P("empty"), Ct);

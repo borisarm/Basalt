@@ -35,6 +35,7 @@ public interface IFileWriter
     Task<Result<Unit>> CreateDirectoryAsync(VaultPath path, CancellationToken ct);
     Task<Result<Unit>> MoveAsync(VaultPath from, VaultPath to, CancellationToken ct);   // falla si 'to' existe; soporta cambio solo de mayúsculas
     Task<Result<Unit>> DeleteAsync(VaultPath path, CancellationToken ct);               // borrado físico (lo usa la papelera y la sync)
+    Task<Result<Unit>> DeleteIfUnchangedAsync(VaultPath path, BlobSha expectedSha, CancellationToken ct); // sync: borra solo si el contenido no cambió (fs.concurrent_modification)
     Task<Result<Unit>> DeleteDirectoryIfEmptyAsync(VaultPath path, CancellationToken ct);
 }
 

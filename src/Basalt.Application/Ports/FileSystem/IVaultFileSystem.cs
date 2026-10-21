@@ -89,6 +89,12 @@ public interface IFileWriter
     /// <summary>Physically deletes a file, or a folder with its content.</summary>
     Task<Result<Unit>> DeleteAsync(VaultPath path, CancellationToken ct);
 
+    /// <summary>
+    /// Deletes a file only when its current content still has <paramref name="expectedSha"/>; otherwise fails with
+    /// <c>fs.concurrent_modification</c> (sync optimistic concurrency, spec 06 §6 step 8).
+    /// </summary>
+    Task<Result<Unit>> DeleteIfUnchangedAsync(VaultPath path, BlobSha expectedSha, CancellationToken ct);
+
     /// <summary>Deletes a folder only if it is empty; succeeds (no-op) otherwise or when it does not exist.</summary>
     Task<Result<Unit>> DeleteDirectoryIfEmptyAsync(VaultPath path, CancellationToken ct);
 }

@@ -199,4 +199,5 @@
   <data name="Workspace.ToggleLeftSidebar" xml:space="preserve"><value>Toggle left sidebar</value></data>
   <data name="Workspace.ToggleRightSidebar" xml:space="preserve"><value>Toggle right sidebar</value></data>
   <data name="Workspace.Unsaved" xml:space="preserve"><value>Unsaved changes</value></data>
+  <data name="Sync.Completed" xml:space="preserve"><value>Sync completed.</value></data>
 </root>

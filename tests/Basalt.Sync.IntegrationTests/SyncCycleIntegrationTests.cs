@@ -131,6 +131,23 @@ public sealed class SyncCycleIntegrationTests : IAsyncLifetime
     }
 
     [Fact]
+    [Trait("Spec", "SYNC-DELETE-REMOTE")]
+    public async Task RemoteDeletion_IsAppliedLocally()
+    {
+        await WriteAsync("Notes/D.md", "# D");
+        var first = await CycleAsync();
+        first.Status.Should().Be(SyncCycleStatus.Published);
+        await CommitChangesAsync(new TreeChange.Delete(VaultPath.Create("Notes/D.md").Value));
+        var remoteTree = await _remote.GetTreeAsync((await _remote.GetHeadAsync(null, Ct)).Value.Head!.Tree, Ct);
+        remoteTree.Value.Files.Should().NotContain(file => file.Path == VaultPath.Create("Notes/D.md").Value);
+
+        var result = await CycleAsync();
+
+        result.Status.Should().Be(SyncCycleStatus.Downloaded);
+        (await _files.StatAsync(VaultPath.Create("Notes/D.md").Value, Ct)).IsFailure.Should().BeTrue();
+    }
+
+    [Fact]
     [Trait("Spec", "SYNC-DELETE-LOCAL")]
     public async Task LocalDeletion_IsPublished()
     {

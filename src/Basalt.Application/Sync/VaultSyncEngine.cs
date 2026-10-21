@@ -412,7 +412,8 @@ public sealed class VaultSyncEngine : IVaultSyncRunner
             return SyncOutcome.Published;
         }
 
-        return cycle.Plan.Actions.Any(action => action is SyncAction.Download or SyncAction.MergeText)
+        return cycle.Plan.Actions.Any(action => action is SyncAction.Download or SyncAction.MergeText
+            or SyncAction.DeleteLocal or SyncAction.CreateConflictCopy)
             ? SyncOutcome.Downloaded
             : SyncOutcome.UpToDate;
     }

@@ -109,6 +109,33 @@ internal sealed class JsonFileStore<T>(
         }
     }
 
+    public async Task<Result<Unit>> DeleteAsync(CancellationToken ct)
+    {
+        await _gate.WaitAsync(ct).ConfigureAwait(false);
+        try
+        {
+            if (File.Exists(Path))
+            {
+                File.Delete(Path);
+            }
+
+            _needsBackup = false;
+            return Result.Success();
+        }
+        catch (IOException ex)
+        {
+            return new Error(ErrorCodes.StorageIo, ex.Message);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return new Error(ErrorCodes.StorageIo, ex.Message);
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
     public void Dispose() => _gate.Dispose();
 
     private (T? Value, string? Problem) Parse(string text)

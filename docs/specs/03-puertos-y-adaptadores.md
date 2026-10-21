@@ -194,16 +194,21 @@ public interface ISyncProfileStore         // perfil de sync por vault (local al
     Task<Result<Unit>> SaveAsync(SyncProfile profile, CancellationToken ct);
     Task<Result<Unit>> DeleteAsync(VaultId id, CancellationToken ct);
 }
-public interface ISyncStateStore           // base de sincronización + journal + caché de hashes, por vault
+public interface ISyncStateStore           // base + journal + hash cache + remote trees + log, per vault
 {
     Task<SyncBase> LoadBaseAsync(CancellationToken ct);
-    Task<Result<Unit>> SaveBaseAsync(SyncBase @base, CancellationToken ct);             // atómico
+    Task<Result<Unit>> SaveBaseAsync(SyncBase @base, CancellationToken ct);             // atomic
     Task<SyncJournal?> LoadJournalAsync(CancellationToken ct);
     Task<Result<Unit>> SaveJournalAsync(SyncJournal journal, CancellationToken ct);
     Task<Result<Unit>> ClearJournalAsync(CancellationToken ct);
-    Task<HashCache> LoadHashCacheAsync(CancellationToken ct);                           // (path, size, mtime) → sha
-    Task SaveHashCacheAsync(HashCache cache, CancellationToken ct);
+    Task<HashCache> LoadHashCacheAsync(CancellationToken ct);                           // (path, size, mtime) -> sha
+    Task<Result<Unit>> SaveHashCacheAsync(HashCache cache, CancellationToken ct);
+    Task<IReadOnlyList<RemoteTreeCacheEntry>> LoadRemoteTreesAsync(CancellationToken ct);
+    Task<Result<Unit>> SaveRemoteTreesAsync(IReadOnlyList<RemoteTreeCacheEntry> trees, CancellationToken ct); // max. 3
+    Task<IReadOnlyList<SyncLogEntry>> LoadLogAsync(int max, CancellationToken ct);
+    Task<Result<Unit>> AppendLogAsync(SyncLogEntry entry, CancellationToken ct);        // log.jsonl, max. 500
 }
+public interface ISyncStateStoreFactory { ISyncStateStore Create(VaultId vault); }
 public interface IAppSettingsStore { /* ajustes globales de la app: tema, idioma, atajos, último vault */ }
 public interface IVaultConfigStore         // .basalt/vault.json, .basalt/bookmarks.json, .basalt/workspace.<deviceId>.json dentro del vault (Load/Save de cada uno)
 public interface IRecentFilesStore         // {AppData}/vaults/{vaultId}/recent.json: LoadAsync(VaultId) / SaveAsync(VaultId, paths)

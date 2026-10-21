@@ -75,7 +75,10 @@ public sealed class CompositionTests : IAsyncDisposable
     }
 
     /// <summary>Ports whose implementations are created per vault session by a registered factory.</summary>
-    private static readonly Type[] PerSession = [typeof(IVaultFileSystem), typeof(IFileWatcher), typeof(INoteIndex), typeof(IRemoteRepository)];
+    private static readonly Type[] PerSession =
+    [
+        typeof(IVaultFileSystem), typeof(IFileWatcher), typeof(INoteIndex), typeof(IRemoteRepository), typeof(Application.Ports.Storage.ISyncStateStore),
+    ];
 
     /// <summary>Ports that only aggregate others (their parts are checked through the composite).</summary>
     private static readonly Type[] Aggregated = [typeof(IFileReader), typeof(IFileWriter), typeof(IFileEnumerator), typeof(INoteIndexReader), typeof(INoteIndexWriter)];
@@ -91,6 +94,7 @@ public sealed class CompositionTests : IAsyncDisposable
     {
         [typeof(IVaultFileSystemFactory)] = typeof(IVaultFileSystem),
         [typeof(INoteIndexFactory)] = typeof(INoteIndex),
+        [typeof(Application.Ports.Storage.ISyncStateStoreFactory)] = typeof(Application.Ports.Storage.ISyncStateStore),
     };
 
     /// <summary>Ports whose contract has another subject (the watcher is obtained from the file system under test).</summary>

@@ -131,6 +131,20 @@ public sealed class SyncCycleIntegrationTests : IAsyncLifetime
     }
 
     [Fact]
+    [Trait("Spec", "SYNC-AUTH")]
+    public async Task MissingToken_ReturnsAuthRequiredWithoutChangingAnything()
+    {
+        await WriteAsync("Notes/Auth.md", "# Auth");
+
+        var result = await _engine.RunAsync(
+            new SyncCycleRequest(_profile, true, false, new CommitAuthor("Test", "test@example.com"), "Vault"), Ct);
+
+        result.Status.Should().Be(SyncCycleStatus.AuthRequired);
+        (await _files.StatAsync(VaultPath.Create("Notes/Auth.md").Value, Ct)).IsSuccess.Should().BeTrue();
+        (await _remote.GetHeadAsync(null, Ct)).Value.Head.Should().BeNull();
+    }
+
+    [Fact]
     [Trait("Spec", "SYNC-SYNCIGNORE")]
     public async Task SyncIgnore_IsNotPublishedAndExcludesMatchingFiles()
     {

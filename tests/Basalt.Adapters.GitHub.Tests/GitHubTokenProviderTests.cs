@@ -65,6 +65,21 @@ public sealed class GitHubTokenProviderTests
         (await provider.GetTokenAsync(Account, Ct)).Error.Code.Should().Be(RemoteErrors.Unauthorized);
     }
 
+    [Fact]
+    [Trait("Spec", "AUTH-TOKEN")]
+    public async Task StoredToken_SurvivesANewProviderThroughTheSecretStore()
+    {
+        var secrets = new InMemorySecretStore();
+        var first = new GitHubTokenProvider(new FakeGitHubAuthenticator(Host), secrets, new FakeTimeProvider(Now));
+        var token = new GitHubToken("persisted", Now.AddHours(1), "refresh");
+        await first.StoreAsync(Account, Host, token, Ct);
+
+        var second = new GitHubTokenProvider(new FakeGitHubAuthenticator(Host), secrets, new FakeTimeProvider(Now));
+
+        (await second.GetTokenAsync(Account, Ct)).Value.Should().Be(token);
+        await second.RemoveAsync(Account, Ct);
+        (await second.GetTokenAsync(Account, Ct)).Error.Code.Should().Be(RemoteErrors.Unauthorized);
+    }
     private static DateTimeOffset Now => new(2026, 10, 20, 12, 0, 0, TimeSpan.Zero);
 
     private static GitHubTokenProvider Create(TimeProvider clock, out FakeGitHubAuthenticator authenticator)

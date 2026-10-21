@@ -1,6 +1,7 @@
 using Basalt.Application.Auth;
 using Basalt.Application.Ports.Auth;
 using Basalt.Application.Ports.Remote;
+using Basalt.Application.Ports.Security;
 using Basalt.Domain.Accounts;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -17,7 +18,10 @@ public static class GitHubAdapterServiceCollectionExtensions
         services.AddHttpClient("github-oauth");
         services.TryAddSingleton<IGitHubAuthenticator>(provider => new GitHubDeviceFlowAuthenticator(
             provider.GetRequiredService<IHttpClientFactory>().CreateClient("github-oauth"), "basalt"));
-        services.TryAddSingleton<IGitHubTokenProvider, GitHubTokenProvider>();
+        services.TryAddSingleton<IGitHubTokenProvider>(provider => new GitHubTokenProvider(
+            provider.GetRequiredService<IGitHubAuthenticator>(),
+            provider.GetRequiredService<ISecretStore>(),
+            provider.GetRequiredService<TimeProvider>()));
         services.TryAddSingleton<GitHubApiClientFactory>();
         services.TryAddSingleton<IRepositoryAdministration>(provider =>
             new GitHubRepositoryAdministration(provider.GetRequiredService<GitHubApiClientFactory>(), host));

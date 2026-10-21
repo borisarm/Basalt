@@ -50,6 +50,12 @@ public sealed class GitHubRepositoryAdministrationTests : RepositoryAdministrati
     {
         public Task<Result<GitHubToken>> GetTokenAsync(GitHubAccountId account, CancellationToken ct) =>
             Task.FromResult(Result<GitHubToken>.Success(new GitHubToken(token)));
+
+        public Task<Result<Unit>> StoreAsync(GitHubAccountId account, GitHubHost host, GitHubToken value, CancellationToken ct) =>
+            Task.FromResult(Result.Success());
+
+        public Task<Result<Unit>> RemoveAsync(GitHubAccountId account, CancellationToken ct) =>
+            Task.FromResult(Result.Success());
     }
 
     private sealed class AdministrationSut(

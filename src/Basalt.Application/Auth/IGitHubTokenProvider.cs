@@ -13,4 +13,10 @@ public sealed record GitHubUserInfo(long Id, string Login, string? Name, Uri? Av
 public interface IGitHubTokenProvider
 {
     Task<Result<GitHubToken>> GetTokenAsync(GitHubAccountId account, CancellationToken ct);
+
+    /// <summary>Persists the token in the OS secure store (never in config) and caches it.</summary>
+    Task<Result<Unit>> StoreAsync(GitHubAccountId account, GitHubHost host, GitHubToken token, CancellationToken ct);
+
+    /// <summary>Forgets the token locally (sign-out).</summary>
+    Task<Result<Unit>> RemoveAsync(GitHubAccountId account, CancellationToken ct);
 }

@@ -188,6 +188,12 @@ public sealed class GitHubRemoteRepositoryTests : RemoteRepositoryContract
     {
         public Task<Result<GitHubToken>> GetTokenAsync(GitHubAccountId account, CancellationToken ct) =>
             Task.FromResult(token);
+
+        public Task<Result<Unit>> StoreAsync(GitHubAccountId account, GitHubHost host, GitHubToken value, CancellationToken ct) =>
+            Task.FromResult(Result.Success());
+
+        public Task<Result<Unit>> RemoveAsync(GitHubAccountId account, CancellationToken ct) =>
+            Task.FromResult(Result.Success());
     }
 
     private sealed class RepositorySut(IRemoteRepository inner, FakeGitHubServer server, HttpClient http)

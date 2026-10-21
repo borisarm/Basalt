@@ -96,6 +96,42 @@ public sealed class AccountUseCaseTests
         result.Value.Should().ContainSingle().Which.FullName.Should().Be("acme/notes");
     }
 
+    [Fact]
+    public async Task CompleteSignIn_Expired_ReturnsExpiredToken()
+    {
+        var authenticator = new FakeGitHubAuthenticator(Host) { Scenario = FakeAuthenticatorScenario.Expired };
+        var handler = Handler(authenticator, TokenProvider(), Store());
+        var challenge = await authenticator.StartDeviceFlowAsync(Host, Ct);
+
+        var result = await handler.HandleAsync(new CompleteGitHubSignIn(challenge.Value), Ct);
+
+        result.Error.Code.Should().Be(AuthErrors.ExpiredToken);
+    }
+
+    [Fact]
+    public async Task ListAccounts_ReturnsTheStoredAccounts()
+    {
+        var accounts = Store();
+        await accounts.SaveAsync(
+            new GitHubAccount(new GitHubAccountId(Guid.NewGuid()), "octocat", Host, null, ["repo"], Now), Ct);
+
+        var result = await new ListAccountsHandler(accounts).HandleAsync(new ListAccounts(), Ct);
+
+        result.Value.Should().ContainSingle().Which.Login.Should().Be("octocat");
+    }
+
+    [Fact]
+    public async Task CreateRepositoryForVault_UsesTheAdministrationPort()
+    {
+        var admin = new InMemoryRepositoryAdministration();
+        var account = new GitHubAccountId(Guid.NewGuid());
+
+        var result = await new CreateRepositoryForVaultHandler(admin)
+            .HandleAsync(new CreateRepositoryForVault(account, "acme", "notes"), Ct);
+
+        result.Value.FullName.Should().Be("acme/notes");
+        result.Value.IsPrivate.Should().BeTrue();
+    }
     private static CompleteGitHubSignInHandler Handler(
         IGitHubAuthenticator authenticator,
         IGitHubTokenProvider tokens,

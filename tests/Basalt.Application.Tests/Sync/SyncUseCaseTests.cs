@@ -162,6 +162,30 @@ public sealed class SyncUseCaseTests
         runner.Requests[0].VaultName.Should().Be("Notes");
     }
 
+    [Fact]
+    public async Task SyncVault_WithoutTokenAndAccount_UsesFallbacks()
+    {
+        var profiles = new InMemorySyncProfileStore();
+        await profiles.SaveAsync(Profile(), Ct);
+        var tokens = Substitute.For<IGitHubTokenProvider>();
+        tokens.GetTokenAsync(Account, Arg.Any<CancellationToken>())
+            .Returns(Result<GitHubToken>.Failure(new Error("remote.unauthorized", "missing")));
+        var accounts = Substitute.For<IAccountStore>();
+        accounts.GetAsync(Account, Arg.Any<CancellationToken>())
+            .Returns(Result<GitHubAccount>.Failure(new Error("account.not_found", "missing")));
+        var registry = Substitute.For<IVaultRegistry>();
+        registry.GetAllAsync(Arg.Any<CancellationToken>()).Returns([]);
+        var runner = new RecordingRunner(_ => Task.FromResult(UpToDate()));
+        await using var coordinator = Coordinator(runner);
+        var handler = new SyncVaultHandler(profiles, tokens, accounts, registry, coordinator);
+
+        var result = await handler.HandleAsync(new SyncVault(Vault), Ct);
+
+        result.Value!.Status.Should().Be(SyncCycleStatus.UpToDate);
+        runner.Requests[0].HasToken.Should().BeFalse();
+        runner.Requests[0].Author.Name.Should().Be("Basalt");
+        runner.Requests[0].VaultName.Should().Be("Vault");
+    }
     private static SyncCycleResult UpToDate() => new(SyncCycleStatus.UpToDate, SyncBase.Empty, [], false);
 
     private static SyncLogEntry LogEntry() =>

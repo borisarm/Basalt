@@ -131,6 +131,18 @@ public sealed class SyncCycleIntegrationTests : IAsyncLifetime
     }
 
     [Fact]
+    [Trait("Spec", "SYNC-IGNORE-WORKSPACE")]
+    public async Task WorkspaceState_IsNeverPublished()
+    {
+        await WriteAsync(".basalt/workspace.dev.json", "{\"open\":[]}");
+        await WriteAsync("Notes/W.md", "# W");
+        await CycleAsync();
+        var head = (await _remote.GetHeadAsync(null, Ct)).Value.Head!;
+        var tree = await _remote.GetTreeAsync(head.Tree, Ct);
+        tree.Value.Files.Should().NotContain(file => file.Path.ToString().StartsWith(".basalt/workspace.", StringComparison.Ordinal));
+    }
+
+    [Fact]
     [Trait("Spec", "SYNC-BINARY")]
     public async Task BinaryFile_RoundTripsWithoutTextProcessing()
     {

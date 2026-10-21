@@ -131,6 +131,24 @@ public sealed class SyncCycleIntegrationTests : IAsyncLifetime
     }
 
     [Fact]
+    [Trait("Spec", "SYNC-DELETE-VS-MODIFY")]
+    public async Task RemoteDeletionAgainstLocalEdit_KeepsTheModifiedFile()
+    {
+        await WriteAsync("Notes/F.md", "base");
+        await CycleAsync();
+        await CommitChangesAsync(new TreeChange.Delete(VaultPath.Create("Notes/F.md").Value));
+        await WriteAsync("Notes/F.md", "local edit");
+
+        var result = await CycleAsync();
+
+        result.Status.Should().Be(SyncCycleStatus.Published);
+        (await _files.ReadAllTextAsync(VaultPath.Create("Notes/F.md").Value, Ct)).Value.Should().Be("local edit");
+        var head = (await _remote.GetHeadAsync(null, Ct)).Value.Head!;
+        var tree = await _remote.GetTreeAsync(head.Tree, Ct);
+        tree.Value.Files.Should().Contain(file => file.Path.ToString() == "Notes/F.md");
+    }
+
+    [Fact]
     [Trait("Spec", "SYNC-AUTH")]
     public async Task MissingToken_ReturnsAuthRequiredWithoutChangingAnything()
     {

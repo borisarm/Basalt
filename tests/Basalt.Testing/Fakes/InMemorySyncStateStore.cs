@@ -189,4 +189,14 @@ public sealed class InMemorySyncStateStoreFactory : ISyncStateStoreFactory
             return store;
         }
     }
+
+    public Task<Result<Unit>> DeleteAsync(VaultId vault, CancellationToken ct)
+    {
+        lock (_gate)
+        {
+            _stores.Remove(vault);
+        }
+
+        return Task.FromResult(Result.Success());
+    }
 }

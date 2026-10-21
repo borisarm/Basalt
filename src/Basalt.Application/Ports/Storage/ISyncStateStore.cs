@@ -39,4 +39,7 @@ public interface ISyncStateStore
 public interface ISyncStateStoreFactory
 {
     ISyncStateStore Create(VaultId vault);
+
+    /// <summary>Deletes the vault's sync state only; never touches the vault folder or the index.</summary>
+    Task<Result<Unit>> DeleteAsync(VaultId vault, CancellationToken ct);
 }

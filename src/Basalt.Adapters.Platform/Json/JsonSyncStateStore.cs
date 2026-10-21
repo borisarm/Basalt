@@ -389,4 +389,22 @@ internal sealed class JsonSyncStateStoreFactory(IVaultLocalDataStore localData, 
 {
     public ISyncStateStore Create(VaultId vault) =>
         new JsonSyncStateStore(Path.Combine(localData.DirectoryOf(vault), "sync"), time);
+
+    public Task<Result<Unit>> DeleteAsync(VaultId vault, CancellationToken ct)
+    {
+        try
+        {
+            var directory = Path.Combine(localData.DirectoryOf(vault), "sync");
+            if (Directory.Exists(directory))
+            {
+                Directory.Delete(directory, recursive: true);
+            }
+
+            return Task.FromResult(Result.Success());
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            return Task.FromResult(Result.Failure(new Error(ErrorCodes.StorageIo, exception.Message)));
+        }
+    }
 }

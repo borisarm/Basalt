@@ -7,4 +7,5 @@ public static class SyncErrors
     public const string LocalFileMissing = "sync.local_file_missing";
     public const string TreeMismatch = "sync.tree_mismatch";
     public const string ContentMissing = "sync.content_missing";
+    public const string NotConfigured = "sync.not_configured";
 }

@@ -13,6 +13,7 @@ using Basalt.Application.Indexing;
 using Basalt.Application.Notes;
 using Basalt.Application.Ports.Events;
 using Basalt.Application.Settings;
+using Basalt.Application.Sync;
 using Basalt.Application.Vaults;
 using Basalt.Domain.Accounts;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,6 +41,9 @@ public static class CompositionServiceCollectionExtensions
         services.TryAddSingleton<VaultSessions>();
         services.TryAddSingleton<IVaultSessions>(sp => sp.GetRequiredService<VaultSessions>());
         services.TryAddSingleton<VaultLocks>();
+        services.TryAddSingleton<SyncLocks>();
+        services.TryAddSingleton<SyncCoordinator>();
+        services.TryAddSingleton<IVaultSyncRunnerFactory, VaultSyncRunnerFactory>();
         services.TryAddSingleton<IVaultRegistry, VaultRegistry>();
         services.TryAddSingleton<IAccountStore, AccountStore>();
         services.TryAddSingleton<IAppSettingsStore, AppSettingsStore>();

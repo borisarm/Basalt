@@ -48,7 +48,7 @@ public sealed record SyncCycleResult(
 /// Runs steps 0–10 of spec 06 §6 for one vault: preconditions and sync lease, flush, scan, remote snapshot, plan,
 /// materialise, journal, publish (with re-planning on non-fast-forward), local apply and state commit.
 /// </summary>
-public sealed class VaultSyncEngine
+public sealed class VaultSyncEngine : IVaultSyncRunner
 {
     private readonly VaultId _vault;
     private readonly IVaultFileSystem _fileSystem;

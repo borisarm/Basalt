@@ -131,6 +131,20 @@ public sealed class SyncCycleIntegrationTests : IAsyncLifetime
     }
 
     [Fact]
+    [Trait("Spec", "SYNC-SYNCIGNORE")]
+    public async Task SyncIgnore_IsNotPublishedAndExcludesMatchingFiles()
+    {
+        await WriteAsync(".basalt/syncignore", "secret.txt\n");
+        await WriteAsync("secret.txt", "local secret");
+        await WriteAsync("Notes/Public.md", "# Public");
+        await CycleAsync();
+        var head = (await _remote.GetHeadAsync(null, Ct)).Value.Head!;
+        var tree = await _remote.GetTreeAsync(head.Tree, Ct);
+        tree.Value.Files.Should().Contain(file => file.Path.ToString() == "Notes/Public.md");
+        tree.Value.Files.Should().NotContain(file => file.Path.ToString() == "secret.txt");
+    }
+
+    [Fact]
     [Trait("Spec", "SYNC-CRLF-BOM")]
     public async Task CrlfAndBom_ArePreservedOnUpload()
     {

@@ -7,8 +7,15 @@ using Basalt.Domain.Sync;
 
 namespace Basalt.Application.Sync;
 
-/// <summary>One publish attempt: what to publish, the remote state it was planned against, and the last synced base.</summary>
-public sealed record PublishRequest(MaterializedPlan Plan, RemoteSnapshot Remote, Manifest Baseline);
+/// <summary>
+/// One publish attempt: what to publish, the remote state it was planned against, the last synced base and the remote
+/// paths that must be kept untouched (ignored, too large or quarantined).
+/// </summary>
+public sealed record PublishRequest(
+    MaterializedPlan Plan,
+    RemoteSnapshot Remote,
+    Manifest Baseline,
+    IReadOnlyCollection<VaultPath>? Protected = null);
 
 /// <summary>Commit message, author and retry policy of a publish (spec 06 §6, step 7 and §8).</summary>
 public sealed record PublishOptions(
@@ -120,7 +127,8 @@ public sealed class RemotePublisher
             }
         }
 
-        var changes = BuildChanges(remote.Manifest, target);
+        var protectedPaths = request.Protected ?? [];
+        var changes = BuildChanges(remote.Manifest, target, protectedPaths);
         if (changes.Count == 0)
         {
             return (remote.Head, false);
@@ -179,7 +187,17 @@ public sealed class RemotePublisher
             current = created.Value;
         }
 
-        var expected = GitTreeHasher.Compute(target.Entries.ToDictionary(entry => entry.Path, entry => entry.Sha));
+        var expectedTree = new Dictionary<VaultPath, BlobSha>(
+            target.Entries.Select(entry => new KeyValuePair<VaultPath, BlobSha>(entry.Path, entry.Sha)));
+        foreach (var path in protectedPaths)
+        {
+            if (!expectedTree.ContainsKey(path) && remote.Manifest.Get(path) is { } kept)
+            {
+                expectedTree[path] = kept.Sha;
+            }
+        }
+
+        var expected = GitTreeHasher.Compute(expectedTree);
         if (expected != current)
         {
             return new Error(SyncErrors.TreeMismatch, "The remote tree does not match the local target tree.")
@@ -283,7 +301,10 @@ public sealed class RemotePublisher
             .With("expected", expected.ToString())
             .With("actual", actual.ToString());
 
-    private static List<TreeChange> BuildChanges(Manifest remote, Manifest target)
+    private static List<TreeChange> BuildChanges(
+        Manifest remote,
+        Manifest target,
+        IReadOnlyCollection<VaultPath> protectedPaths)
     {
         var changes = new List<TreeChange>();
         foreach (var entry in target.Entries)
@@ -297,7 +318,7 @@ public sealed class RemotePublisher
 
         foreach (var entry in remote.Entries)
         {
-            if (!target.Contains(entry.Path))
+            if (!target.Contains(entry.Path) && !protectedPaths.Contains(entry.Path))
             {
                 changes.Add(new TreeChange.Delete(entry.Path));
             }

@@ -283,6 +283,28 @@ public sealed class RemotePublisherTests
     }
 
     [Fact]
+    public async Task Publish_KeepsProtectedRemotePathsAndVerifiesTheMergedTree()
+    {
+        var repository = await RemoteAsync(
+            (".basalt/vault.json", Utf8("{}")),
+            ("secret.txt", Utf8("remote secret")));
+        var remote = await SnapshotAsync(repository);
+        var target = ManifestOf((".basalt/vault.json", Utf8("{}")), ("A.md", Utf8("A")));
+        var request = new PublishRequest(
+            Plan(target, ("A.md", Utf8("A"))),
+            remote,
+            Manifest.Empty,
+            [P("secret.txt")]);
+
+        var result = await Publisher(new InMemoryVaultFileSystem(), repository)
+            .PublishAsync(request, Options(), null, Ct);
+
+        result.Value.Published.Should().BeTrue();
+        (await SnapshotAsync(repository)).Manifest.Entries.Select(entry => entry.Path.ToString())
+            .Should().Equal(".basalt/vault.json", "A.md", "secret.txt");
+    }
+
+    [Fact]
     public async Task Publish_WhenALocalFileIsMissing_FailsWithLocalFileMissing()
     {
         var repository = await InitializedAsync();

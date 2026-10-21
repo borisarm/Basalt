@@ -394,6 +394,7 @@ public sealed class PlanMaterializer
         private void SetRemote(VaultPath path, byte[] content)
         {
             var sha = GitBlobHasher.Compute(content);
+            _contents[sha] = content;
             target[path] = new ManifestEntry(path, sha, content.LongLength);
         }
 

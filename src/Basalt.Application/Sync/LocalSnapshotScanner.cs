@@ -169,32 +169,8 @@ public sealed class LocalSnapshotScanner
         return kept;
     }
 
-    private bool IsExcluded(VaultPath path, IReadOnlyCollection<VaultPath>? quarantined)
-    {
-        if (_rules.IsIgnored(path, isDirectory: false))
-        {
-            return true;
-        }
-
-        if (!_scope.IncludeObsidianConfig && IsUnder(path, ".obsidian"))
-        {
-            return true;
-        }
-
-        if (!_scope.IncludeTrash && IsUnder(path, FileClassifier.TrashFolder))
-        {
-            return true;
-        }
-
-        if (!_scope.IncludeAttachments && path.Extension != "md" && !IsUnder(path, FileClassifier.ConfigFolder))
-        {
-            return true;
-        }
-
-        return quarantined is not null
-            && quarantined.Any(candidate => path == candidate || path.IsDescendantOf(candidate));
-    }
-
-    private static bool IsUnder(VaultPath path, string folder) =>
-        path.Segments.Count > 0 && string.Equals(path.Segments[0], folder, StringComparison.Ordinal);
+    private bool IsExcluded(VaultPath path, IReadOnlyCollection<VaultPath>? quarantined) =>
+        SyncExclusions.IsIgnored(path, _scope, _rules)
+        || (quarantined is not null
+            && quarantined.Any(candidate => path == candidate || path.IsDescendantOf(candidate)));
 }

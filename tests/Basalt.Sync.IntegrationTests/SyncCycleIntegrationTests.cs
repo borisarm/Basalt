@@ -134,6 +134,42 @@ public sealed class SyncCycleIntegrationTests : IAsyncLifetime
     }
 
     [Fact]
+    [Trait("Spec", "S08")]
+    public async Task BothSidesCreateTheSamePathWithDifferentContent_ConflictCopyIsMade()
+    {
+        await WriteAsync("Notes/Same.md", "local");
+        await CommitRemoteAsync(("Notes/Same.md", "remote"));
+
+        var result = await CycleAsync();
+
+        result.Status.Should().Be(SyncCycleStatus.Merged);
+        var files = new List<string>();
+        await foreach (var entry in _files.EnumerateAsync(VaultPath.Root, true, Ct))
+        {
+            files.Add(entry.Path.ToString());
+        }
+
+        files.Should().Contain("Notes/Same.md");
+        files.Should().Contain(path => path.Contains("conflict", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    [Trait("Spec", "S16")]
+    public async Task ExternalWebCommit_ConvergesWithLocalChanges()
+    {
+        await WriteAsync("Notes/A.md", "base");
+        await CycleAsync();
+        await WriteAsync("Notes/A.md", "local");
+        await CommitRemoteAsync(("Notes/Web.md", "from web"));
+
+        var result = await CycleAsync();
+
+        result.Status.Should().BeOneOf(SyncCycleStatus.Downloaded, SyncCycleStatus.Published);
+        (await _files.ReadAllTextAsync(VaultPath.Create("Notes/A.md").Value, Ct)).Value.Should().Be("local");
+        (await _files.ReadAllTextAsync(VaultPath.Create("Notes/Web.md").Value, Ct)).Value.Should().Be("from web");
+    }
+
+    [Fact]
     [Trait("Spec", "S07")]
     public async Task PreferDelete_RemovesTheLocallyModifiedFile()
     {

@@ -131,6 +131,30 @@ public sealed class SyncCycleIntegrationTests : IAsyncLifetime
     }
 
     [Fact]
+    [Trait("Spec", "SYNC-RENAME")]
+    public async Task LocalRenameAgainstRemoteEdit_LosesNeitherVersion()
+    {
+        await WriteAsync("Notes/Old.md", "base");
+        await CycleAsync();
+        (await _files.MoveAsync(
+            VaultPath.Create("Notes/Old.md").Value, VaultPath.Create("Notes/New.md").Value, Ct))
+            .IsSuccess.Should().BeTrue();
+        await WriteAsync("Notes/New.md", "local edit");
+        await CommitRemoteAsync(("Notes/Old.md", "remote edit"));
+
+        await CycleAsync();
+
+        (await _files.ReadAllTextAsync(VaultPath.Create("Notes/New.md").Value, Ct)).Value.Should().Be("local edit");
+        var files = new List<string>();
+        await foreach (var entry in _files.EnumerateAsync(VaultPath.Root, true, Ct))
+        {
+            files.Add(entry.Path.ToString());
+        }
+
+        files.Should().Contain(path => path == "Notes/Old.md" || path.Contains("conflict", StringComparison.Ordinal));
+    }
+
+    [Fact]
     [Trait("Spec", "SYNC-DELETE-VS-MODIFY")]
     public async Task RemoteDeletionAgainstLocalEdit_KeepsTheModifiedFile()
     {

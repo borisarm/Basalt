@@ -200,4 +200,5 @@
   <data name="Workspace.ToggleRightSidebar" xml:space="preserve"><value>Mostrar u ocultar la barra derecha</value></data>
   <data name="Workspace.Unsaved" xml:space="preserve"><value>Cambios sin guardar</value></data>
   <data name="Sync.Completed" xml:space="preserve"><value>Sincronización completada.</value></data>
+  <data name="Sync.Configured" xml:space="preserve"><value>Sincronización configurada.</value></data>
 </root>

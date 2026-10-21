@@ -44,6 +44,7 @@ public static class CompositionServiceCollectionExtensions
         services.TryAddSingleton<SyncLocks>();
         services.TryAddSingleton<SyncCoordinator>();
         services.TryAddSingleton<IVaultSyncRunnerFactory, VaultSyncRunnerFactory>();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IVaultSessionInitializer, SyncSessionInitializer>());
         services.TryAddSingleton<IVaultRegistry, VaultRegistry>();
         services.TryAddSingleton<IAccountStore, AccountStore>();
         services.TryAddSingleton<IAppSettingsStore, AppSettingsStore>();

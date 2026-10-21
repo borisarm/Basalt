@@ -201,4 +201,5 @@
   <data name="Workspace.Unsaved" xml:space="preserve"><value>Unsaved changes</value></data>
   <data name="Sync.Completed" xml:space="preserve"><value>Sync completed.</value></data>
   <data name="Sync.Configured" xml:space="preserve"><value>Sync configured.</value></data>
+  <data name="Sync.Restored" xml:space="preserve"><value>Version restored.</value></data>
 </root>

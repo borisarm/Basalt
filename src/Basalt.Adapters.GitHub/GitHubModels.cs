@@ -116,13 +116,30 @@ internal sealed record CreateTreeEntryRequest(
     [property: JsonPropertyName("mode")] string Mode,
     [property: JsonPropertyName("type")] string Type,
     [property: JsonPropertyName("sha")]
-    [property: JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     string? Sha,
-    [property: JsonPropertyName("content")] string? Content);
+    [property: JsonPropertyName("content")]
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    string? Content);
+
+internal sealed record DeleteTreeEntryRequest(
+    [property: JsonPropertyName("path")] string Path,
+    [property: JsonPropertyName("mode")] string Mode,
+    [property: JsonPropertyName("type")] string Type,
+    [property: JsonPropertyName("sha")]
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    string? Sha);
+
+internal sealed record PutContentsResponseDto(
+    [property: JsonPropertyName("content")] GitHubContentDto Content);
 
 internal sealed record CreateTreeRequest(
     [property: JsonPropertyName("base_tree")] string? BaseTree,
     [property: JsonPropertyName("tree")] IReadOnlyList<CreateTreeEntryRequest> Tree);
+
+internal sealed record DeleteTreeRequest(
+    [property: JsonPropertyName("base_tree")] string? BaseTree,
+    [property: JsonPropertyName("tree")] IReadOnlyList<DeleteTreeEntryRequest> Tree);
 
 internal sealed record CreateCommitRequest(
     [property: JsonPropertyName("message")] string Message,
@@ -177,11 +194,13 @@ internal sealed record AccessTokenRequest(
 [JsonSerializable(typeof(GitHubAccessTokenDto))]
 [JsonSerializable(typeof(CreateBlobRequest))]
 [JsonSerializable(typeof(CreateTreeRequest))]
+[JsonSerializable(typeof(DeleteTreeRequest))]
 [JsonSerializable(typeof(CreateCommitRequest))]
 [JsonSerializable(typeof(CreateRefRequest))]
 [JsonSerializable(typeof(UpdateRefRequest))]
 [JsonSerializable(typeof(CreateRepositoryRequest))]
 [JsonSerializable(typeof(PutContentsRequest))]
+[JsonSerializable(typeof(PutContentsResponseDto))]
 [JsonSerializable(typeof(DeviceCodeRequest))]
 [JsonSerializable(typeof(AccessTokenRequest))]
 internal sealed partial class GitHubJsonContext : JsonSerializerContext;

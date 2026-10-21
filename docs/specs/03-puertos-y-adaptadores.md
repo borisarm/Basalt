@@ -127,7 +127,9 @@ public interface IRemoteRepository
     Task<Result<byte[]>> GetBlobAsync(BlobSha sha, CancellationToken ct);
     Task<Result<IReadOnlyDictionary<VaultPath, byte[]>>> GetArchiveAsync(CommitSha commit, CancellationToken ct); // zipball (06 §9.5)
     Task<Result<BlobSha>> CreateBlobAsync(ReadOnlyMemory<byte> content, CancellationToken ct);
-    Task<Result<TreeSha>> CreateTreeAsync(TreeSha? baseTree, IReadOnlyList<TreeChange> changes, CancellationToken ct); // TreeChange: Upsert(path, sha) | Delete(path)
+    Task<Result<TreeSha>> CreateTreeAsync(TreeSha? baseTree, IReadOnlyList<TreeChange> changes, CancellationToken ct); // TreeChange: Upsert(path, sha, content?) | Delete(path)
+    // Repo vacío: primer commit con PUT contents de una ruta (06 §6, paso 7).
+    Task<Result<Unit>> CreateInitialCommitAsync(VaultPath path, ReadOnlyMemory<byte> content, string message, CancellationToken ct);
     Task<Result<CommitSha>> CreateCommitAsync(string message, TreeSha tree, IReadOnlyList<CommitSha> parents, CommitAuthor author, CancellationToken ct);
     // Fast-forward únicamente. Si no es FF → Error "remote.non_fast_forward".
     Task<Result<Unit>> UpdateBranchAsync(CommitSha newHead, CommitSha? expectedOld, CancellationToken ct);

@@ -92,6 +92,36 @@ public abstract class RemoteRepositoryContract : ContractTest<IRemoteRepository>
 
     [Fact]
     [Trait("Spec", "REMOTE-PORT")]
+    public async Task CreateTree_AcceptsInlineTextWithoutAPriorBlob()
+    {
+        var content = "# inline\n";
+        var sha = GitBlobHasher.Compute(Encoding.UTF8.GetBytes(content));
+
+        var tree = (await Sut.CreateTreeAsync(null, [new TreeChange.Upsert(P("a.md"), sha, content)], Ct)).Value;
+        var snapshot = (await Sut.GetTreeAsync(tree, Ct)).Value;
+
+        snapshot.Files.Single().Sha.Should().Be(sha);
+        Encoding.UTF8.GetString((await Sut.GetBlobAsync(sha, Ct)).Value).Should().Be(content);
+    }
+
+    [Fact]
+    [Trait("Spec", "REMOTE-PORT")]
+    public async Task EmptyRepository_CanBeInitializedThroughTheContentsApi()
+    {
+        var content = Encoding.UTF8.GetBytes("{}");
+
+        var created = await Sut.CreateInitialCommitAsync(P(".basalt/vault.json"), content, "init", Ct);
+
+        created.IsSuccess.Should().BeTrue(created.IsSuccess ? string.Empty : created.Error.Code + ": " + created.Error.Message);
+        var head = (await Sut.GetHeadAsync(null, Ct)).Value.Head;
+        head.Should().NotBeNull();
+        var snapshot = (await Sut.GetTreeAsync(head!.Tree, Ct)).Value;
+        snapshot.Files.Single(file => file.Path == P(".basalt/vault.json")).Sha
+            .Should().Be(GitBlobHasher.Compute(content));
+    }
+
+    [Fact]
+    [Trait("Spec", "REMOTE-PORT")]
     public async Task CreateTree_AppliesUpsertsAndDeletesOnBaseTree()
     {
         var (_, baseTree, commit) = await CommitAsync(Sut, new Dictionary<string, string>

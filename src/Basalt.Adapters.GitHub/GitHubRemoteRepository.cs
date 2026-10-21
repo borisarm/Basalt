@@ -121,6 +121,19 @@ internal sealed class GitHubRemoteRepository : IRemoteRepository
         return blob.IsSuccess ? BlobSha.Parse(blob.Value.Sha) : Result<BlobSha>.Failure(blob.Error);
     }
 
+    public async Task<Result<Unit>> CreateInitialCommitAsync(
+        VaultPath path,
+        ReadOnlyMemory<byte> content,
+        string message,
+        CancellationToken ct)
+    {
+        var result = await _client.PutContentsAsync(path, content.ToArray(), message, sha: null, ct)
+            .ConfigureAwait(false);
+        return result.IsSuccess
+            ? Result.Success()
+            : Result.Failure(result.Error);
+    }
+
     public async Task<Result<TreeSha>> CreateTreeAsync(
         TreeSha? baseTree,
         IReadOnlyList<TreeChange> changes,

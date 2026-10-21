@@ -36,7 +36,8 @@ public sealed record RemoteTreeSnapshot(IReadOnlyList<RemoteTreeFile> Files, IRe
 /// <summary>A single change applied on top of a base tree (spec 03 §1.4).</summary>
 public abstract record TreeChange(VaultPath Path)
 {
-    public sealed record Upsert(VaultPath Path, BlobSha Sha) : TreeChange(Path);
+    /// <param name="Content">UTF-8 text sent inline in create-tree (spec 06 §6, step 7); null sends <paramref name="Sha"/>.</param>
+    public sealed record Upsert(VaultPath Path, BlobSha Sha, string? Content = null) : TreeChange(Path);
 
     public sealed record Delete(VaultPath Path) : TreeChange(Path);
 }
@@ -100,6 +101,13 @@ public interface IRemoteRepository
     Task<Result<BlobSha>> CreateBlobAsync(ReadOnlyMemory<byte> content, CancellationToken ct);
 
     Task<Result<TreeSha>> CreateTreeAsync(TreeSha? baseTree, IReadOnlyList<TreeChange> changes, CancellationToken ct);
+
+    /// <summary>Creates the first commit of an empty repository through the contents API (spec 06 §6, step 7).</summary>
+    Task<Result<Unit>> CreateInitialCommitAsync(
+        VaultPath path,
+        ReadOnlyMemory<byte> content,
+        string message,
+        CancellationToken ct);
 
     Task<Result<CommitSha>> CreateCommitAsync(
         string message,

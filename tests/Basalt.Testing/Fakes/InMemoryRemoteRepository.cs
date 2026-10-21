@@ -1,3 +1,4 @@
+using System.Text;
 using Basalt.Application.Ports.Remote;
 using Basalt.Domain.Common;
 using Basalt.Domain.Notes;
@@ -25,6 +26,14 @@ public sealed class InMemoryRemoteRepository : IRemoteRepository
     }
 
     public RemoteRepositoryRef Reference { get; }
+
+    public int BlobWrites { get; private set; }
+
+    public int TreeWrites { get; private set; }
+
+    public int CommitWrites { get; private set; }
+
+    public int InitialCommitWrites { get; private set; }
 
     public Task<Result<RemoteHeadCheck>> GetHeadAsync(string? etag, CancellationToken ct)
     {
@@ -110,6 +119,7 @@ public sealed class InMemoryRemoteRepository : IRemoteRepository
         lock (_gate)
         {
             _blobs.TryAdd(sha.ToString(), content.ToArray());
+            BlobWrites++;
         }
 
         return Task.FromResult(Result<BlobSha>.Success(sha));
@@ -143,6 +153,19 @@ public sealed class InMemoryRemoteRepository : IRemoteRepository
                 switch (change)
                 {
                     case TreeChange.Upsert upsert:
+                        if (upsert.Content is { } inline)
+                        {
+                            var bytes = Encoding.UTF8.GetBytes(inline);
+                            if (GitBlobHasher.Compute(bytes) != upsert.Sha)
+                            {
+                                return Task.FromResult(Result<TreeSha>.Failure(new Error(
+                                    RemoteErrors.ValidationFailed,
+                                    "Inline content does not match the declared blob SHA.")));
+                            }
+
+                            _blobs.TryAdd(upsert.Sha.ToString(), bytes);
+                        }
+
                         if (!_blobs.ContainsKey(upsert.Sha.ToString()))
                         {
                             return Task.FromResult(Result<TreeSha>.Failure(
@@ -172,6 +195,7 @@ public sealed class InMemoryRemoteRepository : IRemoteRepository
             }
 
             _trees[tree.ToString()] = files;
+            TreeWrites++;
             return Task.FromResult(Result<TreeSha>.Success(tree));
         }
     }
@@ -227,7 +251,59 @@ public sealed class InMemoryRemoteRepository : IRemoteRepository
             _commits[commit.ToString()] = new InMemoryCommit(
                 commit.ToString(), tree.ToString(), parents.Select(parent => parent.ToString()).ToArray(),
                 message, author.Name, author.Email, when);
+            CommitWrites++;
             return Task.FromResult(Result<CommitSha>.Success(commit));
+        }
+    }
+
+    public Task<Result<Unit>> CreateInitialCommitAsync(
+        VaultPath path,
+        ReadOnlyMemory<byte> content,
+        string message,
+        CancellationToken ct)
+    {
+        ct.ThrowIfCancellationRequested();
+        lock (_gate)
+        {
+            if (_head is not null)
+            {
+                return Task.FromResult(Result<Unit>.Failure(new Error(
+                    RemoteErrors.Conflict,
+                    "The repository is not empty.")));
+            }
+
+            var when = _clock.GetUtcNow();
+            GitSignature signature;
+            CommitSha commit;
+            TreeSha tree;
+            var sha = GitBlobHasher.Compute(content.Span);
+            try
+            {
+                signature = new GitSignature("Basalt Test", "test@basalt.local", when);
+                var files = new Dictionary<VaultPath, BlobSha> { [path] = sha };
+                tree = GitTreeHasher.Compute(files);
+                commit = GitCommitHasher.Compute(tree, [], signature, signature, message);
+                _blobs[sha.ToString()] = content.ToArray();
+                _trees[tree.ToString()] = files;
+            }
+            catch (ArgumentException exception)
+            {
+                return Task.FromResult(Result<Unit>.Failure(new Error(
+                    RemoteErrors.ValidationFailed,
+                    exception.Message)));
+            }
+
+            _commits[commit.ToString()] = new InMemoryCommit(
+                commit.ToString(),
+                tree.ToString(),
+                [],
+                message,
+                signature.Name,
+                signature.Email,
+                when);
+            InitialCommitWrites++;
+            _head = commit.ToString();
+            return Task.FromResult(Result<Unit>.Success(Unit.Value));
         }
     }
 

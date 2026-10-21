@@ -167,25 +167,52 @@ internal sealed class GitHubApiClient
             null,
             ct);
 
-    public Task<Result<GitHubTreeDto>> CreateTreeAsync(
+    public async Task<Result<GitHubTreeDto>> CreateTreeAsync(
         TreeSha? baseTree,
         IReadOnlyList<TreeChange> changes,
         CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(changes);
-        var entries = changes.Select(change => change switch
+        var upserts = changes.OfType<TreeChange.Upsert>().Select(upsert => new CreateTreeEntryRequest(
+            upsert.Path.ToString(),
+            "100644",
+            "blob",
+            upsert.Content is null ? upsert.Sha.ToString() : null,
+            upsert.Content)).ToArray();
+        var deletes = changes.OfType<TreeChange.Delete>().Select(delete => new DeleteTreeEntryRequest(
+            delete.Path.ToString(), "100644", "blob", Sha: null)).ToArray();
+        if (upserts.Length + deletes.Length != changes.Count)
         {
-            TreeChange.Upsert upsert => new CreateTreeEntryRequest(
-                upsert.Path.ToString(), "100644", "blob", upsert.Sha.ToString(), null),
-            TreeChange.Delete delete => new CreateTreeEntryRequest(
-                delete.Path.ToString(), "100644", "blob", null, null),
-            _ => throw new ArgumentException("Unknown tree change.", nameof(changes)),
-        }).ToArray();
-        return SendJsonAsync<GitHubTreeDto>(
-            HttpMethod.Post,
-            $"{RepositoryPath}/git/trees",
-            new CreateTreeRequest(baseTree?.ToString(), entries),
-            ct);
+            throw new ArgumentException("Unknown tree change.", nameof(changes));
+        }
+
+        Result<GitHubTreeDto>? last = null;
+        var current = baseTree;
+        if (upserts.Length > 0)
+        {
+            last = await SendJsonAsync<GitHubTreeDto>(
+                HttpMethod.Post,
+                $"{RepositoryPath}/git/trees",
+                new CreateTreeRequest(current?.ToString(), upserts),
+                ct).ConfigureAwait(false);
+            if (last.Value.IsFailure)
+            {
+                return last.Value;
+            }
+
+            current = TreeSha.Parse(last.Value.Value.Sha).Value;
+        }
+
+        if (deletes.Length > 0 || last is null)
+        {
+            last = await SendJsonAsync<GitHubTreeDto>(
+                HttpMethod.Post,
+                $"{RepositoryPath}/git/trees",
+                new DeleteTreeRequest(current?.ToString(), deletes),
+                ct).ConfigureAwait(false);
+        }
+
+        return last!.Value;
     }
 
     public async Task<Result<byte[]>> GetBlobAsync(BlobSha sha, CancellationToken ct)
@@ -223,13 +250,13 @@ internal sealed class GitHubApiClient
         return SendPageAsync<GitHubCommitListItemDto>($"{RepositoryPath}/commits{query}", ct);
     }
 
-    public Task<Result<GitHubContentDto>> PutContentsAsync(
+    public Task<Result<PutContentsResponseDto>> PutContentsAsync(
         VaultPath path,
         byte[] content,
         string message,
         string? sha,
         CancellationToken ct) =>
-        SendJsonAsync<GitHubContentDto>(
+        SendJsonAsync<PutContentsResponseDto>(
             HttpMethod.Put,
             $"{RepositoryPath}/contents/{EscapePath(path)}",
             new PutContentsRequest(message, Convert.ToBase64String(content), _repository.Branch, sha),

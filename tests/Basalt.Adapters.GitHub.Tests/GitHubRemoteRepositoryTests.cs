@@ -210,6 +210,12 @@ public sealed class GitHubRemoteRepositoryTests : RemoteRepositoryContract
             IReadOnlyList<TreeChange> changes,
             CancellationToken ct) => inner.CreateTreeAsync(baseTree, changes, ct);
 
+        public Task<Result<Unit>> CreateInitialCommitAsync(
+            VaultPath path,
+            ReadOnlyMemory<byte> content,
+            string message,
+            CancellationToken ct) => inner.CreateInitialCommitAsync(path, content, message, ct);
+
         public Task<Result<CommitSha>> CreateCommitAsync(
             string message,
             TreeSha tree,

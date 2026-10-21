@@ -2,6 +2,7 @@ using Basalt.Application.Auth;
 using Basalt.Application.Ports.Auth;
 using Basalt.Application.Ports.Remote;
 using Basalt.Application.Ports.Security;
+using Basalt.Application.Sync;
 using Basalt.Domain.Accounts;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -23,6 +24,7 @@ public static class GitHubAdapterServiceCollectionExtensions
             provider.GetRequiredService<ISecretStore>(),
             provider.GetRequiredService<TimeProvider>()));
         services.TryAddSingleton<GitHubApiClientFactory>();
+        services.TryAddSingleton<IRemoteRepositoryFactory>(provider => new GitHubRemoteRepositoryFactory(provider.GetRequiredService<GitHubApiClientFactory>()));
         services.TryAddSingleton<IRepositoryAdministration>(provider =>
             new GitHubRepositoryAdministration(provider.GetRequiredService<GitHubApiClientFactory>(), host));
         return services;

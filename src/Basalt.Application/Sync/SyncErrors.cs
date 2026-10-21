@@ -8,4 +8,5 @@ public static class SyncErrors
     public const string TreeMismatch = "sync.tree_mismatch";
     public const string ContentMissing = "sync.content_missing";
     public const string NotConfigured = "sync.not_configured";
+    public const string ConfirmationRequired = "sync.confirmation_required";
 }

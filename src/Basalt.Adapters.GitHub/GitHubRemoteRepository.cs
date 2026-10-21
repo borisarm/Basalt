@@ -364,3 +364,4 @@ internal sealed class GitHubRemoteRepository : IRemoteRepository
         RemoteErrors.ValidationFailed,
         $"Zip entry '{entry}' escapes the vault.");
 }
+

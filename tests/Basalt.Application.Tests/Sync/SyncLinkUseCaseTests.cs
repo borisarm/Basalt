@@ -158,6 +158,32 @@ public sealed class SyncLinkUseCaseTests : IAsyncLifetime
 
         result.Error.Code.Should().Be(Basalt.Application.Errors.ErrorCodes.VaultNotOpen);
     }
+    [Fact]
+    public async Task Preview_EqualAndConflictingFiles_AreCounted()
+    {
+        var path = VaultPath.Create("A.md").Value;
+        await _files.WriteAllBytesAsync(path, "local"u8.ToArray(), null, Ct);
+        await _repositories.Create(Account, Ref).CreateInitialCommitAsync(path, "remote"u8.ToArray(), "remote", Ct);
+        var handler = new PreviewSyncLinkHandler(_sessions, _admin, _repositories);
+
+        var result = await handler.HandleAsync(new PreviewSyncLink(Vault, Account, Ref, SyncScope.Default, SyncPolicy.Default), Ct);
+
+        result.Value.Mode.Should().Be(SyncLinkMode.Merge);
+        result.Value.Conflicts.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task Preview_RemoteFileOnly_IsDownload()
+    {
+        await _repositories.Create(Account, Ref).CreateInitialCommitAsync(
+            VaultPath.Create("A.md").Value, "remote"u8.ToArray(), "remote", Ct);
+        var handler = new PreviewSyncLinkHandler(_sessions, _admin, _repositories);
+
+        var result = await handler.HandleAsync(new PreviewSyncLink(Vault, Account, Ref, SyncScope.Default, SyncPolicy.Default), Ct);
+
+        result.Value.Mode.Should().Be(SyncLinkMode.Download);
+        result.Value.RemoteOnly.Should().Be(1);
+    }
     private sealed class NoRunnerFactory : IVaultSyncRunnerFactory
     {
         public IVaultSyncRunner Create(SyncProfile profile) =>

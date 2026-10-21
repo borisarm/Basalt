@@ -31,6 +31,7 @@ public static class PlatformServiceCollectionExtensions
         services.AddSingleton<IRecentFilesStore, JsonRecentFilesStore>();
         services.AddSingleton<Application.Ports.FileSystem.IVaultLocalDataStore, VaultLocalDataStore>();
         services.AddSingleton<ISyncStateStoreFactory, JsonSyncStateStoreFactory>();
+        services.TryAddSingleton<ISyncProfileStore, JsonSyncProfileStore>();
         services.TryAddSingleton<ISecretStore, PlatformSecretStore>();
         return services;
     }

@@ -2,6 +2,8 @@ using Basalt.Application.Sync;
 
 namespace Basalt.Adapters.Platform.Json;
 
+internal sealed record SyncProfileDocument(SyncProfile? Profile);
+
 internal sealed record ManifestEntryDto(string Path, string Sha, long Size);
 
 internal sealed record SyncBaseDto(

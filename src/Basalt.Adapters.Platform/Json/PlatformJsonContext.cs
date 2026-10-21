@@ -28,4 +28,5 @@ internal sealed record VaultConfigDto(VaultId VaultId, VaultSettings Settings);
 [JsonSerializable(typeof(SyncJournalDto))]
 [JsonSerializable(typeof(RemoteTreeDto))]
 [JsonSerializable(typeof(SyncLogEntryDto))]
+[JsonSerializable(typeof(SyncProfileDocument))]
 internal sealed partial class PlatformJsonContext : JsonSerializerContext;

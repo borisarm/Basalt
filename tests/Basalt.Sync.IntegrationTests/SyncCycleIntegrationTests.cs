@@ -131,6 +131,19 @@ public sealed class SyncCycleIntegrationTests : IAsyncLifetime
     }
 
     [Fact]
+    [Trait("Spec", "SYNC-CRLF-BOM")]
+    public async Task CrlfAndBom_ArePreservedOnUpload()
+    {
+        byte[] content = [0xEF, 0xBB, 0xBF, (byte)'a', (byte)'\r', (byte)'\n'];
+        await _files.WriteAllBytesAsync(VaultPath.Create("Notes/CRLF.md").Value, content, null, Ct);
+        await CycleAsync();
+        var head = (await _remote.GetHeadAsync(null, Ct)).Value.Head!;
+        var tree = await _remote.GetTreeAsync(head.Tree, Ct);
+        var file = tree.Value.Files.Single(entry => entry.Path.ToString() == "Notes/CRLF.md");
+        (await _remote.GetBlobAsync(file.Sha, Ct)).Value.Should().Equal(content);
+    }
+
+    [Fact]
     [Trait("Spec", "SYNC-IGNORE-WORKSPACE")]
     public async Task WorkspaceState_IsNeverPublished()
     {

@@ -131,6 +131,20 @@ public sealed class SyncCycleIntegrationTests : IAsyncLifetime
     }
 
     [Fact]
+    [Trait("Spec", "SYNC-BINARY")]
+    public async Task BinaryFile_RoundTripsWithoutTextProcessing()
+    {
+        var content = new byte[] { 0, 1, 2, 255, 0, 42 };
+        await _files.WriteAllBytesAsync(VaultPath.Create("Assets/image.bin").Value, content, null, Ct);
+        var result = await CycleAsync();
+        result.Status.Should().Be(SyncCycleStatus.Published);
+        var head = (await _remote.GetHeadAsync(null, Ct)).Value.Head!;
+        var tree = await _remote.GetTreeAsync(head.Tree, Ct);
+        var file = tree.Value.Files.Single(entry => entry.Path.ToString() == "Assets/image.bin");
+        (await _remote.GetBlobAsync(file.Sha, Ct)).Value.Should().Equal(content);
+    }
+
+    [Fact]
     [Trait("Spec", "SYNC-MERGE")]
     public async Task NonOverlappingTextEdits_MergeWithoutAConflictCopy()
     {

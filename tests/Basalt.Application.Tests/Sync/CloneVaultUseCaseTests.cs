@@ -107,11 +107,14 @@ public sealed class CloneVaultUseCaseTests
         fileSystems.Combine("C:\\vaults", "Notes").Returns("C:\\vaults\\Notes");
         fileSystems.CreateAsync("C:\\vaults\\Notes", Arg.Any<CancellationToken>())
             .Returns(Result<IVaultFileSystem>.Success(files));
+        var configs = Substitute.For<IVaultConfigStore>();
+        configs.SaveVaultConfigAsync(files, Arg.Any<VaultConfig>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Success());
         var registry = Substitute.For<IVaultRegistry>();
         registry.AddAsync(Arg.Any<VaultRegistration>(), Arg.Any<CancellationToken>())
             .Returns(Result.Failure(new Error("vault.already_registered", "exists")));
         var handler = new CloneVaultFromRepositoryHandler(
-            fileSystems, Substitute.For<IVaultConfigStore>(), registry, new InMemorySyncProfileStore(), factory,
+            fileSystems, configs, registry, new InMemorySyncProfileStore(), factory,
             new SequentialIdGenerator(), new FakeClock());
 
         var result = await handler.HandleAsync(Command(), Ct);

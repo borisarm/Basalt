@@ -31,6 +31,8 @@ public sealed class SyncCycleIntegrationTests : IAsyncLifetime
     private VaultSyncEngine _engine = null!;
     private IVaultFileSystem _files = null!;
     private SyncProfile _profile = null!;
+    private VaultId _vault;
+    private ISyncStateStore _state = null!;
 
     public async ValueTask InitializeAsync()
     {
@@ -41,12 +43,12 @@ public sealed class SyncCycleIntegrationTests : IAsyncLifetime
 
         var location = Path.Combine(_vaultRoot.Path, "vault");
         _files = (await _provider.GetRequiredService<IVaultFileSystemFactory>().CreateAsync(location, Ct)).Value;
-        var vault = new VaultId(Guid.NewGuid());
+        _vault = new VaultId(Guid.NewGuid());
         var configs = _provider.GetRequiredService<IVaultConfigStore>();
-        (await configs.SaveVaultConfigAsync(_files, new VaultConfig(vault, VaultSettings.Default), Ct))
+        (await configs.SaveVaultConfigAsync(_files, new VaultConfig(_vault, VaultSettings.Default), Ct))
             .IsSuccess.Should().BeTrue();
         _profile = new SyncProfile(
-            vault,
+            _vault,
             new GitHubAccountId(Guid.NewGuid()),
             Ref,
             true,
@@ -55,11 +57,12 @@ public sealed class SyncCycleIntegrationTests : IAsyncLifetime
             SyncPolicy.Default,
             SyncScope.Default,
             new CommitSettings());
+        _state = _provider.GetRequiredService<ISyncStateStoreFactory>().Create(_vault);
         _engine = new VaultSyncEngine(
-            vault,
+            _vault,
             _files,
             _remote,
-            _provider.GetRequiredService<ISyncStateStoreFactory>().Create(vault),
+            _state,
             _provider.GetRequiredService<IEventBus>(),
             _provider.GetRequiredService<IClock>(),
             _provider.GetRequiredService<IDeviceInfo>(),
@@ -128,6 +131,78 @@ public sealed class SyncCycleIntegrationTests : IAsyncLifetime
         }
 
         files.Should().Contain(path => path.Contains(" (conflict ", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    [Trait("Spec", "S07")]
+    public async Task PreferDelete_RemovesTheLocallyModifiedFile()
+    {
+        await WriteAsync("Notes/D.md", "base");
+        await CycleAsync();
+        await CommitChangesAsync(new TreeChange.Delete(VaultPath.Create("Notes/D.md").Value));
+        await WriteAsync("Notes/D.md", "local edit");
+
+        var result = await CycleAsync(SyncPolicy.Default with { DeleteVsModify = DeleteConflictPolicy.PreferDelete });
+
+        result.Status.Should().Be(SyncCycleStatus.Downloaded);
+        (await _files.StatAsync(VaultPath.Create("Notes/D.md").Value, Ct)).IsFailure.Should().BeTrue();
+    }
+
+    [Fact]
+    [Trait("Spec", "S20")]
+    public async Task FileAboveTheSizeLimit_IsNotPublished()
+    {
+        await WriteAsync("big.bin", "0123456789");
+
+        await CycleAsync(SyncPolicy.Default with { MaxFileSizeBytes = 5 });
+
+        var head = (await _remote.GetHeadAsync(null, Ct)).Value.Head;
+        if (head is not null)
+        {
+            var tree = await _remote.GetTreeAsync(head.Tree, Ct);
+            tree.Value.Files.Should().NotContain(file => file.Path.ToString() == "big.bin");
+        }
+    }
+
+    [Fact]
+    [Trait("Spec", "S21")]
+    public async Task EmptyRepository_IsInitializedWithTheVaultConfig()
+    {
+        await CycleAsync();
+
+        var head = (await _remote.GetHeadAsync(null, Ct)).Value.Head;
+        head.Should().NotBeNull();
+        var tree = await _remote.GetTreeAsync(head!.Tree, Ct);
+        tree.Value.Files.Should().Contain(file => file.Path.ToString() == ".basalt/vault.json");
+    }
+
+    [Fact]
+    [Trait("Spec", "S31")]
+    public async Task LostBase_DegradesToAMergeWithoutDuplicatingData()
+    {
+        await WriteAsync("Notes/A.md", "# A");
+        await CycleAsync();
+        var head = (await _remote.GetHeadAsync(null, Ct)).Value.Head!.Commit;
+        (await _state.SaveBaseAsync(SyncBase.Empty, Ct)).IsSuccess.Should().BeTrue();
+
+        var result = await CycleAsync();
+
+        result.Status.Should().Be(SyncCycleStatus.UpToDate);
+        (await _remote.GetHeadAsync(null, Ct)).Value.Head!.Commit.Should().Be(head);
+        (await _files.ReadAllTextAsync(VaultPath.Create("Notes/A.md").Value, Ct)).Value.Should().Be("# A");
+    }
+
+    [Fact]
+    [Trait("Spec", "S29")]
+    public async Task NfdFileName_IsPublishedAsNfc()
+    {
+        await WriteAsync("Notes/Cafe\u0301.md", "# Cafe");
+
+        await CycleAsync();
+
+        var head = (await _remote.GetHeadAsync(null, Ct)).Value.Head!;
+        var tree = await _remote.GetTreeAsync(head.Tree, Ct);
+        tree.Value.Files.Should().Contain(file => file.Path.ToString() == "Notes/Caf\u00e9.md");
     }
 
     [Fact]
@@ -288,9 +363,11 @@ public sealed class SyncCycleIntegrationTests : IAsyncLifetime
         var tree = await _remote.GetTreeAsync(head.Tree, Ct);
         tree.Value.Files.Should().NotContain(file => file.Path == path);
     }
-    private Task<SyncCycleResult> CycleAsync() =>
+    private Task<SyncCycleResult> CycleAsync() => CycleAsync(SyncPolicy.Default);
+
+    private Task<SyncCycleResult> CycleAsync(SyncPolicy policy) =>
         _engine.RunAsync(
-            new SyncCycleRequest(_profile, true, true, new CommitAuthor("Test", "test@example.com"), "Vault"),
+            new SyncCycleRequest(_profile with { Policy = policy }, true, true, new CommitAuthor("Test", "test@example.com"), "Vault"),
             Ct);
 
     private async Task WriteAsync(string path, string content)

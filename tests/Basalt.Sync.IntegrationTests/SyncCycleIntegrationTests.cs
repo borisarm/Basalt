@@ -131,6 +131,22 @@ public sealed class SyncCycleIntegrationTests : IAsyncLifetime
     }
 
     [Fact]
+    [Trait("Spec", "SYNC-MERGE")]
+    public async Task NonOverlappingTextEdits_MergeWithoutAConflictCopy()
+    {
+        await WriteAsync("Notes/M.md", "one\n");
+        await CycleAsync();
+        await WriteAsync("Notes/M.md", "one\ntwo\n");
+        await CommitRemoteAsync(("Notes/M.md", "zero\none\n"));
+
+        var result = await CycleAsync();
+
+        result.Status.Should().BeOneOf(SyncCycleStatus.Merged, SyncCycleStatus.Published);
+        var text = (await _files.ReadAllTextAsync(VaultPath.Create("Notes/M.md").Value, Ct)).Value;
+        text.Should().Contain("zero").And.Contain("two").And.NotContain("<<<<<<<");
+    }
+
+    [Fact]
     [Trait("Spec", "SYNC-DELETE-REMOTE")]
     public async Task RemoteDeletion_IsAppliedLocally()
     {

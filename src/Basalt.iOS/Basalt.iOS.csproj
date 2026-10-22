@@ -10,7 +10,6 @@
     <ApplicationDisplayVersion>0.1</ApplicationDisplayVersion>
     <ApplicationVersion>1</ApplicationVersion>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-    <IsTrimmable>true</IsTrimmable>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../Basalt.Composition/Basalt.Composition.csproj" />

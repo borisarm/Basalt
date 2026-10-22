@@ -8,7 +8,7 @@ Registro de avance del plan (`docs/specs/10-plan-de-implementacion.md`). Platafo
 - [x] T0.1 Estructura de la solución — 2026-10-19. SDK 11 RC + TFM net10.0 (ADR-0008); Verify sustituido por snapshots propios (ADR-0009); ADRs movidos a docs/specs/adr; proyecto extra `Basalt.Adapters.Platform.Tests`; `Basalt.iOS` se crea en T0.4/T10.1. Verificado solo en Windows (macOS en CI).
 - [x] T0.2 Tests de arquitectura — 2026-10-19. R1–R7, matriz de módulos (ArchUnitNET), escáner IL de APIs prohibidas y convenciones, con tests canario por regla. El test DI y "puerto sin fake/contrato" se añaden cuando existan (T6.1 / Fase 2).
 - [x] T0.3 CI — 2026-10-19. ci.yml (matriz Windows/macOS/Linux, UI, simulación, coverage-gate con build/coverage-gate.py, arquitectura, iOS condicionado a T10.1, seguridad, formato) y nightly.yml (Stryker, simulación 10 000, Live gated, benchmarks).
-- [ ] T0.4 Spike de plataforma (iOS + AvaloniaEdit) — **PARCIAL / BLOQUEADO (requiere macOS)**: ADR-0007 aceptado (headless OK con xUnit v3 vía `Avalonia.Headless`); AvaloniaEdit 12 verificado en headless; validación en simulador iOS pendiente → ADR-0006 provisional (TextBox en iOS). El head iOS se crea en T10.1.
+- [ ] T0.4 Spike de plataforma (iOS + AvaloniaEdit) — **PARCIAL**: ADR-0007 aceptado (headless OK con xUnit v3 vía `Avalonia.Headless`); AvaloniaEdit 12 verificado en headless; el head iOS arranca en el simulador iPhone 17 Pro (iOS 26.5) con Avalonia+Skia (T10.1), pero la validación táctil de AvaloniaEdit en iOS sigue pendiente ⇒ ADR-0006 provisional (TextBox en iOS).
 - [x] T0.5 Basalt.Testing base — 2026-10-19. Result/Result<T>/Error/Unit en Domain.Common (cobertura 100 %, mutación 100 %); Basalt.Testing con TempDirectory, Snapshot (ADR-0009), A, ContractTest<T>. Stryker funciona con el runner `mtp` (stryker-config.json). FakeClock se crea con el puerto IClock (T3.1).
 - [x] T0.6 Trazabilidad — 2026-10-19. SpecTraceabilityTests en modo informe (escanea F-x.y, S01–S32, SYNC-ROW-n, SYNC-P1..5 y NFR automatizables frente a [Trait("Spec")] en el código de tests). Estricto con BASALT_TRACE_STRICT=1; se activará por defecto en T9.10.
 
@@ -114,7 +114,7 @@ Registro de avance del plan (`docs/specs/10-plan-de-implementacion.md`). Platafo
 
 ## Fase 10 — iOS
 
-- [ ] T10.1 Head iOS
+- [x] T10.1 Head iOS — 2026-10-22. `Basalt.iOS` (`net10.0-ios`): `Program` + `AppDelegate` con `AvaloniaAppDelegate` (lifetime de vista única), `MainView` en `Basalt.UI` con `ViewLocator` y toasts, raíz de composición iOS (core, Apple adapter, Presentation, UI, `IWindowService` propio de una sola ventana), `ApplePlatformPaths` (Documents/Basalt para vaults), `AppleKeychainStore` con `SecItem*` y `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`, `AppleConnectivityMonitor` (`NWPathMonitor` en iOS, `NetworkChange` en macOS), `IConnectivityMonitor` con fake y contrato, `Info.plist` con Files/background/encryption, y `SkiaSharp.NativeAssets.iOS`. Verificado en macOS: build 0 warnings y arranque real en simulador iPhone 17 Pro mostrando la pantalla de vaults. ADR-0010 (SDK/workload/Skia). El head queda fuera de `Basalt.slnx` (CI lo compila en `build-ios`). Pendiente para T10.2/T10.3: navegación, ajustes/sign-in en iOS y tareas en segundo plano.
 - [ ] T10.2 Vistas iPhone
 - [ ] T10.3 Ciclo de vida y sync en segundo plano
 - [ ] T10.4 Tests

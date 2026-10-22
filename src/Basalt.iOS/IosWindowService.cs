@@ -1,7 +1,7 @@
+using Basalt.Application.Vaults;
 using Basalt.Domain.Vaults;
 using Basalt.Presentation.Diff;
 using Basalt.Presentation.Shell;
-using Basalt.Presentation.Vaults;
 
 namespace Basalt.iOS;
 

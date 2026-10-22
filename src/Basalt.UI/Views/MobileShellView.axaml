@@ -1,0 +1,34 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:shell="clr-namespace:Basalt.Presentation.Shell;assembly=Basalt.Presentation"
+             xmlns:vaults="clr-namespace:Basalt.Presentation.Vaults;assembly=Basalt.Presentation"
+             xmlns:workspace="clr-namespace:Basalt.Presentation.Workspace;assembly=Basalt.Presentation"
+             xmlns:converters="clr-namespace:Avalonia.Data.Converters;assembly=Avalonia.Base"
+             xmlns:views="clr-namespace:Basalt.UI.Views"
+             xmlns:ui="clr-namespace:Basalt.UI"
+             xmlns:l="clr-namespace:Basalt.UI.Localization"
+             x:Class="Basalt.UI.Views.MobileShellView"
+             x:DataType="shell:ShellViewModel">
+  <!-- Spec 07 §4: vault list → workspace; the workspace adapts between iPhone stack and iPad columns. -->
+  <DockPanel Background="{DynamicResource BasaltBackgroundBrush}">
+    <Border DockPanel.Dock="Top" Background="{DynamicResource BasaltSurfaceAltBrush}" Padding="8,6"
+            IsVisible="{Binding ActiveVault, Converter={x:Static converters:ObjectConverters.IsNotNull}}">
+      <Grid ColumnDefinitions="Auto,*">
+        <Button x:Name="VaultsButton" Content="{l:Loc Mobile.Vaults}" Command="{Binding CloseVaultCommand}" />
+        <TextBlock Grid.Column="1" Text="{Binding Title}" VerticalAlignment="Center" Margin="8,0"
+                   TextTrimming="CharacterEllipsis" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
+      </Grid>
+    </Border>
+    <ContentControl Content="{Binding Content}">
+      <ContentControl.DataTemplates>
+        <DataTemplate DataType="{x:Type vaults:VaultPickerViewModel}">
+          <views:VaultPickerView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type workspace:WorkspaceViewModel}">
+          <views:AdaptiveWorkspaceView />
+        </DataTemplate>
+        <ui:ViewLocator />
+      </ContentControl.DataTemplates>
+    </ContentControl>
+  </DockPanel>
+</UserControl>

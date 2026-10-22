@@ -117,6 +117,23 @@
   <data name="Menu.NewWindow" xml:space="preserve"><value>Nueva ventana</value></data>
   <data name="Menu.QuickSwitcher" xml:space="preserve"><value>Selector rápido…</value></data>
   <data name="Menu.View" xml:space="preserve"><value>Ver</value></data>
+  <data name="Mobile.Back" xml:space="preserve"><value>Atrás</value></data>
+  <data name="Mobile.Close" xml:space="preserve"><value>Cerrar</value></data>
+  <data name="Mobile.DailyNote" xml:space="preserve"><value>Nota diaria</value></data>
+  <data name="Mobile.Explorer" xml:space="preserve"><value>Explorador</value></data>
+  <data name="Mobile.HideKeyboard" xml:space="preserve"><value>Ocultar teclado</value></data>
+  <data name="Mobile.Indent" xml:space="preserve"><value>Sangrar</value></data>
+  <data name="Mobile.InsertHeading" xml:space="preserve"><value>Insertar encabezado</value></data>
+  <data name="Mobile.InsertLink" xml:space="preserve"><value>Insertar enlace</value></data>
+  <data name="Mobile.InsertTask" xml:space="preserve"><value>Insertar tarea</value></data>
+  <data name="Mobile.More" xml:space="preserve"><value>Más</value></data>
+  <data name="Mobile.NewNote" xml:space="preserve"><value>Nueva nota</value></data>
+  <data name="Mobile.Outdent" xml:space="preserve"><value>Desangrar</value></data>
+  <data name="Mobile.Panels" xml:space="preserve"><value>Paneles</value></data>
+  <data name="Mobile.Reading" xml:space="preserve"><value>Lectura</value></data>
+  <data name="Mobile.Redo" xml:space="preserve"><value>Rehacer</value></data>
+  <data name="Mobile.Undo" xml:space="preserve"><value>Deshacer</value></data>
+  <data name="Mobile.Vaults" xml:space="preserve"><value>‹ Vaults</value></data>
   <data name="Panel.Refresh" xml:space="preserve"><value>Actualizar</value></data>
   <data name="Panel.backlinks" xml:space="preserve"><value>Enlaces entrantes</value></data>
   <data name="Panel.bookmarks" xml:space="preserve"><value>Marcadores</value></data>

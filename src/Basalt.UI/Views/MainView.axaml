@@ -2,15 +2,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:shell="clr-namespace:Basalt.Presentation.Shell;assembly=Basalt.Presentation"
              xmlns:common="clr-namespace:Basalt.Presentation.Common;assembly=Basalt.Presentation"
-             xmlns:ui="clr-namespace:Basalt.UI"
+             xmlns:views="clr-namespace:Basalt.UI.Views"
              x:Class="Basalt.UI.Views.MainView"
              x:DataType="shell:ShellViewModel">
   <!-- Spec 07 §4: single-view root. T10.2 replaces the desktop-style content with the iPhone/iPad navigation. -->
-  <UserControl.DataTemplates>
-    <ui:ViewLocator />
-  </UserControl.DataTemplates>
   <Panel Background="{DynamicResource BasaltBackgroundBrush}">
-    <ContentControl Content="{Binding Content}" />
+    <views:MobileShellView />
     <ItemsControl x:Name="Toasts" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="{StaticResource BasaltSpacingXl}">
       <ItemsControl.ItemTemplate>
         <DataTemplate x:DataType="common:Notification">

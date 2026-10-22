@@ -1,0 +1,76 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Basalt.Presentation.Workspace;assembly=Basalt.Presentation"
+             xmlns:note="clr-namespace:Basalt.Presentation.Workspace;assembly=Basalt.Presentation"
+             xmlns:views="clr-namespace:Basalt.UI.Views"
+             xmlns:ui="clr-namespace:Basalt.UI"
+             xmlns:l="clr-namespace:Basalt.UI.Localization"
+             x:Class="Basalt.UI.Views.MobileWorkspaceView"
+             x:DataType="vm:WorkspaceViewModel">
+  <!-- Spec 07 §4: iPhone navigation stack (explorer → note), bottom bar and bottom sheets. -->
+  <Grid RowDefinitions="Auto,*,Auto">
+    <Border Grid.Row="0" Background="{DynamicResource BasaltSurfaceAltBrush}" Padding="8,6">
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        <Button x:Name="ExplorerButton" Content="☰" Click="OnShowExplorer"
+                AutomationProperties.Name="{l:Loc Mobile.Explorer}" ToolTip.Tip="{l:Loc Mobile.Explorer}" />
+        <TextBlock Grid.Column="1" Text="{Binding Layout.ActiveGroup.ActiveTab.Title}" VerticalAlignment="Center"
+                   Margin="8,0" TextTrimming="CharacterEllipsis" FontWeight="SemiBold"
+                   Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
+        <Button Grid.Column="2" x:Name="PanelsButton" Content="⋯" Click="OnShowPanels"
+                AutomationProperties.Name="{l:Loc Mobile.More}" />
+      </Grid>
+    </Border>
+
+    <Panel Grid.Row="1">
+      <ContentControl x:Name="NoteHost" Content="{Binding Layout.ActiveGroup.ActiveTab}">
+        <ContentControl.DataTemplates>
+          <DataTemplate DataType="{x:Type note:NoteTabViewModel}">
+            <views:MobileNoteView />
+          </DataTemplate>
+          <ui:ViewLocator />
+        </ContentControl.DataTemplates>
+      </ContentControl>
+
+      <!-- Explorer / search / bookmarks / tags as a full page of the navigation stack. -->
+      <Border x:Name="PageOverlay" IsVisible="False" Background="{DynamicResource BasaltBackgroundBrush}">
+        <DockPanel>
+          <Border DockPanel.Dock="Top" Background="{DynamicResource BasaltSurfaceAltBrush}" Padding="8,6">
+            <Grid ColumnDefinitions="Auto,*">
+              <Button x:Name="PageBack" Content="‹" Click="OnPageBack" AutomationProperties.Name="{l:Loc Mobile.Back}" />
+              <TextBlock x:Name="PageTitle" Grid.Column="1" VerticalAlignment="Center" Margin="8,0" FontWeight="SemiBold"
+                         Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
+            </Grid>
+          </Border>
+          <ContentControl x:Name="PageHost" Margin="8" />
+        </DockPanel>
+      </Border>
+
+      <!-- Right panels and the "more" menu as a bottom sheet. -->
+      <Border x:Name="Sheet" IsVisible="False" VerticalAlignment="Bottom" Background="{DynamicResource BasaltSurfaceBrush}"
+              BorderBrush="{DynamicResource BasaltBorderBrush}" BorderThickness="0,1,0,0" CornerRadius="12,12,0,0"
+              MaxHeight="560">
+        <DockPanel>
+          <Border DockPanel.Dock="Top" Background="{DynamicResource BasaltSurfaceAltBrush}" Padding="8,6" CornerRadius="12,12,0,0">
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock x:Name="SheetTitle" VerticalAlignment="Center" FontWeight="SemiBold"
+                         Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
+              <Button Grid.Column="1" x:Name="SheetClose" Content="✕" Click="OnCloseSheet"
+                      AutomationProperties.Name="{l:Loc Mobile.Close}" />
+            </Grid>
+          </Border>
+          <ContentControl x:Name="SheetHost" Margin="8" />
+        </DockPanel>
+      </Border>
+    </Panel>
+
+    <Border Grid.Row="2" Background="{DynamicResource BasaltSurfaceAltBrush}" Padding="4">
+      <Grid ColumnDefinitions="*,*,*,*,*">
+        <Button x:Name="FilesTab" Grid.Column="0" Content="{l:Loc Mobile.Explorer}" Click="OnShowExplorer" />
+        <Button x:Name="SearchTab" Grid.Column="1" Content="{l:Loc Panel.search}" Click="OnShowSearch" />
+        <Button x:Name="DailyTab" Grid.Column="2" Content="{l:Loc Mobile.DailyNote}" Command="{Binding OpenDailyNoteCommand}" />
+        <Button x:Name="NewNoteTab" Grid.Column="3" Content="{l:Loc Mobile.NewNote}" Click="OnNewNote" />
+        <Button x:Name="MoreTab" Grid.Column="4" Content="{l:Loc Mobile.More}" Click="OnShowMore" />
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

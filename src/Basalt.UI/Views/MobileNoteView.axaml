@@ -1,0 +1,47 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Basalt.Presentation.Workspace;assembly=Basalt.Presentation"
+             xmlns:editor="clr-namespace:Basalt.UI.Editor"
+             xmlns:reading="clr-namespace:Basalt.UI.Reading"
+             xmlns:l="clr-namespace:Basalt.UI.Localization"
+             x:Class="Basalt.UI.Views.MobileNoteView"
+             x:DataType="vm:NoteTabViewModel">
+  <!-- iPhone/iPad editor (ADR-0006) with the keyboard accessory bar of spec 07 §4. -->
+  <DockPanel>
+    <Border DockPanel.Dock="Top" Background="{DynamicResource BasaltSurfaceAltBrush}" Padding="8,6">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                   Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
+        <Button Grid.Column="1" x:Name="ReadingButton" Content="{l:Loc Mobile.Reading}"
+                Command="{Binding ToggleReadingModeCommand}" />
+      </Grid>
+    </Border>
+    <Border DockPanel.Dock="Bottom" Background="{DynamicResource BasaltSurfaceAltBrush}" Padding="4"
+            IsVisible="{Binding !IsReadingMode}">
+      <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+        <StackPanel Orientation="Horizontal" Spacing="4">
+          <Button x:Name="InsertLink" Content="[[" Click="OnInsertLink"
+                  AutomationProperties.Name="{l:Loc Mobile.InsertLink}" />
+          <Button x:Name="InsertHeading" Content="#" Click="OnInsertHeading"
+                  AutomationProperties.Name="{l:Loc Mobile.InsertHeading}" />
+          <Button x:Name="InsertTask" Content="- [ ]" Click="OnInsertTask"
+                  AutomationProperties.Name="{l:Loc Mobile.InsertTask}" />
+          <Button x:Name="Undo" Content="↶" Click="OnUndo"
+                  AutomationProperties.Name="{l:Loc Mobile.Undo}" />
+          <Button x:Name="Redo" Content="↷" Click="OnRedo"
+                  AutomationProperties.Name="{l:Loc Mobile.Redo}" />
+          <Button x:Name="Indent" Content="→" Click="OnIndent"
+                  AutomationProperties.Name="{l:Loc Mobile.Indent}" />
+          <Button x:Name="Outdent" Content="←" Click="OnOutdent"
+                  AutomationProperties.Name="{l:Loc Mobile.Outdent}" />
+          <Button x:Name="HideKeyboard" Content="⌨" Click="OnHideKeyboard"
+                  AutomationProperties.Name="{l:Loc Mobile.HideKeyboard}" />
+        </StackPanel>
+      </ScrollViewer>
+    </Border>
+    <Panel>
+      <editor:MarkdownTextBoxEditor x:Name="MobileEditor" IsVisible="{Binding !IsReadingMode}" />
+      <reading:RenderDocumentView IsVisible="{Binding IsReadingMode}" Tab="{Binding}" Document="{Binding Rendered}" />
+    </Panel>
+  </DockPanel>
+</UserControl>

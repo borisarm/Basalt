@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using Basalt.Application.Abstractions;
 using Basalt.Application.Errors;
+using Basalt.Application.Templates;
 using Basalt.Application.Vaults;
 using Basalt.Application.Workspace;
 using Basalt.Domain.Common;
@@ -357,7 +358,8 @@ public sealed partial class PaneLayoutViewModel : ViewModelBase
 public sealed record WorkspaceUseCases(
     ICommandHandler<RecordRecentFile, Unit> RecordRecent,
     IQueryHandler<LoadWorkspace, WorkspaceState?> Load,
-    ICommandHandler<SaveWorkspace, Unit> Save);
+    ICommandHandler<SaveWorkspace, Unit> Save,
+    ICommandHandler<OpenDailyNote, DailyNote>? DailyNote = null);
 
 /// <summary>
 /// One open vault (spec 07 §2): its panes and tabs, navigation (<see cref="IWorkspaceNavigator"/>), recent files,
@@ -655,6 +657,21 @@ public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNaviga
     private Task<Result<Unit>> OpenConflictsAsync(CancellationToken ct) =>
         RunAsync(token => Layout.ActiveGroup.OpenKindAsync(Basalt.Presentation.Sync.ConflictCenterViewModel.KindId, token));
 
+    /// <summary>Opens (creating it if needed) today's daily note (F-009.1).</summary>
+    [RelayCommand]
+    private async Task OpenDailyNoteAsync(CancellationToken ct)
+    {
+        if (_useCases.DailyNote is not { } daily)
+        {
+            return;
+        }
+
+        var note = await RunAsync(token => daily.HandleAsync(new OpenDailyNote(_vault.Id), token)).ConfigureAwait(true);
+        if (note.IsSuccess)
+        {
+            await OpenFileAsync(new OpenRequest(note.Value.Path), ct).ConfigureAwait(true);
+        }
+    }
     /// <summary>Opens the version history of the active note (F-015.7).</summary>
     [RelayCommand]
     private Task<Result<Unit>> OpenHistoryAsync(CancellationToken ct) =>

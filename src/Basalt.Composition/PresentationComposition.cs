@@ -14,6 +14,7 @@ using Basalt.Application.Ports.Remote;
 using Basalt.Application.Ports.Storage;
 using Basalt.Application.Search;
 using Basalt.Application.Sync;
+using Basalt.Application.Templates;
 using Basalt.Application.Tags;
 using Basalt.Application.Vaults;
 using Basalt.Application.Workspace;
@@ -203,7 +204,7 @@ public sealed class WorkspaceFactory(IServiceProvider services)
                     }),
             ],
             messenger,
-            new WorkspaceUseCases(Get<ICommandHandler<RecordRecentFile, Unit>>(), Get<IQueryHandler<LoadWorkspace, WorkspaceState?>>(), Get<ICommandHandler<SaveWorkspace, Unit>>()),
+            new WorkspaceUseCases(Get<ICommandHandler<RecordRecentFile, Unit>>(), Get<IQueryHandler<LoadWorkspace, WorkspaceState?>>(), Get<ICommandHandler<SaveWorkspace, Unit>>(), Get<ICommandHandler<OpenDailyNote, DailyNote>>()),
             Get<IWindowService>());
 
         workspace.Sync = new SyncStatusViewModel(common, new SyncStatusUseCases(

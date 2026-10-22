@@ -3,7 +3,7 @@ using Avalonia.Markup.Xaml;
 using Basalt.Presentation.Shell;
 using Basalt.UI.Services;
 
-namespace Basalt.iOS;
+namespace Basalt.UI.Views;
 
 /// <summary>Root view of the single-view iOS app (spec 07 §4).</summary>
 public partial class MainView : UserControl

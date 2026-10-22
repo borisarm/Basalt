@@ -40,7 +40,7 @@ internal static class IosComposition
         {
             if (app.ApplicationLifetime is ISingleViewApplicationLifetime single)
             {
-                single.MainView = new MainView(
+                single.MainView = new Basalt.UI.Views.MainView(
                     services.GetRequiredService<ShellFactory>().Create(),
                     services.GetRequiredService<NotificationService>());
             }

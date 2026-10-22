@@ -4,7 +4,8 @@
              xmlns:common="clr-namespace:Basalt.Presentation.Common;assembly=Basalt.Presentation"
              xmlns:views="clr-namespace:Basalt.UI.Views"
              x:Class="Basalt.UI.Views.MainView"
-             x:DataType="shell:ShellViewModel">
+             x:DataType="shell:ShellViewModel"
+             TopLevel.AutoSafeAreaPadding="True">
   <!-- Spec 07 §4: single-view root. T10.2 replaces the desktop-style content with the iPhone/iPad navigation. -->
   <Panel Background="{DynamicResource BasaltBackgroundBrush}">
     <views:MobileShellView />

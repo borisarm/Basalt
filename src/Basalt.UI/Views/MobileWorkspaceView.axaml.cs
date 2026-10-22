@@ -15,6 +15,7 @@ public partial class MobileWorkspaceView : UserControl
 {
     private WorkspaceViewModel? _workspace;
     private SettingsViewModel? _settings;
+    private TopLevel? _top;
 
     public MobileWorkspaceView()
     {
@@ -23,6 +24,12 @@ public partial class MobileWorkspaceView : UserControl
         AttachedToVisualTree += (_, _) =>
         {
             Watch();
+            _top = TopLevel.GetTopLevel(this);
+            if (_top is not null)
+            {
+                _top.BackRequested += OnBackRequested;
+            }
+
             if (_workspace?.ActiveFile is null)
             {
                 ShowExplorer();
@@ -33,6 +40,11 @@ public partial class MobileWorkspaceView : UserControl
             Unwatch();
             _settings?.Dispose();
             _settings = null;
+            if (_top is not null)
+            {
+                _top.BackRequested -= OnBackRequested;
+                _top = null;
+            }
         };
     }
 
@@ -85,6 +97,24 @@ public partial class MobileWorkspaceView : UserControl
         {
             _ = explorer.NewNoteCommand.ExecuteAsync(null);
         }
+    }
+
+    private void OnBackRequested(object? sender, RoutedEventArgs e)
+    {
+        if (Sheet.IsVisible)
+        {
+            Sheet.IsVisible = false;
+        }
+        else if (PageOverlay.IsVisible)
+        {
+            OnPageBack(sender, e);
+        }
+        else
+        {
+            ShowExplorer();
+        }
+
+        e.Handled = true;
     }
 
     private void OnPageBack(object? sender, RoutedEventArgs e)

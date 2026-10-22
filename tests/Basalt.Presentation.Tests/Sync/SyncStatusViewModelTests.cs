@@ -69,4 +69,30 @@ public sealed class SyncStatusViewModelTests
 
         await _pause.Received(1).HandleAsync(Arg.Any<PauseSync>(), Arg.Any<CancellationToken>());
     }
+
+    [Fact]
+    [Trait("Spec", "F-015.4")]
+    public async Task Summary_ShowsTheStateAndHowLongAgo()
+    {
+        _vm.Attach(Vault);
+
+        await _vm.RefreshAsync();
+
+        _vm.Summary.Should().Be("Synced just now");
+    }
+
+    [Fact]
+    [Trait("Spec", "F-015.4")]
+    public async Task Summary_ShowsConflicts()
+    {
+        _status.HandleAsync(Arg.Any<GetSyncStatus>(), Arg.Any<CancellationToken>())
+            .Returns(Result<SyncStatusView>.Success(new SyncStatusView(
+                Vault, SyncState.Error, false, null, null, Now, null, 1, Conflicts: 2)));
+        _vm.Attach(Vault);
+
+        await _vm.RefreshAsync();
+
+        _vm.HasConflicts.Should().BeTrue();
+        _vm.ConflictSummary.Should().Be("Conflicts (2)");
+    }
 }

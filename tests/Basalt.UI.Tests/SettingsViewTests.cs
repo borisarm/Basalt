@@ -60,7 +60,7 @@ public sealed class SettingsViewTests
         LocalizationSource.Instance["Settings.Hotkeys"].Should().Be("Hotkeys");
         var view = window.GetVisualDescendants().OfType<SettingsView>().Single();
 
-        Texts(view).Should().Contain(["General", "Editor", "Files and links", "Appearance", "Hotkeys", "Daily notes", "Templates", "About"]);
+        Texts(view).Should().Contain(["General", "Editor", "Files and links", "Appearance", "Hotkeys", "Daily notes", "Templates", "Accounts", "Sync", "About"]);
 
         Find<ComboBox>(view, "Language").SelectedIndex = 2;
         await SettleAsync();
@@ -85,6 +85,19 @@ public sealed class SettingsViewTests
             .RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         await SettleAsync();
         (await store.GetAsync(Ct)).Hotkeys[row.CommandId].Should().Be("Ctrl+Alt+N");
+
+        window.Close();
+    });
+
+    [Fact]
+    [Trait("Spec", "F-015")]
+    public Task Settings_ShowAccountsAndSyncSections() => Headless.RunAsync(async () =>
+    {
+        await using var v = await ComposedVault.CreateAsync(new Dictionary<string, string>());
+        var (window, _) = await OpenSettingsAsync(v);
+        var view = window.GetVisualDescendants().OfType<SettingsView>().Single();
+
+        Texts(view).Should().Contain(["Accounts", "No GitHub account is signed in on this device.", "Sync", "This vault is not syncing yet."]);
 
         window.Close();
     });

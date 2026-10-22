@@ -6,6 +6,7 @@
              xmlns:ui="clr-namespace:Basalt.UI"
              xmlns:views="clr-namespace:Basalt.UI.Views"
              xmlns:o="clr-namespace:Basalt.Presentation.Overlays;assembly=Basalt.Presentation"
+             xmlns:syncvm="clr-namespace:Basalt.Presentation.Sync;assembly=Basalt.Presentation"
              x:Class="Basalt.UI.Views.WorkspaceView"
              x:DataType="vm:WorkspaceViewModel">
   <!-- Spec 07 §3: ribbon | left sidebar | panes with tabs | right sidebar, status bar at the bottom. -->
@@ -15,8 +16,12 @@
   <DockPanel>
     <Border DockPanel.Dock="Bottom" x:Name="StatusBar" Background="{DynamicResource BasaltSurfaceBrush}"
             BorderBrush="{DynamicResource BasaltBorderBrush}" BorderThickness="0,1,0,0" Padding="{StaticResource BasaltSpacingS}">
-      <TextBlock x:Name="ActiveFileText" Text="{Binding ActiveFile, FallbackValue=''}" FontSize="{StaticResource BasaltFontSizeSmall}"
-                 Foreground="{DynamicResource BasaltTextMutedBrush}" />
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock x:Name="ActiveFileText" Text="{Binding ActiveFile, FallbackValue=''}" FontSize="{StaticResource BasaltFontSizeSmall}"
+                   Foreground="{DynamicResource BasaltTextMutedBrush}" VerticalAlignment="Center" />
+        <views:SyncStatusView Grid.Column="1" x:Name="SyncStatus" DataContext="{Binding Sync}"
+                              x:DataType="syncvm:SyncStatusViewModel" />
+      </Grid>
     </Border>
 
     <!-- Ribbon -->

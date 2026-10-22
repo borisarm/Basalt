@@ -1,13 +1,18 @@
 using Basalt.Application.Abstractions;
+using Basalt.Application.Accounts;
 using Basalt.Application.Commands;
 using Basalt.Application.Ports.Platform;
+using Basalt.Application.Ports.Storage;
 using Basalt.Application.Settings;
+using Basalt.Application.Sync;
 using Basalt.Application.Vaults;
+using Basalt.Domain.Accounts;
 using Basalt.Domain.Common;
 using Basalt.Domain.Vaults;
 using Basalt.Presentation.Common;
 using Basalt.Presentation.Input;
 using Basalt.Presentation.Settings;
+using Basalt.Presentation.Sync;
 using Basalt.Testing.Fakes;
 using Microsoft.Extensions.Time.Testing;
 using NSubstitute;
@@ -175,5 +180,31 @@ public sealed class SettingsViewModelTests
 
         vm.About.Version.Should().NotBeNullOrWhiteSpace();
         vm.About.LogsDirectory.Should().Be("C:/datos/logs");
+    }
+
+    [Fact]
+    [Trait("Spec", "F-015")]
+    public async Task Sections_IncludeAccountsAndSync_WhenComposed()
+    {
+        var services = new ViewModelServices(new ImmediateDispatcher(), new FakeNotificationService(), _localizer, _time);
+        var accounts = new AccountsSettingsViewModel(services, new AccountsSettingsUseCases(
+            Substitute.For<IQueryHandler<ListAccounts, IReadOnlyList<GitHubAccount>>>(),
+            Substitute.For<ICommandHandler<RemoveAccount, Unit>>()));
+        var profiles = Substitute.For<ISyncProfileStore>();
+        profiles.GetAsync(Arg.Any<VaultId>(), Arg.Any<CancellationToken>()).Returns((SyncProfile?)null);
+        var vaultSync = new VaultSyncSettingsViewModel(services, profiles, new VaultSyncSettingsUseCases(
+            Substitute.For<ICommandHandler<PauseSync, Unit>>(),
+            Substitute.For<ICommandHandler<ResumeSync, Unit>>(),
+            Substitute.For<ICommandHandler<DisableSync, Unit>>()));
+        var vault = new VaultSessionInfo(Vault, "Notas", "C:/v", VaultSettings.Default, null);
+        var vm = new SettingsViewModel(services, new SettingsDependencies(_store, _updateVault, _theme, _paths, _bindings, _registry),
+            vault, new SyncSettingsViewModels(accounts, vaultSync));
+
+        await vm.LoadAsync(Ct);
+
+        vm.Sections.Select(s => s.Id).Should().Equal(
+            "general", "editor", "files-links", "appearance", "hotkeys", "daily-notes", "templates", "accounts", "sync", "about");
+        vm.Accounts.Should().BeSameAs(accounts);
+        vm.VaultSync!.IsConfigured.Should().BeFalse();
     }
 }

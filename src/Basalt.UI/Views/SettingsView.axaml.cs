@@ -326,4 +326,36 @@ public partial class SettingsView : UserControl
             _ = _settings.Hotkeys.ResetAsync(row.CommandId);
         }
     }
+
+    private void OnRemoveAccount(object? sender, RoutedEventArgs e)
+    {
+        if (_settings?.Accounts is { } accounts)
+        {
+            _ = accounts.RemoveCommand.ExecuteAsync(null);
+        }
+    }
+
+    private void OnVaultSyncPause(object? sender, RoutedEventArgs e)
+    {
+        if (_settings?.VaultSync is { } sync)
+        {
+            _ = sync.PauseCommand.ExecuteAsync(null);
+        }
+    }
+
+    private void OnVaultSyncResume(object? sender, RoutedEventArgs e)
+    {
+        if (_settings?.VaultSync is { } sync)
+        {
+            _ = sync.ResumeCommand.ExecuteAsync(null);
+        }
+    }
+
+    private void OnVaultSyncDisable(object? sender, RoutedEventArgs e)
+    {
+        if (_settings?.VaultSync is { } sync)
+        {
+            _ = sync.DisableCommand.ExecuteAsync(null);
+        }
+    }
 }

@@ -1,5 +1,6 @@
 using System.Globalization;
 using Basalt.Application.Abstractions;
+using Basalt.Application.Accounts;
 using Basalt.Application.Bookmarks;
 using Basalt.Application.Commands;
 using Basalt.Application.Graph;
@@ -8,10 +9,13 @@ using Basalt.Application.Notes;
 using Basalt.Application.Ports.Events;
 using Basalt.Application.Ports.Index;
 using Basalt.Application.Ports.Platform;
+using Basalt.Application.Ports.Storage;
 using Basalt.Application.Search;
+using Basalt.Application.Sync;
 using Basalt.Application.Tags;
 using Basalt.Application.Vaults;
 using Basalt.Application.Workspace;
+using Basalt.Domain.Accounts;
 using Basalt.Domain.Common;
 using Basalt.Domain.Graph;
 using Basalt.Domain.Notes;
@@ -24,6 +28,7 @@ using Basalt.Presentation.Overlays;
 using Basalt.Presentation.Panels;
 using Basalt.Presentation.Settings;
 using Basalt.Presentation.Shell;
+using Basalt.Presentation.Sync;
 using Basalt.Presentation.Vaults;
 using Basalt.Presentation.Workspace;
 using Microsoft.Extensions.DependencyInjection;
@@ -101,8 +106,24 @@ public sealed class ShellFactory(IServiceProvider services)
         await settings.SaveAsync(current with { LastVaultId = vault }, CancellationToken.None).ConfigureAwait(false);
     }
 
-    public SettingsViewModel CreateSettings(VaultSessionInfo? vault) =>
-        new(services.GetRequiredService<ViewModelServices>(), services.GetRequiredService<SettingsDependencies>(), vault);
+    public SettingsViewModel CreateSettings(VaultSessionInfo? vault)
+    {
+        var common = services.GetRequiredService<ViewModelServices>();
+        SyncSettingsViewModels? sync = null;
+        if (vault is not null)
+        {
+            var accounts = new AccountsSettingsViewModel(common, new AccountsSettingsUseCases(
+                services.GetRequiredService<IQueryHandler<ListAccounts, IReadOnlyList<GitHubAccount>>>(),
+                services.GetRequiredService<ICommandHandler<RemoveAccount, Unit>>()));
+            var vaultSync = new VaultSyncSettingsViewModel(common, services.GetRequiredService<ISyncProfileStore>(), new VaultSyncSettingsUseCases(
+                services.GetRequiredService<ICommandHandler<PauseSync, Unit>>(),
+                services.GetRequiredService<ICommandHandler<ResumeSync, Unit>>(),
+                services.GetRequiredService<ICommandHandler<DisableSync, Unit>>()));
+            sync = new SyncSettingsViewModels(accounts, vaultSync);
+        }
+
+        return new SettingsViewModel(common, services.GetRequiredService<SettingsDependencies>(), vault, sync);
+    }
 }
 
 /// <summary>Builds the workspace of an open vault with its tabs, panels and overlays.</summary>
@@ -142,6 +163,13 @@ public sealed class WorkspaceFactory(IServiceProvider services)
             messenger,
             new WorkspaceUseCases(Get<ICommandHandler<RecordRecentFile, Unit>>(), Get<IQueryHandler<LoadWorkspace, WorkspaceState?>>(), Get<ICommandHandler<SaveWorkspace, Unit>>()),
             Get<IWindowService>());
+
+        workspace.Sync = new SyncStatusViewModel(common, new SyncStatusUseCases(
+            Get<IQueryHandler<GetSyncStatus, SyncStatusView>>(),
+            Get<ICommandHandler<SyncVault, SyncCycleResult?>>(),
+            Get<ICommandHandler<PauseSync, Unit>>(),
+            Get<ICommandHandler<ResumeSync, Unit>>()));
+        workspace.Sync.Attach(vault.Id);
 
         var context = new PanelContext(vault.Id, events, messenger, workspace);
         workspace.Panels = new WorkspacePanels(

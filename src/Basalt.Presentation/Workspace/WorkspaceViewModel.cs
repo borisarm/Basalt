@@ -401,6 +401,9 @@ public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNaviga
     /// <summary>The file of the active tab.</summary>
     public VaultPath? ActiveFile => _announced;
 
+    /// <summary>Sync state of this vault shown in the status bar (F-015.4).</summary>
+    public Sync.SyncStatusViewModel? Sync { get; set; }
+
     /// <summary>The side panels and overlays of this workspace (set by the composition root, disposed with it).</summary>
     public WorkspacePanels? Panels
     {
@@ -539,6 +542,7 @@ public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNaviga
         {
             Layout.Dispose();
             Panels?.Dispose();
+            Sync?.Dispose();
         }
 
         base.Dispose(disposing);

@@ -38,9 +38,35 @@ public sealed partial class SyncStatusViewModel(ViewModelServices services, Sync
     [ObservableProperty]
     public partial DateTimeOffset? NextRetryAt { get; private set; }
 
+    [ObservableProperty]
+    public partial int PendingChanges { get; private set; }
+
+    [ObservableProperty]
+    public partial int Conflicts { get; private set; }
+
+    [ObservableProperty]
+    public partial int Quarantined { get; private set; }
+
     public bool IsConfigured => State != SyncState.NotConfigured;
 
     public bool IsPaused => State == SyncState.Paused || State == SyncState.Disabled;
+
+    public bool HasConflicts => Conflicts > 0;
+
+    /// <summary>Status bar text (F-015.4): state and, when synced, how long ago.</summary>
+    public string Summary => State switch
+    {
+        SyncState.NotConfigured => Localizer.Get("Sync.State.NotConfigured"),
+        SyncState.Disabled => Localizer.Get("Sync.State.Disabled"),
+        SyncState.Paused => Localizer.Get("Sync.State.Paused"),
+        SyncState.Syncing => Localizer.Get("Sync.State.Syncing"),
+        SyncState.Error => Localizer.Get("Sync.State.Error"),
+        _ when LastFinished is { } finished => Localizer.Format("Sync.SyncedAgo", Relative(finished)),
+        _ => Localizer.Get("Sync.State.UpToDate"),
+    };
+
+    /// <summary>Conflict count shown next to the status (F-015.4).</summary>
+    public string ConflictSummary => Localizer.Format("Sync.Conflicts", Conflicts);
 
     public void Attach(VaultId vault)
     {
@@ -112,7 +138,31 @@ public sealed partial class SyncStatusViewModel(ViewModelServices services, Sync
         ConsecutiveFailures = status.ConsecutiveFailures;
         LastFinished = status.LastFinished;
         NextRetryAt = status.NextRetryAt;
+        PendingChanges = status.PendingChanges;
+        Conflicts = status.Conflicts;
+        Quarantined = status.Quarantined;
         OnPropertyChanged(nameof(IsConfigured));
         OnPropertyChanged(nameof(IsPaused));
+        OnPropertyChanged(nameof(HasConflicts));
+        OnPropertyChanged(nameof(Summary));
+        OnPropertyChanged(nameof(ConflictSummary));
+    }
+
+    private string Relative(DateTimeOffset finished)
+    {
+        var elapsed = Services.Time.GetUtcNow() - finished;
+        if (elapsed < TimeSpan.FromMinutes(1))
+        {
+            return Localizer.Get("Sync.JustNow");
+        }
+
+        if (elapsed < TimeSpan.FromHours(1))
+        {
+            return Localizer.Format("Sync.MinutesAgo", (int)elapsed.TotalMinutes);
+        }
+
+        return elapsed < TimeSpan.FromDays(1)
+            ? Localizer.Format("Sync.HoursAgo", (int)elapsed.TotalHours)
+            : Localizer.Format("Sync.DaysAgo", (int)elapsed.TotalDays);
     }
 }

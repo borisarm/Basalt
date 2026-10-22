@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:converters="clr-namespace:Avalonia.Data.Converters;assembly=Avalonia.Base"
              xmlns:settings="clr-namespace:Basalt.Presentation.Settings;assembly=Basalt.Presentation"
+             xmlns:accounts="clr-namespace:Basalt.Domain.Accounts;assembly=Basalt.Domain"
              xmlns:l="clr-namespace:Basalt.UI.Localization"
              x:Class="Basalt.UI.Views.SettingsView"
              x:DataType="settings:SettingsViewModel">
@@ -147,6 +148,52 @@
           <TextBlock Text="{l:Loc Settings.Templates.Folder}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
           <TextBox Grid.Column="1" x:Name="TemplatesFolder" Text="{Binding Templates.Folder}" LostFocus="OnTemplatesFolderLostFocus" />
         </Grid>
+      </StackPanel>
+
+      <StackPanel x:Name="AccountsSection" Spacing="8"
+                  IsVisible="{Binding Accounts, Converter={x:Static converters:ObjectConverters.IsNotNull}}">
+        <TextBlock x:Name="AccountsHeader" Text="{l:Loc Settings.Accounts}" FontSize="{StaticResource BasaltFontSizeTitle}"
+                   FontWeight="SemiBold" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
+        <TextBlock x:Name="AccountsEmpty" Text="{l:Loc Settings.Accounts.Empty}" IsVisible="{Binding Accounts.IsEmpty}"
+                   Foreground="{DynamicResource BasaltTextMutedBrush}" />
+        <ListBox x:Name="AccountsList" ItemsSource="{Binding Accounts.Accounts}" SelectedItem="{Binding Accounts.Selected}"
+                 Background="Transparent" BorderThickness="0">
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="accounts:GitHubAccount">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="{Binding Login}" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
+                <TextBlock Text="{Binding Host}" Foreground="{DynamicResource BasaltTextMutedBrush}" />
+              </StackPanel>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+        <Button x:Name="RemoveAccountButton" Content="{l:Loc Settings.Accounts.Remove}" Click="OnRemoveAccount"
+                IsEnabled="{Binding Accounts.Selected, Converter={x:Static converters:ObjectConverters.IsNotNull}}" />
+      </StackPanel>
+
+      <StackPanel x:Name="VaultSyncSection" Spacing="8"
+                  IsVisible="{Binding VaultSync, Converter={x:Static converters:ObjectConverters.IsNotNull}}">
+        <TextBlock x:Name="VaultSyncHeader" Text="{l:Loc Settings.Sync}" FontSize="{StaticResource BasaltFontSizeTitle}"
+                   FontWeight="SemiBold" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
+        <TextBlock x:Name="VaultSyncNotConfigured" Text="{l:Loc Settings.Sync.NotConfigured}"
+                   IsVisible="{Binding !VaultSync.IsConfigured}" Foreground="{DynamicResource BasaltTextMutedBrush}" />
+        <Grid ColumnDefinitions="220,*" RowDefinitions="Auto,Auto" RowSpacing="4"
+              IsVisible="{Binding VaultSync.IsConfigured}">
+          <TextBlock Text="{l:Loc Settings.Sync.Repository}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
+          <TextBlock Grid.Column="1" x:Name="VaultSyncRepository" Text="{Binding VaultSync.Repository}"
+                     Foreground="{DynamicResource BasaltTextPrimaryBrush}" VerticalAlignment="Center" />
+          <TextBlock Grid.Row="1" Text="{l:Loc Settings.Sync.Triggers}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
+          <TextBlock Grid.Row="1" Grid.Column="1" x:Name="VaultSyncTriggers" Text="{Binding VaultSync.TriggersSummary}"
+                     Foreground="{DynamicResource BasaltTextPrimaryBrush}" VerticalAlignment="Center" />
+        </Grid>
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <Button x:Name="VaultSyncPause" Content="{l:Loc Sync.Pause}" Click="OnVaultSyncPause"
+                  IsEnabled="{Binding VaultSync.IsConfigured}" />
+          <Button x:Name="VaultSyncResume" Content="{l:Loc Sync.Resume}" Click="OnVaultSyncResume"
+                  IsEnabled="{Binding VaultSync.IsConfigured}" />
+          <Button x:Name="VaultSyncDisable" Content="{l:Loc Settings.Sync.Disable}" Click="OnVaultSyncDisable"
+                  IsEnabled="{Binding VaultSync.IsConfigured}" Classes="danger" />
+        </StackPanel>
       </StackPanel>
 
       <StackPanel Spacing="8">

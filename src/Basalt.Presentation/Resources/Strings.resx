@@ -131,6 +131,9 @@
   <data name="Settings.About.Licenses" xml:space="preserve"><value>Licences</value></data>
   <data name="Settings.About.Logs" xml:space="preserve"><value>Logs folder</value></data>
   <data name="Settings.About.Version" xml:space="preserve"><value>Version</value></data>
+  <data name="Settings.Accounts" xml:space="preserve"><value>Accounts</value></data>
+  <data name="Settings.Accounts.Empty" xml:space="preserve"><value>No GitHub account is signed in on this device.</value></data>
+  <data name="Settings.Accounts.Remove" xml:space="preserve"><value>Sign out</value></data>
   <data name="Settings.Appearance" xml:space="preserve"><value>Appearance</value></data>
   <data name="Settings.Appearance.Accent" xml:space="preserve"><value>Accent colour</value></data>
   <data name="Settings.Appearance.InterfaceFontSize" xml:space="preserve"><value>Interface font size</value></data>
@@ -174,11 +177,34 @@
   <data name="Settings.LinkPathStyle.Absolute" xml:space="preserve"><value>Absolute path</value></data>
   <data name="Settings.LinkPathStyle.Relative" xml:space="preserve"><value>Relative path</value></data>
   <data name="Settings.LinkPathStyle.Shortest" xml:space="preserve"><value>Shortest path</value></data>
+  <data name="Settings.Sync" xml:space="preserve"><value>Sync</value></data>
+  <data name="Settings.Sync.Disable" xml:space="preserve"><value>Disable sync</value></data>
+  <data name="Settings.Sync.NotConfigured" xml:space="preserve"><value>This vault is not syncing yet.</value></data>
+  <data name="Settings.Sync.Repository" xml:space="preserve"><value>Repository</value></data>
+  <data name="Settings.Sync.Triggers" xml:space="preserve"><value>Triggers</value></data>
   <data name="Settings.Templates" xml:space="preserve"><value>Templates</value></data>
   <data name="Settings.Templates.Folder" xml:space="preserve"><value>Templates folder</value></data>
   <data name="Settings.Title" xml:space="preserve"><value>Settings</value></data>
   <data name="Shell.Title" xml:space="preserve"><value>Basalt</value></data>
   <data name="Shell.TitleWithVault" xml:space="preserve"><value>{0} — Basalt</value></data>
+  <data name="Sync.Completed" xml:space="preserve"><value>Sync completed.</value></data>
+  <data name="Sync.Configured" xml:space="preserve"><value>Sync configured.</value></data>
+  <data name="Sync.Conflicts" xml:space="preserve"><value>Conflicts ({0})</value></data>
+  <data name="Sync.DaysAgo" xml:space="preserve"><value>{0} d ago</value></data>
+  <data name="Sync.HoursAgo" xml:space="preserve"><value>{0} h ago</value></data>
+  <data name="Sync.JustNow" xml:space="preserve"><value>just now</value></data>
+  <data name="Sync.MinutesAgo" xml:space="preserve"><value>{0} min ago</value></data>
+  <data name="Sync.Pause" xml:space="preserve"><value>Pause</value></data>
+  <data name="Sync.Restored" xml:space="preserve"><value>Version restored.</value></data>
+  <data name="Sync.Resume" xml:space="preserve"><value>Resume</value></data>
+  <data name="Sync.State.Disabled" xml:space="preserve"><value>Sync disabled</value></data>
+  <data name="Sync.State.Error" xml:space="preserve"><value>Sync error</value></data>
+  <data name="Sync.State.NotConfigured" xml:space="preserve"><value>Not syncing</value></data>
+  <data name="Sync.State.Paused" xml:space="preserve"><value>Sync paused</value></data>
+  <data name="Sync.State.Syncing" xml:space="preserve"><value>Syncing…</value></data>
+  <data name="Sync.State.UpToDate" xml:space="preserve"><value>Synced</value></data>
+  <data name="Sync.SyncNow" xml:space="preserve"><value>Sync now</value></data>
+  <data name="Sync.SyncedAgo" xml:space="preserve"><value>Synced {0}</value></data>
   <data name="VaultPicker.ChooseLocation" xml:space="preserve"><value>Choose where to create the vault</value></data>
   <data name="VaultPicker.Create" xml:space="preserve"><value>Create vault</value></data>
   <data name="VaultPicker.Empty" xml:space="preserve"><value>No vaults yet. Create one or open a folder.</value></data>
@@ -199,7 +225,4 @@
   <data name="Workspace.ToggleLeftSidebar" xml:space="preserve"><value>Toggle left sidebar</value></data>
   <data name="Workspace.ToggleRightSidebar" xml:space="preserve"><value>Toggle right sidebar</value></data>
   <data name="Workspace.Unsaved" xml:space="preserve"><value>Unsaved changes</value></data>
-  <data name="Sync.Completed" xml:space="preserve"><value>Sync completed.</value></data>
-  <data name="Sync.Configured" xml:space="preserve"><value>Sync configured.</value></data>
-  <data name="Sync.Restored" xml:space="preserve"><value>Version restored.</value></data>
 </root>

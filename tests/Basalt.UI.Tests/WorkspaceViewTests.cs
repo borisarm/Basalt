@@ -83,6 +83,23 @@ public sealed class WorkspaceViewTests
     });
 
     [Fact]
+    [Trait("Spec", "F-015.4")]
+    public Task StatusBar_ShowsTheSyncState() => Headless.RunAsync(async () =>
+    {
+        await using var v = await ComposedVault.CreateAsync(new Dictionary<string, string>());
+        for (var i = 0; i < 20; i++)
+        {
+            Dispatcher.UIThread.RunJobs();
+            await Task.Yield();
+        }
+
+        var status = v.Window.GetVisualDescendants().OfType<SyncStatusView>().Single();
+        status.DataContext.Should().BeSameAs(v.Workspace.Sync);
+        status.GetVisualDescendants().OfType<Avalonia.Controls.TextBlock>().First(t => t.Name == "SummaryText").Text
+            .Should().Be("Not syncing");
+    });
+
+    [Fact]
     public Task Sidebars_ToggleAndSwitchPanels() => Headless.RunAsync(() =>
     {
         var (window, workspace) = Build();

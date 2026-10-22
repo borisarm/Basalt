@@ -284,13 +284,22 @@ public sealed class AboutViewModel(IPlatformPaths paths)
     public IReadOnlyList<string> Licenses { get; } = ["Basalt — MIT", "Avalonia — MIT", "AvaloniaEdit — MIT", "Markdig — BSD-2-Clause", "YamlDotNet — MIT", "SQLite — Public domain", "CommunityToolkit.Mvvm — MIT"];
 }
 
-/// <summary>The settings screen (F-014) without accounts and sync, which come with the sync UI.</summary>
+/// <summary>Accounts and per-vault sync sections (F-015), built by the composition root.</summary>
+public sealed record SyncSettingsViewModels(
+    Sync.AccountsSettingsViewModel Accounts,
+    Sync.VaultSyncSettingsViewModel VaultSync);
+
+/// <summary>The settings screen (F-014 and F-015).</summary>
 public sealed class SettingsViewModel : ViewModelBase
 {
     private readonly AppSettingsEditor _app;
     private readonly VaultSettingsEditor? _vault;
 
-    public SettingsViewModel(ViewModelServices services, SettingsDependencies dependencies, VaultSessionInfo? vault)
+    public SettingsViewModel(
+        ViewModelServices services,
+        SettingsDependencies dependencies,
+        VaultSessionInfo? vault,
+        SyncSettingsViewModels? sync = null)
         : base(services)
     {
         ArgumentNullException.ThrowIfNull(dependencies);
@@ -322,6 +331,17 @@ public sealed class SettingsViewModel : ViewModelBase
             sections.Add(new("templates", "Settings.Templates", Templates!));
         }
 
+        if (sync is not null)
+        {
+            Accounts = sync.Accounts;
+            sections.Add(new("accounts", "Settings.Accounts", Accounts));
+            if (vault is not null)
+            {
+                VaultSync = sync.VaultSync;
+                sections.Add(new("sync", "Settings.Sync", VaultSync));
+            }
+        }
+
         sections.Add(new("about", "Settings.About", About));
         Sections = sections;
     }
@@ -344,12 +364,18 @@ public sealed class SettingsViewModel : ViewModelBase
 
     public TemplatesSettingsViewModel? Templates { get; }
 
+    public Sync.AccountsSettingsViewModel? Accounts { get; }
+
+    public Sync.VaultSyncSettingsViewModel? VaultSync { get; }
+
     protected override void Dispose(bool disposing)
     {
         if (disposing)
         {
             _app.Dispose();
             _vault?.Dispose();
+            Accounts?.Dispose();
+            VaultSync?.Dispose();
         }
 
         base.Dispose(disposing);
@@ -362,5 +388,14 @@ public sealed class SettingsViewModel : ViewModelBase
         Editor.Refresh();
         Appearance.Refresh();
         Hotkeys.Refresh();
+        if (Accounts is { } accounts)
+        {
+            await accounts.LoadAsync().ConfigureAwait(true);
+        }
+
+        if (VaultSync is { } sync)
+        {
+            await sync.LoadAsync().ConfigureAwait(true);
+        }
     }
 }

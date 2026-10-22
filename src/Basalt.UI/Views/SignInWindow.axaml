@@ -1,0 +1,24 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sync="clr-namespace:Basalt.Presentation.Sync;assembly=Basalt.Presentation"
+        xmlns:converters="clr-namespace:Avalonia.Data.Converters;assembly=Avalonia.Base"
+        xmlns:l="clr-namespace:Basalt.UI.Localization"
+        x:Class="Basalt.UI.Views.SignInWindow"
+        x:DataType="sync:GitHubSignInViewModel"
+        Title="{l:Loc SignIn.Title}" Width="460" SizeToContent="Height"
+        CanResize="False" WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+  <!-- Spec 04 F-015.1 and 07 §8: device flow with a large code and a waiting indicator. -->
+  <StackPanel Margin="{StaticResource BasaltSpacingXl}" Spacing="16">
+    <TextBlock Text="{l:Loc SignIn.Instructions}" TextWrapping="Wrap" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
+    <SelectableTextBlock x:Name="UserCode" Text="{Binding UserCode}" FontSize="32" FontFamily="Consolas, Menlo, monospace"
+                         HorizontalAlignment="Center" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
+    <Button x:Name="OpenGitHub" Content="{l:Loc SignIn.Open}" Click="OnOpenGitHub" HorizontalAlignment="Center" />
+    <StackPanel Spacing="6" IsVisible="{Binding IsWaitingForApproval}">
+      <ProgressBar IsIndeterminate="True" Height="4" />
+      <TextBlock Text="{l:Loc SignIn.Waiting}" HorizontalAlignment="Center" Foreground="{DynamicResource BasaltTextMutedBrush}" />
+    </StackPanel>
+    <TextBlock x:Name="ErrorText" Text="{Binding ErrorMessage}" IsVisible="{Binding ErrorMessage, Converter={x:Static converters:ObjectConverters.IsNotNull}}"
+               TextWrapping="Wrap" Foreground="{DynamicResource BasaltDangerBrush}" />
+    <Button x:Name="Cancel" Content="{l:Loc Common.Cancel}" Click="OnCancel" HorizontalAlignment="Right" IsCancel="True" />
+  </StackPanel>
+</Window>

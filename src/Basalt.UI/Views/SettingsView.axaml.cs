@@ -335,6 +335,14 @@ public partial class SettingsView : UserControl
         }
     }
 
+    private void OnAddAccount(object? sender, RoutedEventArgs e)
+    {
+        if (_settings is not null)
+        {
+            _ = _settings.AddAccountAsync(CancellationToken.None);
+        }
+    }
+
     private void OnVaultSyncPause(object? sender, RoutedEventArgs e)
     {
         if (_settings?.VaultSync is { } sync)

@@ -6,6 +6,7 @@ using Basalt.Application.Commands;
 using Basalt.Application.Graph;
 using Basalt.Application.Links;
 using Basalt.Application.Notes;
+using Basalt.Application.Ports.Auth;
 using Basalt.Application.Ports.Events;
 using Basalt.Application.Ports.Index;
 using Basalt.Application.Ports.Platform;
@@ -106,6 +107,11 @@ public sealed class ShellFactory(IServiceProvider services)
         await settings.SaveAsync(current with { LastVaultId = vault }, CancellationToken.None).ConfigureAwait(false);
     }
 
+    public GitHubSignInViewModel CreateSignIn() =>
+        new(services.GetRequiredService<ViewModelServices>(), new GitHubSignInUseCases(
+            services.GetRequiredService<ICommandHandler<StartGitHubSignIn, DeviceCodeChallenge>>(),
+            services.GetRequiredService<ICommandHandler<CompleteGitHubSignIn, GitHubAccount>>()));
+
     public SettingsViewModel CreateSettings(VaultSessionInfo? vault)
     {
         var common = services.GetRequiredService<ViewModelServices>();
@@ -122,7 +128,8 @@ public sealed class ShellFactory(IServiceProvider services)
             sync = new SyncSettingsViewModels(accounts, vaultSync);
         }
 
-        return new SettingsViewModel(common, services.GetRequiredService<SettingsDependencies>(), vault, sync);
+        return new SettingsViewModel(common, services.GetRequiredService<SettingsDependencies>(), vault, sync,
+            services.GetRequiredService<IWindowService>());
     }
 }
 

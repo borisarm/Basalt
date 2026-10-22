@@ -62,6 +62,7 @@ internal static class Program
             .AddBasaltUi();
         services.AddSingleton<Func<ShellViewModel>>(sp => sp.GetRequiredService<ShellFactory>().Create);
         services.AddSingleton<Func<VaultSessionInfo?, SettingsViewModel>>(sp => sp.GetRequiredService<ShellFactory>().CreateSettings);
+        services.AddSingleton<Func<Presentation.Sync.GitHubSignInViewModel>>(sp => sp.GetRequiredService<ShellFactory>().CreateSignIn);
 
         // Rolling log files kept 7 days (spec 08 §1); tokens and note content are never logged (spec 13 §6).
         services.Replace(ServiceDescriptor.Singleton<ILoggerFactory>(sp => new SerilogLoggerFactory(

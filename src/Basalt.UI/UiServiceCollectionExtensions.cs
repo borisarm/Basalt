@@ -28,7 +28,11 @@ public static class UiServiceCollectionExtensions
 }
 
 /// <summary>Opens desktop windows; each window has its own shell (F-001.7).</summary>
-public sealed class DesktopWindowService(Func<ShellViewModel> createShell, Func<VaultSessionInfo?, SettingsViewModel> createSettings, NotificationService notifications) : IWindowService
+public sealed class DesktopWindowService(
+    Func<ShellViewModel> createShell,
+    Func<VaultSessionInfo?, SettingsViewModel> createSettings,
+    Func<Presentation.Sync.GitHubSignInViewModel> createSignIn,
+    NotificationService notifications) : IWindowService
 {
     /// <summary>Opens a window showing the picker, or the given vault.</summary>
     public async Task<MainWindow> OpenWindowAsync(VaultId? vault)
@@ -48,6 +52,13 @@ public sealed class DesktopWindowService(Func<ShellViewModel> createShell, Func<
     {
         ArgumentNullException.ThrowIfNull(vault);
         new SettingsWindow(createSettings(vault)).Show();
+    }
+
+    public Task<bool> ShowSignInAsync(CancellationToken ct)
+    {
+        var window = new SignInWindow(createSignIn());
+        window.Show();
+        return window.Result;
     }
 
     /// <summary>Makes the first window the desktop lifetime's main window.</summary>

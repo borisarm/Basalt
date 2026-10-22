@@ -294,14 +294,17 @@ public sealed class SettingsViewModel : ViewModelBase
 {
     private readonly AppSettingsEditor _app;
     private readonly VaultSettingsEditor? _vault;
+    private readonly Shell.IWindowService? _windows;
 
     public SettingsViewModel(
         ViewModelServices services,
         SettingsDependencies dependencies,
         VaultSessionInfo? vault,
-        SyncSettingsViewModels? sync = null)
+        SyncSettingsViewModels? sync = null,
+        Shell.IWindowService? windows = null)
         : base(services)
     {
+        _windows = windows;
         ArgumentNullException.ThrowIfNull(dependencies);
         _app = new AppSettingsEditor(dependencies.Store);
         General = new GeneralSettingsViewModel(_app, Localizer);
@@ -367,6 +370,20 @@ public sealed class SettingsViewModel : ViewModelBase
     public Sync.AccountsSettingsViewModel? Accounts { get; }
 
     public Sync.VaultSyncSettingsViewModel? VaultSync { get; }
+
+    /// <summary>Signs a GitHub account in (F-015.1) and refreshes the list.</summary>
+    public async Task AddAccountAsync(CancellationToken ct)
+    {
+        if (_windows is null || Accounts is null)
+        {
+            return;
+        }
+
+        if (await _windows.ShowSignInAsync(ct).ConfigureAwait(true))
+        {
+            await Accounts.LoadAsync().ConfigureAwait(true);
+        }
+    }
 
     protected override void Dispose(bool disposing)
     {

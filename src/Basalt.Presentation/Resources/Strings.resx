@@ -132,6 +132,7 @@
   <data name="Settings.About.Logs" xml:space="preserve"><value>Logs folder</value></data>
   <data name="Settings.About.Version" xml:space="preserve"><value>Version</value></data>
   <data name="Settings.Accounts" xml:space="preserve"><value>Accounts</value></data>
+  <data name="Settings.Accounts.Add" xml:space="preserve"><value>Add GitHub account</value></data>
   <data name="Settings.Accounts.Empty" xml:space="preserve"><value>No GitHub account is signed in on this device.</value></data>
   <data name="Settings.Accounts.Remove" xml:space="preserve"><value>Sign out</value></data>
   <data name="Settings.Appearance" xml:space="preserve"><value>Appearance</value></data>
@@ -187,6 +188,11 @@
   <data name="Settings.Title" xml:space="preserve"><value>Settings</value></data>
   <data name="Shell.Title" xml:space="preserve"><value>Basalt</value></data>
   <data name="Shell.TitleWithVault" xml:space="preserve"><value>{0} — Basalt</value></data>
+  <data name="SignIn.CodeCopied" xml:space="preserve"><value>Code copied to the clipboard.</value></data>
+  <data name="SignIn.Instructions" xml:space="preserve"><value>Enter this code on GitHub to authorize Basalt:</value></data>
+  <data name="SignIn.Open" xml:space="preserve"><value>Copy code and open GitHub</value></data>
+  <data name="SignIn.Title" xml:space="preserve"><value>Sign in with GitHub</value></data>
+  <data name="SignIn.Waiting" xml:space="preserve"><value>Waiting for authorization…</value></data>
   <data name="Sync.Completed" xml:space="preserve"><value>Sync completed.</value></data>
   <data name="Sync.Configured" xml:space="preserve"><value>Sync configured.</value></data>
   <data name="Sync.Conflicts" xml:space="preserve"><value>Conflicts ({0})</value></data>

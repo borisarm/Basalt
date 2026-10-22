@@ -132,6 +132,7 @@
   <data name="Settings.About.Logs" xml:space="preserve"><value>Carpeta de registros</value></data>
   <data name="Settings.About.Version" xml:space="preserve"><value>Versión</value></data>
   <data name="Settings.Accounts" xml:space="preserve"><value>Cuentas</value></data>
+  <data name="Settings.Accounts.Add" xml:space="preserve"><value>Añadir cuenta de GitHub</value></data>
   <data name="Settings.Accounts.Empty" xml:space="preserve"><value>No hay ninguna cuenta de GitHub iniciada en este dispositivo.</value></data>
   <data name="Settings.Accounts.Remove" xml:space="preserve"><value>Cerrar sesión</value></data>
   <data name="Settings.Appearance" xml:space="preserve"><value>Apariencia</value></data>
@@ -187,6 +188,11 @@
   <data name="Settings.Title" xml:space="preserve"><value>Ajustes</value></data>
   <data name="Shell.Title" xml:space="preserve"><value>Basalt</value></data>
   <data name="Shell.TitleWithVault" xml:space="preserve"><value>{0} — Basalt</value></data>
+  <data name="SignIn.CodeCopied" xml:space="preserve"><value>Código copiado al portapapeles.</value></data>
+  <data name="SignIn.Instructions" xml:space="preserve"><value>Introduce este código en GitHub para autorizar Basalt:</value></data>
+  <data name="SignIn.Open" xml:space="preserve"><value>Copiar código y abrir GitHub</value></data>
+  <data name="SignIn.Title" xml:space="preserve"><value>Iniciar sesión con GitHub</value></data>
+  <data name="SignIn.Waiting" xml:space="preserve"><value>Esperando autorización…</value></data>
   <data name="Sync.Completed" xml:space="preserve"><value>Sincronización completada.</value></data>
   <data name="Sync.Configured" xml:space="preserve"><value>Sincronización configurada.</value></data>
   <data name="Sync.Conflicts" xml:space="preserve"><value>Conflictos ({0})</value></data>

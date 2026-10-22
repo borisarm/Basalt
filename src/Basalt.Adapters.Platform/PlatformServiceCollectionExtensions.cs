@@ -24,6 +24,7 @@ public static class PlatformServiceCollectionExtensions
         services.TryAddSingleton<ICultureProvider, SystemCultureProvider>();
         services.TryAddSingleton<ISystemTrash, SystemTrash>();
         services.TryAddSingleton<IConnectivityMonitor, SystemConnectivityMonitor>();
+        services.TryAddSingleton<IFontScaleProvider, SystemFontScaleProvider>();
         services.TryAddSingleton<IDeviceInfo, DesktopDeviceInfo>();
         services.AddSingleton<IDocumentStore<VaultRegistryDocument>>(sp => Store(sp, "vaults.json", PlatformJsonContext.Default.VaultRegistryDocument, () => VaultRegistryDocument.Empty));
         services.AddSingleton<IDocumentStore<AccountsDocument>>(sp => Store(sp, "accounts.json", PlatformJsonContext.Default.AccountsDocument, () => AccountsDocument.Empty));

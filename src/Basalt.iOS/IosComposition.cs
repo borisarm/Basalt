@@ -42,7 +42,8 @@ internal static class IosComposition
             {
                 single.MainView = new Basalt.UI.Views.MainView(
                     services.GetRequiredService<ShellFactory>().Create(),
-                    services.GetRequiredService<NotificationService>());
+                    services.GetRequiredService<NotificationService>(),
+                    services.GetRequiredService<IFontScaleProvider>());
             }
         };
     }
@@ -58,6 +59,7 @@ internal static class IosComposition
             .AddBasaltUi();
         services.Replace(ServiceDescriptor.Singleton<IWindowService, IosWindowService>());
         services.Replace(ServiceDescriptor.Singleton<IConnectivityMonitor, IosConnectivityMonitor>());
+        services.Replace(ServiceDescriptor.Singleton<IFontScaleProvider, IosFontScaleProvider>());
 
         services.Replace(ServiceDescriptor.Singleton<ILoggerFactory>(sp => new SerilogLoggerFactory(
             new LoggerConfiguration()

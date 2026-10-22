@@ -12,8 +12,8 @@ internal sealed class IosConnectivityMonitor : IConnectivityMonitor, IDisposable
 
     public IosConnectivityMonitor()
     {
-        _monitor.Queue = DispatchQueue.MainQueue;
-        _monitor.PathUpdateHandler = path =>
+        _monitor.SetQueue(DispatchQueue.MainQueue);
+        _monitor.SnapshotHandler = path =>
         {
             var online = path.Status == NWPathStatus.Satisfied;
             if (online != _isOnline)

@@ -14,5 +14,5 @@ public sealed class AppDelegate : AvaloniaAppDelegate<BasaltApp>
         return base.CustomizeAppBuilder(builder).WithInterFont();
     }
 
-    public override void DidEnterBackground(UIApplication application) => _ = IosLifecycle.BackgroundAsync();
+
 }

@@ -1,0 +1,26 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:shell="clr-namespace:Basalt.Presentation.Shell;assembly=Basalt.Presentation"
+             xmlns:common="clr-namespace:Basalt.Presentation.Common;assembly=Basalt.Presentation"
+             xmlns:ui="clr-namespace:Basalt.UI"
+             x:Class="Basalt.iOS.MainView"
+             x:DataType="shell:ShellViewModel">
+  <!-- Spec 07 §4: single-view root. T10.2 replaces the desktop-style content with the iPhone/iPad navigation. -->
+  <UserControl.DataTemplates>
+    <ui:ViewLocator />
+  </UserControl.DataTemplates>
+  <Panel Background="{DynamicResource BasaltBackgroundBrush}">
+    <ContentControl Content="{Binding Content}" />
+    <ItemsControl x:Name="Toasts" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="{StaticResource BasaltSpacingXl}">
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="common:Notification">
+          <Border Background="{DynamicResource BasaltSurfaceAltBrush}" BorderBrush="{DynamicResource BasaltBorderBrush}"
+                  BorderThickness="1" CornerRadius="{StaticResource BasaltRadiusM}" Padding="{StaticResource BasaltSpacingL}"
+                  Margin="{StaticResource BasaltSpacingS}" MaxWidth="420">
+            <TextBlock Text="{Binding Message}" TextWrapping="Wrap" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
+          </Border>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+  </Panel>
+</UserControl>

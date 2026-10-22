@@ -294,6 +294,7 @@ public sealed class SettingsViewModel : ViewModelBase
 {
     private readonly AppSettingsEditor _app;
     private readonly VaultSettingsEditor? _vault;
+    private readonly VaultSessionInfo? _session;
     private readonly Shell.IWindowService? _windows;
 
     public SettingsViewModel(
@@ -304,6 +305,7 @@ public sealed class SettingsViewModel : ViewModelBase
         Shell.IWindowService? windows = null)
         : base(services)
     {
+        _session = vault;
         _windows = windows;
         ArgumentNullException.ThrowIfNull(dependencies);
         _app = new AppSettingsEditor(dependencies.Store);
@@ -382,6 +384,20 @@ public sealed class SettingsViewModel : ViewModelBase
         if (await _windows.ShowSignInAsync(ct).ConfigureAwait(true))
         {
             await Accounts.LoadAsync().ConfigureAwait(true);
+        }
+    }
+
+    /// <summary>Opens the sync setup wizard of this vault (F-015.2) and refreshes the section.</summary>
+    public async Task ConfigureSyncAsync(CancellationToken ct)
+    {
+        if (_windows is null || _session is null || VaultSync is null)
+        {
+            return;
+        }
+
+        if (await _windows.ShowConfigureSyncAsync(_session, ct).ConfigureAwait(true))
+        {
+            await VaultSync.LoadAsync().ConfigureAwait(true);
         }
     }
 

@@ -113,6 +113,20 @@ public sealed class ShellFactory(IServiceProvider services)
             services.GetRequiredService<ICommandHandler<StartGitHubSignIn, DeviceCodeChallenge>>(),
             services.GetRequiredService<ICommandHandler<CompleteGitHubSignIn, GitHubAccount>>()));
 
+    public ConfigureSyncWizardViewModel CreateConfigureSync(VaultSessionInfo vault)
+    {
+        ArgumentNullException.ThrowIfNull(vault);
+        var viewModel = new ConfigureSyncWizardViewModel(
+            services.GetRequiredService<ViewModelServices>(),
+            new ConfigureSyncUseCases(
+                services.GetRequiredService<IQueryHandler<PreviewSyncLink, SyncLinkPreview>>(),
+                services.GetRequiredService<ICommandHandler<ConfigureSync, SyncLinkPreview>>(),
+                services.GetRequiredService<IQueryHandler<ListAccounts, IReadOnlyList<GitHubAccount>>>(),
+                services.GetRequiredService<ICommandHandler<CreateRepositoryForVault, RemoteRepositoryInfo>>()));
+        viewModel.Attach(vault.Id, vault.Name);
+        return viewModel;
+    }
+
     public SettingsViewModel CreateSettings(VaultSessionInfo? vault)
     {
         var common = services.GetRequiredService<ViewModelServices>();

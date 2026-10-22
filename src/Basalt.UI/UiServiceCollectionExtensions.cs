@@ -33,6 +33,7 @@ public sealed class DesktopWindowService(
     Func<ShellViewModel> createShell,
     Func<VaultSessionInfo?, SettingsViewModel> createSettings,
     Func<Presentation.Sync.GitHubSignInViewModel> createSignIn,
+    Func<VaultSessionInfo, Presentation.Sync.ConfigureSyncWizardViewModel> createConfigureSync,
     NotificationService notifications) : IWindowService
 {
     /// <summary>Opens a window showing the picker, or the given vault.</summary>
@@ -69,6 +70,13 @@ public sealed class DesktopWindowService(
         window.Closed += (_, _) => closed.TrySetResult();
         window.Show();
         return closed.Task;
+    }
+
+    public Task<bool> ShowConfigureSyncAsync(VaultSessionInfo vault, CancellationToken ct)
+    {
+        var window = new SyncSetupWindow(createConfigureSync(vault));
+        window.Show();
+        return window.Result;
     }
 
     /// <summary>Makes the first window the desktop lifetime's main window.</summary>

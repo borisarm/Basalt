@@ -1,0 +1,50 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sync="clr-namespace:Basalt.Presentation.Sync;assembly=Basalt.Presentation"
+        xmlns:accounts="clr-namespace:Basalt.Domain.Accounts;assembly=Basalt.Domain"
+        xmlns:l="clr-namespace:Basalt.UI.Localization"
+        x:Class="Basalt.UI.Views.SyncSetupWindow"
+        x:DataType="sync:ConfigureSyncWizardViewModel"
+        Title="{l:Loc Sync.Setup.Title}" Width="520" SizeToContent="Height"
+        CanResize="False" WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+  <!-- Spec 04 F-015.2/F-015.5 and 07 §8: account, repository, preview and confirm. -->
+  <StackPanel Margin="{StaticResource BasaltSpacingXl}" Spacing="12">
+    <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="6">
+      <TextBlock Text="{l:Loc Sync.Setup.Account}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
+      <ComboBox Grid.Column="1" x:Name="AccountBox" ItemsSource="{Binding Accounts}" SelectedItem="{Binding SelectedAccount}">
+        <ComboBox.ItemTemplate>
+          <DataTemplate x:DataType="accounts:GitHubAccount">
+            <TextBlock Text="{Binding Login}" />
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+
+      <TextBlock Grid.Row="1" Text="{l:Loc Sync.Setup.Owner}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
+      <TextBox Grid.Row="1" Grid.Column="1" x:Name="OwnerBox" Text="{Binding Owner}" />
+
+      <TextBlock Grid.Row="2" Text="{l:Loc Sync.Setup.Repository}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
+      <TextBox Grid.Row="2" Grid.Column="1" x:Name="RepositoryBox" Text="{Binding RepositoryName}" />
+
+      <TextBlock Grid.Row="3" Text="{l:Loc Sync.Setup.Branch}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
+      <TextBox Grid.Row="3" Grid.Column="1" x:Name="BranchBox" Text="{Binding Branch}" Width="180" HorizontalAlignment="Left" />
+
+      <CheckBox Grid.Row="4" Grid.Column="1" x:Name="PrivateBox" Content="{l:Loc Sync.Setup.Private}" IsChecked="{Binding IsPrivate}" />
+    </Grid>
+
+    <StackPanel Orientation="Horizontal" Spacing="8">
+      <Button x:Name="CreateRepositoryButton" Content="{l:Loc Sync.Setup.CreateRepository}" Command="{Binding CreateRepositoryCommand}" />
+      <Button x:Name="PreviewButton" Content="{l:Loc Sync.Setup.Preview}" Command="{Binding PreviewCommand}" />
+    </StackPanel>
+
+    <TextBlock x:Name="PreviewText" Text="{Binding PreviewSummary}" TextWrapping="Wrap"
+               Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
+    <CheckBox x:Name="MergeBox" Content="{l:Loc Sync.Setup.AcceptMerge}" IsChecked="{Binding AcceptMerge}"
+              IsVisible="{Binding IsMerge}" />
+
+    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+      <Button x:Name="CancelButton" Content="{l:Loc Common.Cancel}" Click="OnCancel" IsCancel="True" />
+      <Button x:Name="ConfirmButton" Content="{l:Loc Sync.Setup.Confirm}" Command="{Binding ConfigureCommand}"
+              IsEnabled="{Binding CanConfirm}" Classes="accent" />
+    </StackPanel>
+  </StackPanel>
+</Window>

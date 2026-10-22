@@ -184,6 +184,7 @@
   <data name="Settings.LinkPathStyle.Relative" xml:space="preserve"><value>Ruta relativa</value></data>
   <data name="Settings.LinkPathStyle.Shortest" xml:space="preserve"><value>Ruta más corta</value></data>
   <data name="Settings.Sync" xml:space="preserve"><value>Sincronización</value></data>
+  <data name="Settings.Sync.Configure" xml:space="preserve"><value>Configurar sincronización</value></data>
   <data name="Settings.Sync.Disable" xml:space="preserve"><value>Desactivar sincronización</value></data>
   <data name="Settings.Sync.NotConfigured" xml:space="preserve"><value>Este vault todavía no se sincroniza.</value></data>
   <data name="Settings.Sync.Repository" xml:space="preserve"><value>Repositorio</value></data>
@@ -214,6 +215,7 @@
   <data name="Sync.MinutesAgo" xml:space="preserve"><value>hace {0} min</value></data>
   <data name="Sync.Pause" xml:space="preserve"><value>Pausar</value></data>
   <data name="Sync.Preview" xml:space="preserve"><value>Vista previa</value></data>
+  <data name="Sync.Preview.Summary" xml:space="preserve"><value>Modo {0} · iguales {1} · solo local {2} · solo remoto {3} · conflictos {4}</value></data>
   <data name="Sync.Refresh" xml:space="preserve"><value>Actualizar</value></data>
   <data name="Sync.Resolution" xml:space="preserve"><value>Resolución</value></data>
   <data name="Sync.Resolution.KeepBoth" xml:space="preserve"><value>Mantener ambos</value></data>
@@ -225,6 +227,16 @@
   <data name="Sync.Restored" xml:space="preserve"><value>Versión restaurada.</value></data>
   <data name="Sync.Resume" xml:space="preserve"><value>Reanudar</value></data>
   <data name="Sync.SelectedVersion" xml:space="preserve"><value>Versión seleccionada</value></data>
+  <data name="Sync.Setup.AcceptMerge" xml:space="preserve"><value>Fusionar el contenido de ambos lados</value></data>
+  <data name="Sync.Setup.Account" xml:space="preserve"><value>Cuenta</value></data>
+  <data name="Sync.Setup.Branch" xml:space="preserve"><value>Rama</value></data>
+  <data name="Sync.Setup.Confirm" xml:space="preserve"><value>Activar sincronización</value></data>
+  <data name="Sync.Setup.CreateRepository" xml:space="preserve"><value>Crear repositorio</value></data>
+  <data name="Sync.Setup.Owner" xml:space="preserve"><value>Propietario</value></data>
+  <data name="Sync.Setup.Preview" xml:space="preserve"><value>Vista previa</value></data>
+  <data name="Sync.Setup.Private" xml:space="preserve"><value>Repositorio privado</value></data>
+  <data name="Sync.Setup.Repository" xml:space="preserve"><value>Repositorio</value></data>
+  <data name="Sync.Setup.Title" xml:space="preserve"><value>Configurar sincronización</value></data>
   <data name="Sync.State.Disabled" xml:space="preserve"><value>Sincronización desactivada</value></data>
   <data name="Sync.State.Error" xml:space="preserve"><value>Error de sincronización</value></data>
   <data name="Sync.State.NotConfigured" xml:space="preserve"><value>Sin sincronizar</value></data>

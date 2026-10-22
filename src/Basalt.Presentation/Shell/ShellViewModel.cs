@@ -29,6 +29,9 @@ public interface IWindowService
 
     /// <summary>A window with a side-by-side diff (spec 07 §8).</summary>
     Task ShowDiffAsync(DiffRequest request, CancellationToken ct);
+
+    /// <summary>The sync setup wizard of a vault (F-015.2, F-015.5). True when sync was configured.</summary>
+    Task<bool> ShowConfigureSyncAsync(VaultSessionInfo vault, CancellationToken ct);
 }
 
 /// <summary>

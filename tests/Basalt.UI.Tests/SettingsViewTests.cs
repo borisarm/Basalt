@@ -90,6 +90,26 @@ public sealed class SettingsViewTests
     });
 
     [Fact]
+    [Trait("Spec", "F-015.1")]
+    public Task Settings_OpenTheSignInAndSetupDialogs() => Headless.RunAsync(async () =>
+    {
+        await using var v = await ComposedVault.CreateAsync(new Dictionary<string, string>());
+        var (window, _) = await OpenSettingsAsync(v);
+        var view = window.GetVisualDescendants().OfType<SettingsView>().Single();
+
+        Click(Find<Button>(view, "AddAccountButton"));
+        await SettleAsync();
+        await v.Windows.Received(1).ShowSignInAsync(Arg.Any<CancellationToken>());
+
+        Click(Find<Button>(view, "VaultSyncConfigure"));
+        await SettleAsync();
+        await v.Windows.Received(1).ShowConfigureSyncAsync(
+            Arg.Is<VaultSessionInfo>(info => info.Id == v.Vault.Id), Arg.Any<CancellationToken>());
+
+        window.Close();
+    });
+
+    [Fact]
     [Trait("Spec", "F-015")]
     public Task Settings_ShowAccountsAndSyncSections() => Headless.RunAsync(async () =>
     {

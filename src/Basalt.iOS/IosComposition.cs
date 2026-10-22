@@ -4,6 +4,7 @@ using Basalt.Adapters.Platform.Apple;
 using Basalt.Application.Commands;
 using Basalt.Application.Ports.Platform;
 using Basalt.Application.Settings;
+using Basalt.Application.Sync;
 using Basalt.Composition;
 using Basalt.Presentation.Localization;
 using Basalt.Presentation.Settings;
@@ -35,13 +36,16 @@ internal static class IosComposition
         _attached = true;
         var services = BuildServices();
         BasaltApp.Services = services;
+        _ = services.GetRequiredService<IBackgroundSyncScheduler>();
         ApplySettings(services);
         BasaltApp.Started += app =>
         {
             if (app.ApplicationLifetime is ISingleViewApplicationLifetime single)
             {
+                var shell = services.GetRequiredService<ShellFactory>().Create();
+                IosLifecycle.Configure(shell, services);
                 single.MainView = new Basalt.UI.Views.MainView(
-                    services.GetRequiredService<ShellFactory>().Create(),
+                    shell,
                     services.GetRequiredService<NotificationService>(),
                     services.GetRequiredService<IFontScaleProvider>());
             }
@@ -60,6 +64,10 @@ internal static class IosComposition
         services.Replace(ServiceDescriptor.Singleton<IWindowService, IosWindowService>());
         services.Replace(ServiceDescriptor.Singleton<IConnectivityMonitor, IosConnectivityMonitor>());
         services.Replace(ServiceDescriptor.Singleton<IFontScaleProvider, IosFontScaleProvider>());
+        services.AddSingleton(sp => new IosBackgroundSyncScheduler(
+            ct => sp.GetRequiredService<SyncCoordinator>().RunBackgroundRefreshAsync(ct)));
+        services.Replace(ServiceDescriptor.Singleton<IBackgroundSyncScheduler>(
+            sp => sp.GetRequiredService<IosBackgroundSyncScheduler>()));
 
         services.Replace(ServiceDescriptor.Singleton<ILoggerFactory>(sp => new SerilogLoggerFactory(
             new LoggerConfiguration()

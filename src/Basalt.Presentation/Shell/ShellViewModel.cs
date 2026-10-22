@@ -92,6 +92,15 @@ public sealed partial class ShellViewModel : ViewModelBase, IVaultOpener
         }
     }
 
+    /// <summary>Flushes the open workspace (edits + layout) before the app goes to the background.</summary>
+    public async Task FlushAsync(CancellationToken ct)
+    {
+        if (Content is IClosable closable)
+        {
+            await closable.CloseAsync(ct).ConfigureAwait(true);
+        }
+    }
+
     public async Task<Result<Unit>> OpenAsync(VaultId vault, CancellationToken ct)
     {
         if (ActiveVault == vault)

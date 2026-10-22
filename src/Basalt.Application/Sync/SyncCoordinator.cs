@@ -30,6 +30,7 @@ public enum SyncTriggerReason
     Interval,
     EditIdle,
     AppBackground,
+    BackgroundRefresh,
     Retry,
 }
 
@@ -111,6 +112,28 @@ public sealed class SyncCoordinator : IAsyncDisposable
         return await completion.Task.ConfigureAwait(false);
     }
 
+    /// <summary>Syncs, in series, every open vault that syncs on backgrounding (spec 06 §11).</summary>
+    public async Task RunAppBackgroundAsync(CancellationToken ct)
+    {
+        foreach (var profile in Profiles(p => p.Triggers.OnAppBackground))
+        {
+            ct.ThrowIfCancellationRequested();
+            await RequestAsync(profile, SyncTriggerReason.AppBackground, null, ct).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>Best-effort BGAppRefresh: syncs, in series, the vaults with BackgroundRefresh enabled (spec 06 §11).</summary>
+    public async Task RunBackgroundRefreshAsync(CancellationToken ct)
+    {
+        foreach (var profile in Profiles(p => p.Triggers.BackgroundRefresh))
+        {
+            ct.ThrowIfCancellationRequested();
+            await RequestAsync(profile, SyncTriggerReason.BackgroundRefresh, null, ct).ConfigureAwait(false);
+        }
+    }
+
+    private List<SyncProfile> Profiles(Func<SyncProfile, bool> predicate) =>
+        [.. _states.Values.Select(state => state.Profile).Where(predicate).DistinctBy(profile => profile.VaultId)];
     public SyncStatus GetStatus(VaultId vault) => ToStatus(GetState(vault));
 
     public void UpdateContext(VaultId vault, SyncCycleContext context)

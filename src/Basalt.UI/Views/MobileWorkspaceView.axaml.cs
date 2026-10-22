@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Markup.Xaml;
+using Basalt.Domain.Accounts;
 using Basalt.Presentation.Panels;
 using Basalt.Presentation.Settings;
 using Basalt.Presentation.Workspace;
@@ -16,6 +17,8 @@ public partial class MobileWorkspaceView : UserControl
     private WorkspaceViewModel? _workspace;
     private SettingsViewModel? _settings;
     private TopLevel? _top;
+    private SettingsView? _settingsView;
+    private TaskCompletionSource<bool>? _signIn;
 
     public MobileWorkspaceView()
     {
@@ -40,6 +43,7 @@ public partial class MobileWorkspaceView : UserControl
             Unwatch();
             _settings?.Dispose();
             _settings = null;
+            _settingsView = null;
             if (_top is not null)
             {
                 _top.BackRequested -= OnBackRequested;
@@ -101,6 +105,11 @@ public partial class MobileWorkspaceView : UserControl
 
     private void OnBackRequested(object? sender, RoutedEventArgs e)
     {
+        if (_signIn is not null)
+        {
+            _signIn.TrySetResult(false);
+        }
+
         if (Sheet.IsVisible)
         {
             Sheet.IsVisible = false;
@@ -119,6 +128,7 @@ public partial class MobileWorkspaceView : UserControl
 
     private void OnPageBack(object? sender, RoutedEventArgs e)
     {
+        _signIn?.TrySetResult(false);
         PageOverlay.IsVisible = false;
         if (_workspace?.ActiveFile is null)
         {
@@ -195,8 +205,53 @@ public partial class MobileWorkspaceView : UserControl
             return;
         }
 
+        _settings.SignInPresenter = SignInAsync;
         _ = _settings.LoadAsync(CancellationToken.None);
-        ShowPage(new SettingsView { DataContext = _settings }, "Settings.Title");
+        _settingsView = new SettingsView { DataContext = _settings };
+        ShowPage(_settingsView, "Settings.Title");
+    }
+
+    private async Task<bool> SignInAsync(CancellationToken ct)
+    {
+        if (_workspace?.SignInFactory is not { } factory)
+        {
+            return false;
+        }
+
+        var viewModel = factory();
+        var page = new MobileSignInView { DataContext = viewModel };
+        var completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _signIn = completion;
+        void SignedIn(object? sender, GitHubAccount account)
+        {
+            completion.TrySetResult(true);
+            ShowPage(_settingsView, "Settings.Title");
+        }
+
+        void Cancelled(object? sender, EventArgs e)
+        {
+            completion.TrySetResult(false);
+            ShowPage(_settingsView, "Settings.Title");
+        }
+
+        viewModel.SignedIn += SignedIn;
+        page.Cancelled += Cancelled;
+        try
+        {
+            ShowPage(page, "SignIn.Title");
+            _ = viewModel.StartAsync(GitHubHost.GitHubDotCom);
+            return await completion.Task.WaitAsync(ct).ConfigureAwait(true);
+        }
+        catch (OperationCanceledException)
+        {
+            return false;
+        }
+        finally
+        {
+            viewModel.SignedIn -= SignedIn;
+            page.Cancelled -= Cancelled;
+            _signIn = null;
+        }
     }
 
     private void OnCloseSheet(object? sender, RoutedEventArgs e) => Sheet.IsVisible = false;

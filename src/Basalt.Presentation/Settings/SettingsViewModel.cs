@@ -373,15 +373,21 @@ public sealed class SettingsViewModel : ViewModelBase
 
     public Sync.VaultSyncSettingsViewModel? VaultSync { get; }
 
+    /// <summary>The iOS stack hosts the device flow as a page; desktop windows leave this null.</summary>
+    public Func<CancellationToken, Task<bool>>? SignInPresenter { get; set; }
+
     /// <summary>Signs a GitHub account in (F-015.1) and refreshes the list.</summary>
     public async Task AddAccountAsync(CancellationToken ct)
     {
-        if (_windows is null || Accounts is null)
+        if (Accounts is null)
         {
             return;
         }
 
-        if (await _windows.ShowSignInAsync(ct).ConfigureAwait(true))
+        var signedIn = SignInPresenter is { } presenter
+            ? await presenter(ct).ConfigureAwait(true)
+            : _windows is not null && await _windows.ShowSignInAsync(ct).ConfigureAwait(true);
+        if (signedIn)
         {
             await Accounts.LoadAsync().ConfigureAwait(true);
         }

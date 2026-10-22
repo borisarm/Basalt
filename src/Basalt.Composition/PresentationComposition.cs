@@ -208,6 +208,7 @@ public sealed class WorkspaceFactory(IServiceProvider services)
             Get<IWindowService>());
 
         workspace.SettingsFactory = v => services.GetRequiredService<ShellFactory>().CreateSettings(v);
+        workspace.SignInFactory = () => services.GetRequiredService<ShellFactory>().CreateSignIn();
 
         workspace.Sync = new SyncStatusViewModel(common, new SyncStatusUseCases(
             Get<IQueryHandler<GetSyncStatus, SyncStatusView>>(),

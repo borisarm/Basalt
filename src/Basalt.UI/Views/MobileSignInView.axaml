@@ -1,0 +1,19 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sync="clr-namespace:Basalt.Presentation.Sync;assembly=Basalt.Presentation"
+             xmlns:l="clr-namespace:Basalt.UI.Localization"
+             x:Class="Basalt.UI.Views.MobileSignInView"
+             x:DataType="sync:GitHubSignInViewModel">
+  <!-- Spec 04 F-015.1 on iOS: device flow inside the navigation stack. -->
+  <StackPanel Spacing="16" Margin="16">
+    <TextBlock Text="{l:Loc SignIn.Instructions}" TextWrapping="Wrap" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
+    <SelectableTextBlock x:Name="UserCode" Text="{Binding UserCode}" FontSize="32" HorizontalAlignment="Center"
+                         FontFamily="Menlo, Menlo-Regular, monospace" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
+    <Button x:Name="OpenGitHub" Content="{l:Loc SignIn.Open}" Click="OnOpenGitHub" HorizontalAlignment="Center" />
+    <StackPanel Spacing="6" IsVisible="{Binding IsWaitingForApproval}">
+      <ProgressBar IsIndeterminate="True" Height="4" />
+      <TextBlock Text="{l:Loc SignIn.Waiting}" HorizontalAlignment="Center" Foreground="{DynamicResource BasaltTextMutedBrush}" />
+    </StackPanel>
+    <Button x:Name="CancelSignIn" Content="{l:Loc Common.Cancel}" Click="OnCancel" HorizontalAlignment="Center" />
+  </StackPanel>
+</UserControl>

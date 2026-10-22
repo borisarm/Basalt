@@ -271,6 +271,7 @@ public sealed class VaultSyncEngineTests
     }
 
     [Fact]
+    [Trait("Spec", "NFR-022")]
     public async Task Run_WhenCancelledDuringTheFlush_ReturnsCancelled()
     {
         using var cancellation = new CancellationTokenSource();

@@ -139,4 +139,20 @@ public sealed class FuzzyMatcherTests
             return (FuzzyMatcher.Match(query, candidate) is not null) == (j == query.Length);
         }).QuickCheckThrowOnFailure();
     }
+
+    [Fact]
+    [Trait("Category", "Performance")]
+    [Trait("Spec", "NFR-005")]
+    public void RankingTenThousandTitles_IsUnderFiftyMilliseconds()
+    {
+        var titles = Enumerable.Range(0, 10_000).Select(index => $"Nota {index:00000} del vault").ToList();
+        FuzzyMatcher.Rank("nota1234", titles, title => title);
+
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        var ranked = FuzzyMatcher.Rank("nota1234", titles, title => title);
+        watch.Stop();
+
+        ranked.Should().NotBeEmpty();
+        watch.Elapsed.Should().BeLessThan(TimeSpan.FromMilliseconds(50), "spec NFR-005: quick switcher per keystroke");
+    }
 }

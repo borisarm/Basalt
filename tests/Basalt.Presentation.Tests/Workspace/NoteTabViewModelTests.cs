@@ -68,6 +68,7 @@ public sealed class NoteTabViewModelTests : IAsyncLifetime
 
     [Fact]
     [Trait("Spec", "F-003.1")]
+    [Trait("Spec", "NFR-024")]
     public async Task Autosave_TwoSecondsAfterTheLastChange()
     {
         _editor.Type(_tab, "uno\ndos\ntres!");

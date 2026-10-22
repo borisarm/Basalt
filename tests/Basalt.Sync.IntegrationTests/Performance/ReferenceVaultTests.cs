@@ -62,6 +62,8 @@ public sealed class ReferenceVaultTests
     [Fact]
     [Trait("Category", "Performance")]
     [Trait("Spec", "NFR-002")]
+    [Trait("Spec", "NFR-003")]
+    [Trait("Spec", "NFR-004")]
     public async Task OpeningTheReferenceVault_WithAnExistingIndex_IsFast()
     {
         await using var root = TempDirectory.Create("refvault");

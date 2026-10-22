@@ -207,6 +207,8 @@ public sealed class WorkspaceFactory(IServiceProvider services)
             new WorkspaceUseCases(Get<ICommandHandler<RecordRecentFile, Unit>>(), Get<IQueryHandler<LoadWorkspace, WorkspaceState?>>(), Get<ICommandHandler<SaveWorkspace, Unit>>(), Get<ICommandHandler<OpenDailyNote, DailyNote>>()),
             Get<IWindowService>());
 
+        workspace.SettingsFactory = v => services.GetRequiredService<ShellFactory>().CreateSettings(v);
+
         workspace.Sync = new SyncStatusViewModel(common, new SyncStatusUseCases(
             Get<IQueryHandler<GetSyncStatus, SyncStatusView>>(),
             Get<ICommandHandler<SyncVault, SyncCycleResult?>>(),

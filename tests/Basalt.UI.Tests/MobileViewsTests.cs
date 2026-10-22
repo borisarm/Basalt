@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Basalt.Domain.Notes;
@@ -20,6 +21,30 @@ public sealed class MobileViewsTests
 
         Dispatcher.UIThread.RunJobs();
     }
+
+    private static void Click(Button button) => button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+
+    [Fact]
+    [Trait("Spec", "F-014")]
+    public Task MobileWorkspace_OpensTheSettingsPage() => Headless.RunAsync(async () =>
+    {
+        await using var v = await ComposedVault.CreateAsync(new Dictionary<string, string>());
+        var view = new MobileWorkspaceView { DataContext = v.Workspace };
+        var window = new Window { Content = view, Width = 390, Height = 844 };
+        window.Show();
+        await SettleAsync();
+
+        Click(view.FindControl<Button>("MoreTab")!);
+        await SettleAsync();
+        var sheet = view.FindControl<Border>("Sheet")!;
+        sheet.IsVisible.Should().BeTrue();
+        var settings = sheet.GetVisualDescendants().OfType<Button>().First(b => Equals(b.Content, "Settings"));
+        Click(settings);
+        await SettleAsync();
+
+        view.GetVisualDescendants().OfType<SettingsView>().Should().ContainSingle();
+        window.Close();
+    });
 
     [Fact]
     [Trait("Spec", "F-004.1")]

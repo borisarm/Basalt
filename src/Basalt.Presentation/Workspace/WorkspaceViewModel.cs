@@ -436,6 +436,12 @@ public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNaviga
     /// <summary>The file of the active tab.</summary>
     public VaultPath? ActiveFile => _announced;
 
+    /// <summary>The open vault (used by the mobile settings page).</summary>
+    public VaultSessionInfo Vault => _vault;
+
+    /// <summary>Builds the settings page in the app's composition (iOS hosts it in the navigation stack).</summary>
+    public Func<VaultSessionInfo, ViewModelBase>? SettingsFactory { get; set; }
+
     /// <summary>Sync state of this vault shown in the status bar (F-015.4).</summary>
     public Sync.SyncStatusViewModel? Sync { get; set; }
 

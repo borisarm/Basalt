@@ -4,6 +4,7 @@ using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Markup.Xaml;
 using Basalt.Presentation.Panels;
+using Basalt.Presentation.Settings;
 using Basalt.Presentation.Workspace;
 using Basalt.UI.Localization;
 
@@ -13,6 +14,7 @@ namespace Basalt.UI.Views;
 public partial class MobileWorkspaceView : UserControl
 {
     private WorkspaceViewModel? _workspace;
+    private SettingsViewModel? _settings;
 
     public MobileWorkspaceView()
     {
@@ -26,7 +28,12 @@ public partial class MobileWorkspaceView : UserControl
                 ShowExplorer();
             }
         };
-        DetachedFromVisualTree += (_, _) => Unwatch();
+        DetachedFromVisualTree += (_, _) =>
+        {
+            Unwatch();
+            _settings?.Dispose();
+            _settings = null;
+        };
     }
 
     private void Watch()
@@ -118,6 +125,7 @@ public partial class MobileWorkspaceView : UserControl
         Add(menu, "Commands.OpenGraph", () => _ = workspace.OpenGraphCommand.ExecuteAsync(null));
         Add(menu, "Commands.OpenConflicts", () => _ = workspace.OpenConflictsCommand.ExecuteAsync(null));
         Add(menu, "Commands.OpenHistory", () => _ = workspace.OpenHistoryCommand.ExecuteAsync(null));
+        Add(menu, "Settings.Title", ShowSettings);
         ShowSheet(menu, "Mobile.More");
     }
 
@@ -141,6 +149,24 @@ public partial class MobileWorkspaceView : UserControl
 
         workspace.ShowPanelCommand.Execute(panelId);
         ShowPage(workspace.PanelFor(panelId), "Panel." + panelId);
+    }
+
+    private void ShowSettings()
+    {
+        if (_workspace is not { SettingsFactory: { } factory } workspace)
+        {
+            return;
+        }
+
+        _settings?.Dispose();
+        _settings = factory(workspace.Vault) as SettingsViewModel;
+        if (_settings is null)
+        {
+            return;
+        }
+
+        _ = _settings.LoadAsync(CancellationToken.None);
+        ShowPage(new SettingsView { DataContext = _settings }, "Settings.Title");
     }
 
     private void OnCloseSheet(object? sender, RoutedEventArgs e) => Sheet.IsVisible = false;

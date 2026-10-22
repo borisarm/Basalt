@@ -25,6 +25,10 @@ public interface IWorkspaceCommandHost : ICommandHost
 
     Task OpenGraphAsync(CancellationToken ct);
 
+    Task OpenConflictsAsync(CancellationToken ct);
+
+    Task OpenHistoryAsync(CancellationToken ct);
+
     Task OpenSettingsAsync();
 }
 
@@ -40,6 +44,8 @@ public sealed class WorkspaceCommands : ICommandContribution
     public const string GoBack = "workspace.go-back";
     public const string GoForward = "workspace.go-forward";
     public const string OpenGraph = "workspace.open-graph";
+    public const string OpenConflicts = "workspace.open-conflicts";
+    public const string OpenHistory = "workspace.open-history";
     public const string OpenSettings = "workspace.open-settings";
 
     public IEnumerable<CommandDescriptor> GetCommands() =>
@@ -53,6 +59,8 @@ public sealed class WorkspaceCommands : ICommandContribution
         Command(GoBack, "Commands.GoBack", "Alt+Left;Mod+[", (host, ct) => host.GoBackAsync(ct)),
         Command(GoForward, "Commands.GoForward", "Alt+Right;Mod+]", (host, ct) => host.GoForwardAsync(ct)),
         Command(OpenGraph, "Commands.OpenGraph", null, (host, ct) => host.OpenGraphAsync(ct)),
+        Command(OpenConflicts, "Commands.OpenConflicts", null, (host, ct) => host.OpenConflictsAsync(ct)),
+        Command(OpenHistory, "Commands.OpenHistory", null, (host, ct) => host.OpenHistoryAsync(ct)),
         Command(OpenSettings, "Commands.OpenSettings", "Mod+,", (host, _) => host.OpenSettingsAsync()),
     ];
 

@@ -118,4 +118,31 @@ public sealed class WorkspaceViewTests
         workspace.LeftSidebar.ActivePanel.Should().Be("search");
         window.Close();
     });
+
+    [Fact]
+    [Trait("Spec", "F-015.6")]
+    public Task ConflictCenter_OpensAsATab() => Headless.RunAsync(async () =>
+    {
+        await using var v = await ComposedVault.CreateAsync(new Dictionary<string, string>());
+
+        await v.Workspace.OpenConflictsCommand.ExecuteAsync(null);
+        Dispatcher.UIThread.RunJobs();
+
+        v.Workspace.Layout.ActiveGroup.Tabs.Should().Contain(tab => tab.Kind == "conflicts");
+        v.Window.GetVisualDescendants().OfType<ConflictCenterView>().Should().ContainSingle();
+    });
+
+    [Fact]
+    [Trait("Spec", "F-015.7")]
+    public Task FileHistory_OpensForTheActiveNote() => Headless.RunAsync(async () =>
+    {
+        await using var v = await ComposedVault.CreateAsync(new Dictionary<string, string> { ["A.md"] = "# A\n" });
+        await v.Workspace.OpenAsync(new OpenRequest(VaultPath.Create("A.md").Value), TestContext.Current.CancellationToken);
+
+        await v.Workspace.OpenHistoryCommand.ExecuteAsync(null);
+        Dispatcher.UIThread.RunJobs();
+
+        v.Workspace.Layout.ActiveGroup.Tabs.Should().Contain(tab => tab.Kind == "history" && tab.Path == VaultPath.Create("A.md").Value);
+        v.Window.GetVisualDescendants().OfType<FileHistoryView>().Should().ContainSingle();
+    });
 }

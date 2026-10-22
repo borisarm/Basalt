@@ -10,6 +10,7 @@ using Basalt.Application.Ports.Auth;
 using Basalt.Application.Ports.Events;
 using Basalt.Application.Ports.Index;
 using Basalt.Application.Ports.Platform;
+using Basalt.Application.Ports.Remote;
 using Basalt.Application.Ports.Storage;
 using Basalt.Application.Search;
 using Basalt.Application.Sync;
@@ -166,6 +167,26 @@ public sealed class WorkspaceFactory(IServiceProvider services)
                 new DelegateTabFactory("note", p => FileClassifier.Classify(p) == FileKind.Note, () => new NoteTabViewModel(common, noteTabs, events, messenger, vault.Id, editing, Get<IEditorCommands>(), reading)),
                 new DelegateTabFactory(GraphTabViewModel.KindId, _ => false,
                     () => new GraphTabViewModel(common, vault.Id, Get<IQueryHandler<GetGraph, GraphModel>>(), workspace!, Get<IRandom>(), events)),
+                new DelegateTabFactory(ConflictCenterViewModel.KindId, _ => false,
+                    () =>
+                    {
+                        var tab = new ConflictCenterViewModel(common, new ConflictCenterUseCases(
+                            Get<IQueryHandler<ListConflicts, IReadOnlyList<SyncConflictEntry>>>(),
+                            Get<ICommandHandler<ResolveConflict, Unit>>()));
+                        tab.Attach(vault.Id);
+                        return tab;
+                    }),
+                new DelegateTabFactory(FileHistoryViewModel.KindId, path => FileClassifier.Classify(path) == FileKind.Note,
+                    () =>
+                    {
+                        var tab = new FileHistoryViewModel(common, new FileHistoryUseCases(
+                            Get<IQueryHandler<GetFileHistory, IReadOnlyList<RemoteCommitInfo>>>(),
+                            Get<IQueryHandler<GetFileVersion, byte[]?>>(),
+                            Get<ICommandHandler<RestoreFileVersion, Unit>>(),
+                            Get<IQueryHandler<ReadNote, NoteDocument>>()));
+                        tab.Attach(vault.Id);
+                        return tab;
+                    }),
             ],
             messenger,
             new WorkspaceUseCases(Get<ICommandHandler<RecordRecentFile, Unit>>(), Get<IQueryHandler<LoadWorkspace, WorkspaceState?>>(), Get<ICommandHandler<SaveWorkspace, Unit>>()),

@@ -54,7 +54,7 @@ public sealed class SyncSettingsViewModelsTests
         resolve.HandleAsync(Arg.Any<ResolveConflict>(), Arg.Any<CancellationToken>()).Returns(Result.Success());
         var vm = new ConflictCenterViewModel(Services(), new ConflictCenterUseCases(list, resolve));
         vm.Attach(Vault);
-        await vm.LoadAsync();
+        await vm.ReloadAsync();
         vm.Selected = conflict;
 
         await vm.ResolveCommand.ExecuteAsync(null);

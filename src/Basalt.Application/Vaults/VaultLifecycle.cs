@@ -11,7 +11,7 @@ namespace Basalt.Application.Vaults;
 /// <summary>Closes an open vault; succeeds when it was not open.</summary>
 public sealed record CloseVault(VaultId VaultId) : ICommand<Unit>, IVaultRequest;
 
-public sealed class CloseVaultHandler(IVaultSessions sessions, IEventBus events) : ICommandHandler<CloseVault, Unit>
+public sealed class CloseVaultHandler(IVaultSessions sessions, IEventBus events, Sync.SyncCoordinator? coordinator = null) : ICommandHandler<CloseVault, Unit>
 {
     public async Task<Result<Unit>> HandleAsync(CloseVault command, CancellationToken ct)
     {
@@ -19,6 +19,11 @@ public sealed class CloseVaultHandler(IVaultSessions sessions, IEventBus events)
         if (sessions.Get(command.VaultId).IsFailure)
         {
             return Result.Success();
+        }
+
+        if (coordinator is not null)
+        {
+            await coordinator.StopAsync(command.VaultId).ConfigureAwait(false);
         }
 
         await sessions.CloseAsync(command.VaultId).ConfigureAwait(false);

@@ -4,6 +4,7 @@ using Basalt.Application.Sync;
 using Basalt.Domain.Common;
 using Basalt.Domain.Vaults;
 using Basalt.Presentation.Common;
+using Basalt.Presentation.Workspace;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -15,9 +16,13 @@ public sealed record ConflictCenterUseCases(
 
 /// <summary>Conflict copies and marker files with the four resolutions (F-015.6).</summary>
 public sealed partial class ConflictCenterViewModel(ViewModelServices services, ConflictCenterUseCases useCases)
-    : ViewModelBase(services)
+    : TabViewModel(services)
 {
+    public const string KindId = "conflicts";
+
     private VaultId _vault;
+
+    public override string Kind => KindId;
 
     public ObservableCollection<SyncConflictEntry> Conflicts { get; } = [];
 
@@ -36,17 +41,19 @@ public sealed partial class ConflictCenterViewModel(ViewModelServices services, 
     public void Attach(VaultId vault)
     {
         _vault = vault;
-        _ = LoadAsync();
+        Title = Localizer.Get("Sync.ConflictsTitle");
+        _ = ReloadAsync();
     }
 
-    [RelayCommand]
-    public async Task LoadAsync()
+    protected override async Task<Result<Unit>> LoadAsync(OpenRequest request, CancellationToken ct) =>
+        await LoadAsync(ct).ConfigureAwait(true);
+
+    protected override async Task<Result<Unit>> LoadAsync(CancellationToken ct)
     {
-        var conflicts = await RunAsync(ct => useCases.List.HandleAsync(new ListConflicts(_vault), ct))
-            .ConfigureAwait(true);
+        var conflicts = await RunAsync(token => useCases.List.HandleAsync(new ListConflicts(_vault), token)).ConfigureAwait(true);
         if (conflicts.IsFailure)
         {
-            return;
+            return conflicts.Error;
         }
 
         Conflicts.Clear();
@@ -56,6 +63,13 @@ public sealed partial class ConflictCenterViewModel(ViewModelServices services, 
         }
 
         OnPropertyChanged(nameof(IsEmpty));
+        return Result.Success();
+    }
+
+    [RelayCommand]
+    public async Task ReloadAsync()
+    {
+        await LoadAsync(CancellationToken.None).ConfigureAwait(true);
     }
 
     [RelayCommand(CanExecute = nameof(CanResolve))]

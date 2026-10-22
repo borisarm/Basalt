@@ -103,6 +103,31 @@ public sealed partial class TabGroupViewModel(ViewModelServices services, IReadO
         return Result.Success();
     }
 
+    /// <summary>
+    /// Opens a tab of <paramref name="kind"/> showing <paramref name="request"/> (for files whose default tab is another kind,
+    /// such as a note's version history). <c>entry.unsupported</c> when no tab type has that kind.
+    /// </summary>
+    public async Task<Result<Unit>> OpenKindForPathAsync(string kind, OpenRequest request, CancellationToken ct)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(kind);
+        ArgumentNullException.ThrowIfNull(request);
+        if (factories.FirstOrDefault(f => f.Kind == kind) is not { } factory)
+        {
+            return new Error(ErrorCodes.EntryUnsupported, "No tab of this kind.").With("kind", kind);
+        }
+
+        var tab = factory.Create();
+        var shown = await tab.ShowAsync(request, ct).ConfigureAwait(true);
+        if (shown.IsFailure)
+        {
+            tab.Dispose();
+            return shown;
+        }
+
+        Add(tab);
+        return Result.Success();
+    }
+
     private void Add(TabViewModel tab)
     {
         Tabs.Insert(ActiveTab is null ? Tabs.Count : Tabs.IndexOf(ActiveTab) + 1, tab);
@@ -625,6 +650,18 @@ public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNaviga
     private Task<Result<Unit>> OpenGraphAsync(CancellationToken ct) =>
         RunAsync(token => Layout.ActiveGroup.OpenKindAsync(GraphTabViewModel.KindId, token));
 
+    /// <summary>Opens (or activates) the conflict center (F-015.6).</summary>
+    [RelayCommand]
+    private Task<Result<Unit>> OpenConflictsAsync(CancellationToken ct) =>
+        RunAsync(token => Layout.ActiveGroup.OpenKindAsync(Basalt.Presentation.Sync.ConflictCenterViewModel.KindId, token));
+
+    /// <summary>Opens the version history of the active note (F-015.7).</summary>
+    [RelayCommand]
+    private Task<Result<Unit>> OpenHistoryAsync(CancellationToken ct) =>
+        ActiveFile is { } path
+            ? RunAsync(token => Layout.ActiveGroup.OpenKindForPathAsync(Basalt.Presentation.Sync.FileHistoryViewModel.KindId, new OpenRequest(path), token))
+            : Task.FromResult(Result.Failure<Unit>(new Error(ErrorCodes.EntryUnsupported, "No active note.")));
+
     /// <summary>Opens the settings window of the app and this vault (F-014).</summary>
     [RelayCommand]
     private void OpenSettings() => _windows.OpenSettings(_vault);
@@ -650,6 +687,10 @@ public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNaviga
         Layout.ActiveGroup.ActiveTab is { } tab ? tab.GoForwardCommand.ExecuteAsync(null) : Task.CompletedTask;
 
     Task IWorkspaceCommandHost.OpenGraphAsync(CancellationToken ct) => OpenGraphAsync(ct);
+
+    Task IWorkspaceCommandHost.OpenConflictsAsync(CancellationToken ct) => OpenConflictsAsync(ct);
+
+    Task IWorkspaceCommandHost.OpenHistoryAsync(CancellationToken ct) => OpenHistoryAsync(ct);
 
     Task IWorkspaceCommandHost.OpenSettingsAsync()
     {

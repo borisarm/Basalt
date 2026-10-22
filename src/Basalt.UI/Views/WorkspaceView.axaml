@@ -35,6 +35,10 @@
                 AutomationProperties.Name="{l:Loc Menu.CommandPalette}" ToolTip.Tip="{l:Loc Menu.CommandPalette}" />
         <Button x:Name="GraphButton" Content="◎" Command="{Binding OpenGraphCommand}"
                 AutomationProperties.Name="{l:Loc Commands.OpenGraph}" ToolTip.Tip="{l:Loc Commands.OpenGraph}" />
+        <Button x:Name="ConflictsButton" Content="⚠" Command="{Binding OpenConflictsCommand}"
+                AutomationProperties.Name="{l:Loc Commands.OpenConflicts}" ToolTip.Tip="{l:Loc Commands.OpenConflicts}" />
+        <Button x:Name="HistoryButton" Content="⟲" Command="{Binding OpenHistoryCommand}"
+                AutomationProperties.Name="{l:Loc Commands.OpenHistory}" ToolTip.Tip="{l:Loc Commands.OpenHistory}" />
         <Button x:Name="SettingsButton" Content="⚙" Command="{Binding OpenSettingsCommand}"
                 AutomationProperties.Name="{l:Loc Commands.OpenSettings}" ToolTip.Tip="{l:Loc Commands.OpenSettings}" />
         <Button x:Name="ToggleRight" Content="◧" Command="{Binding RightSidebar.ToggleCommand}"

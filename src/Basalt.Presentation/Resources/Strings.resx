@@ -14,8 +14,10 @@
   <data name="Commands.GoBack" xml:space="preserve"><value>Go back</value></data>
   <data name="Commands.GoForward" xml:space="preserve"><value>Go forward</value></data>
   <data name="Commands.NewNote" xml:space="preserve"><value>New note</value></data>
+  <data name="Commands.OpenConflicts" xml:space="preserve"><value>Open conflict center</value></data>
   <data name="Commands.OpenDailyNote" xml:space="preserve"><value>Open today's daily note</value></data>
   <data name="Commands.OpenGraph" xml:space="preserve"><value>Open graph</value></data>
+  <data name="Commands.OpenHistory" xml:space="preserve"><value>Open version history</value></data>
   <data name="Commands.OpenSettings" xml:space="preserve"><value>Open settings</value></data>
   <data name="Commands.ReopenClosedTab" xml:space="preserve"><value>Reopen closed tab</value></data>
   <data name="Commands.SearchVault" xml:space="preserve"><value>Search in vault</value></data>
@@ -198,14 +200,31 @@
   <data name="SignIn.Waiting" xml:space="preserve"><value>Waiting for authorization…</value></data>
   <data name="Sync.Completed" xml:space="preserve"><value>Sync completed.</value></data>
   <data name="Sync.Configured" xml:space="preserve"><value>Sync configured.</value></data>
+  <data name="Sync.ConflictCopy" xml:space="preserve"><value>Conflict copy</value></data>
+  <data name="Sync.ConflictMarkers" xml:space="preserve"><value>Merge markers</value></data>
   <data name="Sync.Conflicts" xml:space="preserve"><value>Conflicts ({0})</value></data>
+  <data name="Sync.ConflictsTitle" xml:space="preserve"><value>Conflicts</value></data>
+  <data name="Sync.CurrentVersion" xml:space="preserve"><value>Current version</value></data>
   <data name="Sync.DaysAgo" xml:space="preserve"><value>{0} d ago</value></data>
+  <data name="Sync.History" xml:space="preserve"><value>Version history</value></data>
+  <data name="Sync.HistoryFor" xml:space="preserve"><value>History of {0}</value></data>
   <data name="Sync.HoursAgo" xml:space="preserve"><value>{0} h ago</value></data>
   <data name="Sync.JustNow" xml:space="preserve"><value>just now</value></data>
+  <data name="Sync.MergedText" xml:space="preserve"><value>Result</value></data>
   <data name="Sync.MinutesAgo" xml:space="preserve"><value>{0} min ago</value></data>
   <data name="Sync.Pause" xml:space="preserve"><value>Pause</value></data>
+  <data name="Sync.Preview" xml:space="preserve"><value>Preview</value></data>
+  <data name="Sync.Refresh" xml:space="preserve"><value>Refresh</value></data>
+  <data name="Sync.Resolution" xml:space="preserve"><value>Resolution</value></data>
+  <data name="Sync.Resolution.KeepBoth" xml:space="preserve"><value>Keep both</value></data>
+  <data name="Sync.Resolution.KeepLocal" xml:space="preserve"><value>Keep mine</value></data>
+  <data name="Sync.Resolution.KeepRemote" xml:space="preserve"><value>Use the remote version</value></data>
+  <data name="Sync.Resolution.Merged" xml:space="preserve"><value>Use the merged text</value></data>
+  <data name="Sync.Resolve" xml:space="preserve"><value>Resolve</value></data>
+  <data name="Sync.Restore" xml:space="preserve"><value>Restore</value></data>
   <data name="Sync.Restored" xml:space="preserve"><value>Version restored.</value></data>
   <data name="Sync.Resume" xml:space="preserve"><value>Resume</value></data>
+  <data name="Sync.SelectedVersion" xml:space="preserve"><value>Selected version</value></data>
   <data name="Sync.State.Disabled" xml:space="preserve"><value>Sync disabled</value></data>
   <data name="Sync.State.Error" xml:space="preserve"><value>Sync error</value></data>
   <data name="Sync.State.NotConfigured" xml:space="preserve"><value>Not syncing</value></data>

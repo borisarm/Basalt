@@ -1,0 +1,48 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sync="clr-namespace:Basalt.Presentation.Sync;assembly=Basalt.Presentation"
+             xmlns:s="clr-namespace:Basalt.Application.Sync;assembly=Basalt.Application"
+             xmlns:l="clr-namespace:Basalt.UI.Localization"
+             x:Class="Basalt.UI.Views.ConflictCenterView"
+             x:DataType="sync:ConflictCenterViewModel">
+  <!-- Spec 04 F-015.6: conflict copies and marker files with the four resolutions. -->
+  <Grid ColumnDefinitions="320,*" Margin="{StaticResource BasaltSpacingM}">
+    <DockPanel Grid.Column="0" Margin="0,0,12,0">
+      <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="6" Margin="0,0,0,8">
+        <Button x:Name="RefreshButton" Content="{l:Loc Sync.Refresh}" Command="{Binding ReloadCommand}" />
+      </StackPanel>
+      <TextBlock DockPanel.Dock="Top" Text="{l:Loc Sync.ConflictsTitle}" FontWeight="SemiBold"
+                 Foreground="{DynamicResource BasaltTextPrimaryBrush}" Margin="0,0,0,8" />
+      <ListBox x:Name="ConflictsList" ItemsSource="{Binding Conflicts}" SelectedItem="{Binding Selected}" Background="Transparent">
+        <ListBox.ItemTemplate>
+          <DataTemplate x:DataType="s:SyncConflictEntry">
+            <StackPanel Spacing="2">
+              <TextBlock Text="{Binding Path}" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
+              <TextBlock Text="{l:Loc Sync.ConflictCopy}" IsVisible="{Binding IsConflictCopy}"
+                         FontSize="{StaticResource BasaltFontSizeSmall}" Foreground="{DynamicResource BasaltWarningBrush}" />
+              <TextBlock Text="{l:Loc Sync.ConflictMarkers}" IsVisible="{Binding HasMarkers}"
+                         FontSize="{StaticResource BasaltFontSizeSmall}" Foreground="{DynamicResource BasaltWarningBrush}" />
+            </StackPanel>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </DockPanel>
+    <DockPanel Grid.Column="1">
+      <StackPanel DockPanel.Dock="Top" Spacing="8">
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <TextBlock Text="{l:Loc Sync.Resolution}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
+          <ComboBox x:Name="ResolutionBox" SelectionChanged="OnResolutionChanged">
+            <ComboBoxItem Content="{l:Loc Sync.Resolution.KeepLocal}" />
+            <ComboBoxItem Content="{l:Loc Sync.Resolution.KeepRemote}" />
+            <ComboBoxItem Content="{l:Loc Sync.Resolution.KeepBoth}" />
+            <ComboBoxItem Content="{l:Loc Sync.Resolution.Merged}" />
+          </ComboBox>
+          <Button x:Name="ResolveButton" Content="{l:Loc Sync.Resolve}" Command="{Binding ResolveCommand}" />
+        </StackPanel>
+        <TextBlock Text="{l:Loc Sync.MergedText}" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
+      </StackPanel>
+      <TextBox x:Name="MergedText" Text="{Binding MergedText}" AcceptsReturn="True" TextWrapping="NoWrap"
+               FontFamily="Consolas, Menlo, monospace" VerticalContentAlignment="Top" />
+    </DockPanel>
+  </Grid>
+</UserControl>

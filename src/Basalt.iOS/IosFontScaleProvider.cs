@@ -1,5 +1,4 @@
 using Basalt.Application.Ports.Platform;
-using UIKit;
 
 namespace Basalt.iOS;
 
@@ -14,7 +13,7 @@ internal sealed class IosFontScaleProvider : IFontScaleProvider, IDisposable
             (_, _) => Changed?.Invoke(this, Scale));
     }
 
-    public double Scale => UIApplication.SharedApplication.PreferredContentSizeCategory switch
+    public double Scale => UIContentSizeCategoryExtensions.GetValue(UIApplication.SharedApplication.PreferredContentSizeCategory) switch
     {
         UIContentSizeCategory.ExtraSmall => 0.82,
         UIContentSizeCategory.Small => 0.88,

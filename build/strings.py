@@ -84,6 +84,9 @@ STRINGS = {
     "Conflict.KeepMine": ("Keep mine", "Mantener el mío"),
     "Conflict.UseDisk": ("Use the disk version", "Usar el de disco"),
     "Conflict.ShowDiff": ("Show differences", "Ver diferencias"),
+    "Conflict.DiffTitle": ("Differences", "Diferencias"),
+    "Conflict.Mine": ("Mine", "El mío"),
+    "Conflict.Disk": ("On disk", "En disco"),
     # Panels
     "Panel.Refresh": ("Refresh", "Actualizar"),
     "Search.Placeholder": ("Search the vault…", "Buscar en el vault…"),

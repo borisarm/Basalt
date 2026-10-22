@@ -378,6 +378,14 @@ public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNaviga
         };
         Watch(Layout.ActiveGroup);
         messenger.Register<NavigateRequested>(this, (_, m) => _ = OpenFileAsync(m.Request, CancellationToken.None));
+        messenger.Register<ExternalConflictDiffRequested>(this, (_, m) => _ = _windows.ShowDiffAsync(
+            new Diff.DiffRequest(
+                Localizer.Get("Conflict.DiffTitle"),
+                Localizer.Get("Conflict.Mine"),
+                Localizer.Get("Conflict.Disk"),
+                m.Mine,
+                m.Disk),
+            CancellationToken.None));
         LeftSidebar.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(SidebarViewModel.ActivePanel))

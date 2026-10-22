@@ -28,8 +28,11 @@
   <data name="Common.OK" xml:space="preserve"><value>Aceptar</value></data>
   <data name="Common.Retry" xml:space="preserve"><value>Reintentar</value></data>
   <data name="Common.Yes" xml:space="preserve"><value>Sí</value></data>
+  <data name="Conflict.DiffTitle" xml:space="preserve"><value>Diferencias</value></data>
+  <data name="Conflict.Disk" xml:space="preserve"><value>En disco</value></data>
   <data name="Conflict.KeepMine" xml:space="preserve"><value>Mantener el mío</value></data>
   <data name="Conflict.Message" xml:space="preserve"><value>La nota cambió en el disco y los cambios chocan con tus ediciones.</value></data>
+  <data name="Conflict.Mine" xml:space="preserve"><value>El mío</value></data>
   <data name="Conflict.ShowDiff" xml:space="preserve"><value>Ver diferencias</value></data>
   <data name="Conflict.UseDisk" xml:space="preserve"><value>Usar el de disco</value></data>
   <data name="Errors.account.invalid_host" xml:space="preserve"><value>El servidor de GitHub no es válido.</value></data>

@@ -60,4 +60,22 @@ public sealed class SyncViewsTests
         window.Close();
         (await window.Result).Should().BeFalse();
     });
+
+    [Fact]
+    [Trait("Spec", "F-015.6")]
+    public Task DiffWindow_ShowsTheAlignedRows() => Headless.RunAsync(async () =>
+    {
+        var window = new DiffWindow(new Basalt.Presentation.Diff.DiffRequest(
+            "Differences", "Mine", "On disk", "a\nold\n", "a\nnew\n"));
+        window.Show();
+        await SettleAsync();
+
+        var view = window.GetVisualDescendants().OfType<DiffView>().Single();
+        view.Document.Should().HaveCount(2);
+        view.Document!.Select(row => row.Kind).Should().Equal(
+            Basalt.Presentation.Diff.DiffLineKind.Equal,
+            Basalt.Presentation.Diff.DiffLineKind.Changed);
+
+        window.Close();
+    });
 }

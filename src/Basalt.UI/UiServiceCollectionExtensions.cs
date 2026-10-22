@@ -2,6 +2,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Basalt.Application.Vaults;
 using Basalt.Domain.Vaults;
 using Basalt.Presentation.Common;
+using Basalt.Presentation.Diff;
 using Basalt.Presentation.Settings;
 using Basalt.Presentation.Shell;
 using Basalt.UI.Services;
@@ -59,6 +60,15 @@ public sealed class DesktopWindowService(
         var window = new SignInWindow(createSignIn());
         window.Show();
         return window.Result;
+    }
+
+    public Task ShowDiffAsync(DiffRequest request, CancellationToken ct)
+    {
+        var window = new DiffWindow(request);
+        var closed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        window.Closed += (_, _) => closed.TrySetResult();
+        window.Show();
+        return closed.Task;
     }
 
     /// <summary>Makes the first window the desktop lifetime's main window.</summary>

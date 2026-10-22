@@ -3,6 +3,7 @@ using Basalt.Application.Vaults;
 using Basalt.Domain.Common;
 using Basalt.Domain.Vaults;
 using Basalt.Presentation.Common;
+using Basalt.Presentation.Diff;
 using Basalt.Presentation.Vaults;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -25,6 +26,9 @@ public interface IWindowService
 
     /// <summary>The GitHub device-flow dialog (F-015.1). True when an account was signed in.</summary>
     Task<bool> ShowSignInAsync(CancellationToken ct);
+
+    /// <summary>A window with a side-by-side diff (spec 07 §8).</summary>
+    Task ShowDiffAsync(DiffRequest request, CancellationToken ct);
 }
 
 /// <summary>

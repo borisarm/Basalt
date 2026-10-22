@@ -1,5 +1,3 @@
-using UIKit;
-
 namespace Basalt.iOS;
 
 /// <summary>Native entry point; Avalonia's <see cref="AppDelegate"/> starts the single-view app.</summary>

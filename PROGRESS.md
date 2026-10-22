@@ -121,7 +121,7 @@ Registro de avance del plan (`docs/specs/10-plan-de-implementacion.md`). Platafo
 
 ## Fase 11 — Calidad, rendimiento y release
 
-- [ ] T11.1 Benchmarks
+- [ ] T11.1 Benchmarks — en curso. Tests de rendimiento con umbral: NFR-003/NFR-004 (indexado inicial y búsqueda en el vault de referencia), NFR-005 (quick switcher con 10 000 títulos < 50 ms), NFR-010 (escaneo local con caché), NFR-022 (cancelación de un ciclo) y NFR-024 (autoguardado a 2 s). Faltan los benchmarks `BenchmarkDotNet` de `tests/Basalt.Benchmarks` (búsqueda, quick switcher, escaneo) y NFR-007/008/009/011.
 - [ ] T11.2 Accesibilidad
 - [ ] T11.3 Seguridad
 - [ ] T11.4 Empaquetado y firma

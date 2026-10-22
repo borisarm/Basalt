@@ -26,6 +26,7 @@ public sealed class SpecTraceabilityTests
         }
     }
 
+
     [Fact]
     public void SpecCatalog_FindsAllIdentifierFamilies()
     {

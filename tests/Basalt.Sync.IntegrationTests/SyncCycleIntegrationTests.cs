@@ -114,6 +114,7 @@ public sealed class SyncCycleIntegrationTests : IAsyncLifetime
 
     [Fact]
     [Trait("Spec", "SYNC-CONFLICT")]
+    [Trait("Spec", "S04")]
     public async Task DivergentText_CreatesAConflictCopy()
     {
         await WriteAsync("Notes/C.md", "local");
@@ -243,6 +244,7 @@ public sealed class SyncCycleIntegrationTests : IAsyncLifetime
 
     [Fact]
     [Trait("Spec", "SYNC-RENAME")]
+    [Trait("Spec", "S09")]
     public async Task LocalRenameAgainstRemoteEdit_LosesNeitherVersion()
     {
         await WriteAsync("Notes/Old.md", "base");
@@ -267,6 +269,7 @@ public sealed class SyncCycleIntegrationTests : IAsyncLifetime
 
     [Fact]
     [Trait("Spec", "SYNC-DELETE-VS-MODIFY")]
+    [Trait("Spec", "S06")]
     public async Task RemoteDeletionAgainstLocalEdit_KeepsTheModifiedFile()
     {
         await WriteAsync("Notes/F.md", "base");
@@ -285,6 +288,7 @@ public sealed class SyncCycleIntegrationTests : IAsyncLifetime
 
     [Fact]
     [Trait("Spec", "SYNC-AUTH")]
+    [Trait("Spec", "S24")]
     public async Task MissingToken_ReturnsAuthRequiredWithoutChangingAnything()
     {
         await WriteAsync("Notes/Auth.md", "# Auth");
@@ -299,6 +303,7 @@ public sealed class SyncCycleIntegrationTests : IAsyncLifetime
 
     [Fact]
     [Trait("Spec", "SYNC-SYNCIGNORE")]
+    [Trait("Spec", "S27")]
     public async Task SyncIgnore_IsNotPublishedAndExcludesMatchingFiles()
     {
         await WriteAsync(".basalt/syncignore", "secret.txt\n");
@@ -313,6 +318,7 @@ public sealed class SyncCycleIntegrationTests : IAsyncLifetime
 
     [Fact]
     [Trait("Spec", "SYNC-CRLF-BOM")]
+    [Trait("Spec", "S28")]
     public async Task CrlfAndBom_ArePreservedOnUpload()
     {
         byte[] content = [0xEF, 0xBB, 0xBF, (byte)'a', (byte)'\r', (byte)'\n'];
@@ -326,6 +332,7 @@ public sealed class SyncCycleIntegrationTests : IAsyncLifetime
 
     [Fact]
     [Trait("Spec", "SYNC-IGNORE-WORKSPACE")]
+    [Trait("Spec", "S27")]
     public async Task WorkspaceState_IsNeverPublished()
     {
         await WriteAsync(".basalt/workspace.dev.json", "{\"open\":[]}");
@@ -352,6 +359,7 @@ public sealed class SyncCycleIntegrationTests : IAsyncLifetime
 
     [Fact]
     [Trait("Spec", "SYNC-MERGE")]
+    [Trait("Spec", "S03")]
     public async Task NonOverlappingTextEdits_MergeWithoutAConflictCopy()
     {
         await WriteAsync("Notes/M.md", "one\n");
@@ -399,6 +407,93 @@ public sealed class SyncCycleIntegrationTests : IAsyncLifetime
         var tree = await _remote.GetTreeAsync(head.Tree, Ct);
         tree.Value.Files.Should().NotContain(file => file.Path == path);
     }
+    [Fact]
+    [Trait("Spec", "S05")]
+    public async Task SameLineConflict_WithMarkersPolicy_WritesMergeMarkers()
+    {
+        await WriteAsync("Notes/Markers.md", "base\n");
+        await CycleAsync();
+        await WriteAsync("Notes/Markers.md", "mine\n");
+        await CommitRemoteAsync(("Notes/Markers.md", "theirs\n"));
+
+        var result = await CycleAsync(SyncPolicy.Default with { TextConflicts = TextConflictPolicy.AutoMergeOrMarkers });
+
+        result.Status.Should().Be(SyncCycleStatus.Merged);
+        var text = (await _files.ReadAllTextAsync(VaultPath.Create("Notes/Markers.md").Value, Ct)).Value;
+        text.Should().Contain("<<<<<<<").And.Contain("=======").And.Contain(">>>>>>>");
+    }
+
+    [Fact]
+    [Trait("Spec", "S10")]
+    public async Task BinaryConflict_KeepsBothVersions()
+    {
+        var original = new byte[] { 0, 1, 2, 3 };
+        var local = new byte[] { 0, 9, 2, 3 };
+        var remote = new byte[] { 0, 7, 2, 3 };
+        await _files.WriteAllBytesAsync(VaultPath.Create("Assets/pic.bin").Value, original, null, Ct);
+        await CycleAsync();
+        await _files.WriteAllBytesAsync(VaultPath.Create("Assets/pic.bin").Value, local, null, Ct);
+        var blob = (await _remote.CreateBlobAsync(remote, Ct)).Value;
+        await CommitChangesAsync(new TreeChange.Upsert(VaultPath.Create("Assets/pic.bin").Value, blob));
+
+        var result = await CycleAsync();
+
+        result.Status.Should().Be(SyncCycleStatus.Merged);
+        var files = new List<string>();
+        await foreach (var entry in _files.EnumerateAsync(VaultPath.Root, true, Ct))
+        {
+            files.Add(entry.Path.ToString());
+        }
+
+        files.Should().Contain(path => path.Contains("conflict", StringComparison.Ordinal));
+        var kept = files.Where(path => path.StartsWith("Assets/pic", StringComparison.Ordinal)).ToList();
+        kept.Should().HaveCountGreaterThanOrEqualTo(2);
+    }
+
+    [Fact]
+    [Trait("Spec", "S01")]
+    [Trait("Spec", "S02")]
+    public async Task TwoDevices_CloneAndReceiveLaterEdits()
+    {
+        await WriteAsync("Notes/Shared.md", "# v1");
+        await CycleAsync();
+        var (files2, engine2, vault2) = await CreateDeviceAsync("device2");
+
+        await engine2.RunAsync(Request(_profile with { VaultId = vault2 }), Ct);
+        (await files2.ReadAllTextAsync(VaultPath.Create("Notes/Shared.md").Value, Ct)).Value.Should().Be("# v1");
+
+        await WriteAsync("Notes/Shared.md", "# v2");
+        await CycleAsync();
+        await engine2.RunAsync(Request(_profile with { VaultId = vault2 }), Ct);
+
+        (await files2.ReadAllTextAsync(VaultPath.Create("Notes/Shared.md").Value, Ct)).Value.Should().Be("# v2");
+    }
+
+    private SyncCycleRequest Request(SyncProfile profile) =>
+        new(profile, true, true, new CommitAuthor("Test", "test@example.com"), "Vault");
+
+    private async Task<(IVaultFileSystem Files, VaultSyncEngine Engine, VaultId Id)> CreateDeviceAsync(string name)
+    {
+        var location = Path.Combine(_vaultRoot.Path, name);
+        var files = (await _provider.GetRequiredService<IVaultFileSystemFactory>().CreateAsync(location, Ct)).Value;
+        var vault = new VaultId(Guid.NewGuid());
+        (await _provider.GetRequiredService<IVaultConfigStore>()
+            .SaveVaultConfigAsync(files, new VaultConfig(vault, VaultSettings.Default), Ct)).IsSuccess.Should().BeTrue();
+        var state = _provider.GetRequiredService<ISyncStateStoreFactory>().Create(vault);
+        var engine = new VaultSyncEngine(
+            vault,
+            files,
+            _remote,
+            state,
+            _provider.GetRequiredService<IEventBus>(),
+            _provider.GetRequiredService<IClock>(),
+            _provider.GetRequiredService<IDeviceInfo>(),
+            TimeProvider.System,
+            new SyncLocks(),
+            new VaultLocks());
+        return (files, engine, vault);
+    }
+
     private Task<SyncCycleResult> CycleAsync() => CycleAsync(SyncPolicy.Default);
 
     private Task<SyncCycleResult> CycleAsync(SyncPolicy policy) =>

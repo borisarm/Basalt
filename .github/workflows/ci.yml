@@ -107,7 +107,7 @@ jobs:
         run: |
           if [ ! -f src/Basalt.iOS/Basalt.iOS.csproj ]; then echo "iOS head not created yet (T10.1)"; exit 0; fi
           dotnet workload restore src/Basalt.iOS/Basalt.iOS.csproj
-          dotnet build src/Basalt.iOS/Basalt.iOS.csproj -c Release -p:RuntimeIdentifier=iossimulator-arm64
+          dotnet build src/Basalt.iOS/Basalt.iOS.csproj -c Release -p:RuntimeIdentifier=iossimulator-arm64 -p:ValidateXcodeVersion=false
 
   security:
     runs-on: ubuntu-latest

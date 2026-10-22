@@ -17,10 +17,10 @@
 1. Añadir `SkiaSharp.NativeAssets.iOS` 3.119.4 como referencia explícita del head iOS, para que el framework nativo viaje en el bundle.
 2. Compilar y **ejecutar** el head iOS localmente con el SDK 10 del sistema (workload iOS 26.4) y `-p:ValidateXcodeVersion=false` mientras Xcode 26.5 no tenga un workload de .NET 11 equivalente. Documentar la línea de comandos en `PROGRESS.md`.
 3. Mantener `Basalt.iOS` fuera de `Basalt.slnx`: Windows y Linux no pueden compilar `net10.0-ios`. CI lo compila explícitamente en el job `build-ios` (solo build, sin ejecución).
-4. En CI se conserva el SDK de `global.json` para el build; cuando el workload de .NET 11 soporte el Xcode del runner, se usará para compilar y ejecutar el head.
+4. En CI se conserva el SDK de `global.json` para el build y se pasa `-p:ValidateXcodeVersion=false` (solo build, sin ejecución) porque el runner usa Xcode 26.6 con el pack iOS 26.0; cuando el workload de .NET 11 soporte ese Xcode, se quitará el override.\n5. `Basalt.Adapters.Platform.Apple` se queda en `net10.0` para que el build de la solución en macOS no exija el workload iOS; `NWPathMonitor` vive en el head iOS y sustituye al monitor de macOS en su contenedor.
 
 ## Consecuencias
 
 - T10.1 queda verificado con build + arranque real en simulador, sin depender de macOS para el resto del equipo.
 - El SDK usado para iOS difiere del resto de heads hasta que se actualice el workload; el TFM sigue siendo `net10.0-ios` y el código no cambia.
-- `ValidateXcodeVersion=false` solo se usa en la verificación local; no se añade al proyecto ni al CI.
+- `ValidateXcodeVersion=false` solo se usa al compilar/ejecutar con un Xcode distinto del que espera el pack iOS; no se añade al proyecto.

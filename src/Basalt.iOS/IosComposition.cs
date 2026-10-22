@@ -57,6 +57,7 @@ internal static class IosComposition
             .AddBasaltPresentation(CommandPlatform.MacOS, new ShellOptions(MultipleWindows: false))
             .AddBasaltUi();
         services.Replace(ServiceDescriptor.Singleton<IWindowService, IosWindowService>());
+        services.Replace(ServiceDescriptor.Singleton<IConnectivityMonitor, IosConnectivityMonitor>());
 
         services.Replace(ServiceDescriptor.Singleton<ILoggerFactory>(sp => new SerilogLoggerFactory(
             new LoggerConfiguration()

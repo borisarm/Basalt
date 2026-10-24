@@ -91,6 +91,12 @@ dotnet run --project src/Basalt.Desktop
 
 Development is test-driven. Every specified scenario is traced to tests with `[Trait("Spec", "<id>")]`. CI enforces coverage thresholds of at least 95 % lines on the domain and at least 90 % on the application layer, and runs mutation testing nightly.
 
+## Documentation
+
+- [User guide](docs/user-guide.md): creating vaults, editing, GitHub sync, conflicts and history.
+- [Release checklist](docs/release-checklist.md): preflight checks, packaging and publication.
+- [Specification](docs/specs/README.md): the source of truth for the product and the architecture.
+
 ## Contributing
 
 Read [`CLAUDE.md`](CLAUDE.md) and the specification before contributing. In short:

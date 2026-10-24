@@ -100,6 +100,19 @@ public sealed class GitHubRemoteRepositoryTests : RemoteRepositoryContract
     }
 
     [Fact]
+    [Trait("Spec", "NFR-035")]
+    public async Task Zipball_RejectsArchivesOverTheUncompressedSizeLimit()
+    {
+        using var http = new HttpClient(new LargeZipHandler()) { BaseAddress = new Uri("http://localhost") };
+        var reference = new RemoteRepositoryRef(GitHubHost.GitHubDotCom, "acme", "vault", "main");
+        var repository = new GitHubRemoteRepository(new GitHubApiClient(http, reference), reference, maxUncompressedBytes: 10);
+
+        var files = await repository.GetArchiveAsync(ParseCommit("0000000000000000000000000000000000000000"), Ct);
+
+        files.Error.Code.Should().Be(RemoteErrors.ValidationFailed);
+    }
+
+    [Fact]
     [Trait("Spec", "GITHUB-REMOTE")]
     public async Task CreateTree_IsChunked()
     {
@@ -172,6 +185,31 @@ public sealed class GitHubRemoteRepositoryTests : RemoteRepositoryContract
             stream.Write("x"u8);
         }
     }
+    private sealed class LargeZipHandler : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            using var buffer = new MemoryStream();
+            using (var zip = new ZipArchive(buffer, ZipArchiveMode.Create, leaveOpen: true))
+            {
+                Add(zip, "root/a.md", 8);
+                Add(zip, "root/b.md", 8);
+            }
+
+            return Task.FromResult(new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+            {
+                Content = new ByteArrayContent(buffer.ToArray()),
+            });
+        }
+
+        private static void Add(ZipArchive zip, string name, int size)
+        {
+            var entry = zip.CreateEntry(name);
+            using var stream = entry.Open();
+            stream.Write(new byte[size]);
+        }
+    }
+
     private static HttpMessageHandler CreateHandler(FakeGitHubServer server)
     {
         var tokens = new StubTokenProvider(Result<GitHubToken>.Success(new GitHubToken(server.Options.Token)));

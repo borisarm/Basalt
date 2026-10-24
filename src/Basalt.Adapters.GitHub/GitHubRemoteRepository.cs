@@ -14,15 +14,25 @@ namespace Basalt.Adapters.GitHub;
 /// </summary>
 internal sealed class GitHubRemoteRepository : IRemoteRepository
 {
+    internal const long DefaultMaxUncompressedBytes = 1L << 30;
     private const int TreeChangeChunk = 1_000;
 
     private readonly GitHubApiClient _client;
     private readonly RemoteRepositoryRef _reference;
+    private readonly long _maxUncompressedBytes;
 
-    public GitHubRemoteRepository(GitHubApiClient client, RemoteRepositoryRef reference)
+    /// <param name="maxUncompressedBytes">
+    /// Cap of the archive after inflation (NFR-035); the reference vault is far below it.
+    /// </param>
+    public GitHubRemoteRepository(
+        GitHubApiClient client,
+        RemoteRepositoryRef reference,
+        long maxUncompressedBytes = DefaultMaxUncompressedBytes)
     {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxUncompressedBytes);
         _client = client;
         _reference = reference;
+        _maxUncompressedBytes = maxUncompressedBytes;
     }
 
     public async Task<Result<RemoteHeadCheck>> GetHeadAsync(string? etag, CancellationToken ct)
@@ -272,6 +282,7 @@ internal sealed class GitHubRemoteRepository : IRemoteRepository
             using var zip = new ZipArchive(new MemoryStream(archive.Value), ZipArchiveMode.Read);
             var files = new Dictionary<VaultPath, byte[]>();
             string? root = null;
+            long uncompressed = 0;
             foreach (var entry in zip.Entries)
             {
                 var normalized = entry.FullName.Replace('\\', '/');
@@ -302,7 +313,20 @@ internal sealed class GitHubRemoteRepository : IRemoteRepository
 
                 using var stream = entry.Open();
                 using var buffer = new MemoryStream();
-                stream.CopyTo(buffer);
+                var chunk = new byte[81_920];
+                int read;
+                while ((read = await stream.ReadAsync(chunk, ct).ConfigureAwait(false)) > 0)
+                {
+                    uncompressed += read;
+                    if (uncompressed > _maxUncompressedBytes)
+                    {
+                        return Result<IReadOnlyDictionary<VaultPath, byte[]>>.Failure(
+                            new Error(RemoteErrors.ValidationFailed, "The zipball exceeds the maximum uncompressed size."));
+                    }
+
+                    buffer.Write(chunk, 0, read);
+                }
+
                 if (!files.TryAdd(path.Value, buffer.ToArray()))
                 {
                     return Result<IReadOnlyDictionary<VaultPath, byte[]>>.Failure(

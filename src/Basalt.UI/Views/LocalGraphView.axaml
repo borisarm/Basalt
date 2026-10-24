@@ -10,11 +10,13 @@
     <StackPanel DockPanel.Dock="Top" Margin="{StaticResource BasaltSpacingS}" Spacing="4">
       <DockPanel>
         <TextBlock DockPanel.Dock="Left" Text="{l:Loc Graph.Depth}" VerticalAlignment="Center" />
-        <ComboBox x:Name="Depth" Margin="8,0,0,0" ItemsSource="{Binding Depths}" SelectedItem="{Binding Depth}" />
+        <ComboBox x:Name="Depth" Margin="8,0,0,0" ItemsSource="{Binding Depths}" SelectedItem="{Binding Depth}"
+                  AutomationProperties.Name="{l:Loc Graph.Depth}" />
       </DockPanel>
       <DockPanel>
         <TextBlock DockPanel.Dock="Left" Text="{l:Loc Graph.Direction}" VerticalAlignment="Center" />
-        <ComboBox x:Name="Direction" Margin="8,0,0,0" ItemsSource="{Binding Directions}" SelectedItem="{Binding SelectedDirection}">
+        <ComboBox x:Name="Direction" Margin="8,0,0,0" ItemsSource="{Binding Directions}" SelectedItem="{Binding SelectedDirection}"
+                  AutomationProperties.Name="{l:Loc Graph.Direction}">
           <ComboBox.ItemTemplate>
             <DataTemplate x:DataType="p:LocalGraphViewModel+DirectionChoice">
               <TextBlock Text="{Binding Label}" />
@@ -29,6 +31,7 @@
         <CheckBox Content="{l:Loc Graph.ShowTags}" IsChecked="{Binding ShowTags}" />
       </WrapPanel>
     </StackPanel>
-    <g:GraphCanvas x:Name="Canvas" Graph="{Binding Graph}" Layout="{Binding Layout}" />
+    <g:GraphCanvas x:Name="Canvas" Graph="{Binding Graph}" Layout="{Binding Layout}"
+                   AutomationProperties.Name="{l:Loc Graph.Title}" />
   </DockPanel>
 </UserControl>

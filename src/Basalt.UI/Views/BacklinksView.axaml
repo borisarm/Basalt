@@ -19,6 +19,7 @@
                   <DataTemplate x:DataType="p:MentionItemViewModel">
                     <DockPanel>
                       <Button Classes="mention" Background="Transparent" HorizontalContentAlignment="Left"
+                              AutomationProperties.Name="{Binding Context}"
                               Command="{Binding $parent[UserControl].((p:BacklinksViewModel)DataContext).OpenCommand}" CommandParameter="{Binding}">
                         <TextBlock Text="{Binding Context}" TextWrapping="Wrap" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
                       </Button>
@@ -41,8 +42,10 @@
                   <DataTemplate x:DataType="p:MentionItemViewModel">
                     <DockPanel>
                       <Button DockPanel.Dock="Right" Content="{Binding Source={x:Static l:LocalizationSource.Instance}, Path=[Backlinks.Link]}"
+                              AutomationProperties.Name="{l:Loc Backlinks.Link}"
                               Command="{Binding $parent[UserControl].((p:BacklinksViewModel)DataContext).LinkMentionCommand}" CommandParameter="{Binding}" />
                       <Button Classes="mention" Background="Transparent" HorizontalContentAlignment="Left"
+                              AutomationProperties.Name="{Binding Context}"
                               Command="{Binding $parent[UserControl].((p:BacklinksViewModel)DataContext).OpenCommand}" CommandParameter="{Binding}">
                         <TextBlock Text="{Binding Context}" TextWrapping="Wrap" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
                       </Button>

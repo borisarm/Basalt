@@ -21,8 +21,10 @@
       </DockPanel>
     </Border>
     <Panel>
-      <editor:MarkdownEditorControl x:Name="SourceEditor" IsVisible="{Binding !IsReadingMode}" />
-      <reading:RenderDocumentView x:Name="ReadingView" IsVisible="{Binding IsReadingMode}" Tab="{Binding}" Document="{Binding Rendered}" />
+      <editor:MarkdownEditorControl x:Name="SourceEditor" IsVisible="{Binding !IsReadingMode}"
+                                    AutomationProperties.Name="{l:Loc Workspace.Editor}" />
+      <reading:RenderDocumentView x:Name="ReadingView" IsVisible="{Binding IsReadingMode}" Tab="{Binding}" Document="{Binding Rendered}"
+                                  AutomationProperties.Name="{l:Loc Workspace.Reading}" />
     </Panel>
   </DockPanel>
 </UserControl>

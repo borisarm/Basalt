@@ -15,7 +15,8 @@
       <Button x:Name="Refresh" Content="⟳" Command="{Binding RefreshCommand}"
               AutomationProperties.Name="{l:Loc Panel.Refresh}" ToolTip.Tip="{l:Loc Panel.Refresh}" />
     </StackPanel>
-    <TreeView x:Name="Tree" ItemsSource="{Binding Roots}" SelectedItem="{Binding Selected}">
+    <TreeView x:Name="Tree" ItemsSource="{Binding Roots}" SelectedItem="{Binding Selected}"
+              AutomationProperties.Name="{l:Loc Panel.files}">
       <TreeView.Styles>
         <Style Selector="TreeViewItem" x:DataType="p:FileTreeNodeViewModel">
           <Setter Property="IsExpanded" Value="{Binding IsExpanded}" />

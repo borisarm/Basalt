@@ -10,6 +10,12 @@
              x:Class="Basalt.UI.Views.MobileShellView"
              x:DataType="shell:ShellViewModel">
   <!-- Spec 07 §4: vault list → workspace; the workspace adapts between iPhone stack and iPad columns. -->
+  <UserControl.Styles>
+    <Style Selector="Button">
+      <Setter Property="MinWidth" Value="44" />
+      <Setter Property="MinHeight" Value="44" />
+    </Style>
+  </UserControl.Styles>
   <DockPanel Background="{DynamicResource BasaltBackgroundBrush}">
     <Border DockPanel.Dock="Top" Background="{DynamicResource BasaltSurfaceAltBrush}" Padding="8,6"
             IsVisible="{Binding ActiveVault, Converter={x:Static converters:ObjectConverters.IsNotNull}}">

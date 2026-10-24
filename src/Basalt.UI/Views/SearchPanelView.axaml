@@ -13,7 +13,7 @@
       <TextBlock x:Name="Error" Text="{Binding Error}" IsVisible="{Binding Error, Converter={x:Static ObjectConverters.IsNotNull}}"
                  Foreground="{DynamicResource BasaltDangerBrush}" TextWrapping="Wrap" />
     </StackPanel>
-    <ListBox x:Name="Results" ItemsSource="{Binding Results}">
+      <ListBox x:Name="Results" ItemsSource="{Binding Results}" AutomationProperties.Name="{l:Loc Panel.search}">
       <ListBox.ItemTemplate>
         <DataTemplate x:DataType="p:SearchResultGroupViewModel">
           <DockPanel>

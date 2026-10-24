@@ -17,21 +17,28 @@
           <CheckBox Content="{l:Loc Graph.ShowAttachments}" IsChecked="{Binding ShowAttachments}" />
           <CheckBox Content="{l:Loc Graph.ShowUnresolved}" IsChecked="{Binding ShowUnresolved}" />
           <CheckBox Content="{l:Loc Graph.ShowTags}" IsChecked="{Binding ShowTags}" />
-          <TextBox Text="{Binding Filter}" PlaceholderText="{l:Loc Graph.Filter}" />
+          <TextBox Text="{Binding Filter}" PlaceholderText="{l:Loc Graph.Filter}"
+                   AutomationProperties.Name="{l:Loc Graph.Filter}" />
           <TextBlock Text="{l:Loc Graph.ColorGroups}" TextWrapping="Wrap" />
-          <TextBox x:Name="ColorGroups" Text="{Binding ColorGroupsText}" AcceptsReturn="True" Height="72" />
+          <TextBox x:Name="ColorGroups" Text="{Binding ColorGroupsText}" AcceptsReturn="True" Height="72"
+                   AutomationProperties.Name="{l:Loc Graph.ColorGroups}" />
           <TextBlock Text="{l:Loc Graph.Forces}" FontWeight="SemiBold" Margin="0,8,0,0" />
           <TextBlock Text="{l:Loc Graph.Repulsion}" />
-          <Slider Minimum="10" Maximum="3000" Value="{Binding Repulsion}" />
+          <Slider Minimum="10" Maximum="3000" Value="{Binding Repulsion}"
+                  AutomationProperties.Name="{l:Loc Graph.Repulsion}" />
           <TextBlock Text="{l:Loc Graph.LinkDistance}" />
-          <Slider Minimum="10" Maximum="300" Value="{Binding LinkDistance}" />
+          <Slider Minimum="10" Maximum="300" Value="{Binding LinkDistance}"
+                  AutomationProperties.Name="{l:Loc Graph.LinkDistance}" />
           <TextBlock Text="{l:Loc Graph.LinkStrength}" />
-          <Slider Minimum="0.01" Maximum="1" Value="{Binding LinkStrength}" />
+          <Slider Minimum="0.01" Maximum="1" Value="{Binding LinkStrength}"
+                  AutomationProperties.Name="{l:Loc Graph.LinkStrength}" />
           <TextBlock Text="{l:Loc Graph.Gravity}" />
-          <Slider Minimum="0" Maximum="0.5" Value="{Binding Gravity}" />
+          <Slider Minimum="0" Maximum="0.5" Value="{Binding Gravity}"
+                  AutomationProperties.Name="{l:Loc Graph.Gravity}" />
         </StackPanel>
       </ScrollViewer>
     </Border>
-    <g:GraphCanvas x:Name="Canvas" Graph="{Binding Graph}" Layout="{Binding Layout}" />
+    <g:GraphCanvas x:Name="Canvas" Graph="{Binding Graph}" Layout="{Binding Layout}"
+                   AutomationProperties.Name="{l:Loc Graph.Title}" />
   </DockPanel>
 </UserControl>

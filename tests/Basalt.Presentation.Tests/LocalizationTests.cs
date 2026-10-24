@@ -24,6 +24,7 @@ public sealed class LocalizationTests
 
     [Fact]
     [Trait("Spec", "UI-1")]
+    [Trait("Spec", "NFR-044")]
     public void EveryKey_ExistsInEnglishAndSpanish()
     {
         var english = KeysOf(English.Parent == CultureInfo.InvariantCulture ? CultureInfo.InvariantCulture : English);

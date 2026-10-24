@@ -11,7 +11,8 @@
           BoxShadow="0 8 24 0 #40000000">
     <DockPanel>
       <TextBox DockPanel.Dock="Top" x:Name="Input" Text="{Binding Text}" PlaceholderText="{l:Loc QuickSwitcher.Placeholder}" AutomationProperties.Name="{l:Loc QuickSwitcher.Placeholder}" />
-      <ListBox x:Name="List" ItemsSource="{Binding Items}" SelectedIndex="{Binding SelectedIndex, Mode=OneWay}" MaxHeight="360" Margin="0,8,0,0">
+      <ListBox x:Name="List" ItemsSource="{Binding Items}" SelectedIndex="{Binding SelectedIndex, Mode=OneWay}" MaxHeight="360" Margin="0,8,0,0"
+               AutomationProperties.Name="{l:Loc Menu.QuickSwitcher}">
         <ListBox.ItemTemplate>
           <DataTemplate x:DataType="s:QuickSwitchItem">
             <StackPanel>

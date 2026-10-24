@@ -84,6 +84,7 @@ public sealed class PanelViewsTests
 
     [Fact]
     [Trait("Spec", "F-008")]
+    [Trait("Spec", "NFR-040")]
     public Task QuickSwitcher_OpensWithItsShortcut_AndOpensTheChosenNote() => Headless.RunAsync(async () =>
     {
         await using var v = await ComposedVault.CreateAsync(Files);
@@ -110,6 +111,7 @@ public sealed class PanelViewsTests
 
     [Fact]
     [Trait("Spec", "F-008.2")]
+    [Trait("Spec", "NFR-040")]
     public Task CommandPalette_ListsCommandsWithShortcuts() => Headless.RunAsync(async () =>
     {
         await using var v = await ComposedVault.CreateAsync(Files);

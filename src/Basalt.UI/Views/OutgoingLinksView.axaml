@@ -14,7 +14,7 @@
   <ItemsControl ItemsSource="{Binding Links}" Margin="{StaticResource BasaltSpacingS}">
     <ItemsControl.ItemTemplate>
       <DataTemplate x:DataType="p:OutgoingLinkItemViewModel">
-        <Button Background="Transparent" HorizontalContentAlignment="Left"
+        <Button Background="Transparent" HorizontalContentAlignment="Left" AutomationProperties.Name="{Binding Target}"
                 Command="{Binding $parent[UserControl].((p:OutgoingLinksViewModel)DataContext).OpenCommand}" CommandParameter="{Binding}">
           <TextBlock Text="{Binding Target}" Classes.unresolved="{Binding !IsResolved}" />
         </Button>

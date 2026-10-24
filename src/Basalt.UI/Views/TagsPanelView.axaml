@@ -6,7 +6,7 @@
              xmlns:l="clr-namespace:Basalt.UI.Localization"
              x:Class="Basalt.UI.Views.TagsPanelView"
              x:DataType="p:TagsPanelViewModel">
-  <TreeView x:Name="Tree" ItemsSource="{Binding Roots}">
+  <TreeView x:Name="Tree" ItemsSource="{Binding Roots}" AutomationProperties.Name="{l:Loc Panel.tags}">
     <TreeView.ItemTemplate>
       <TreeDataTemplate x:DataType="p:TagNodeViewModel" ItemsSource="{Binding Children}">
         <DockPanel>

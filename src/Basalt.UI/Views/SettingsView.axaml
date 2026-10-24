@@ -14,7 +14,8 @@
                    FontWeight="SemiBold" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
         <Grid ColumnDefinitions="220,*" RowDefinitions="Auto,Auto" RowSpacing="4">
           <TextBlock Text="{l:Loc Settings.General.Language}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
-          <ComboBox Grid.Column="1" x:Name="Language" SelectionChanged="OnLanguageChanged">
+          <ComboBox Grid.Column="1" x:Name="Language" SelectionChanged="OnLanguageChanged"
+                    AutomationProperties.Name="{l:Loc Settings.General.Language}">
             <ComboBoxItem Content="{l:Loc Settings.General.System}" />
             <ComboBoxItem Content="{l:Loc Settings.General.English}" />
             <ComboBoxItem Content="{l:Loc Settings.General.Spanish}" />
@@ -29,11 +30,13 @@
                    FontWeight="SemiBold" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
         <Grid ColumnDefinitions="220,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="4">
           <TextBlock Text="{l:Loc Settings.Editor.FontFamily}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
-          <TextBox Grid.Column="1" x:Name="FontFamilyBox" Text="{Binding Editor.Settings.FontFamily}" LostFocus="OnEditorLostFocus" />
+          <TextBox Grid.Column="1" x:Name="FontFamilyBox" Text="{Binding Editor.Settings.FontFamily}" LostFocus="OnEditorLostFocus"
+                   AutomationProperties.Name="{l:Loc Settings.Editor.FontFamily}" />
 
           <TextBlock Grid.Row="1" Text="{l:Loc Settings.Editor.FontSize}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
           <TextBox Grid.Row="1" Grid.Column="1" x:Name="FontSizeBox" Width="100" HorizontalAlignment="Left"
-                   Text="{Binding Editor.Settings.FontSize}" LostFocus="OnEditorLostFocus" />
+                   Text="{Binding Editor.Settings.FontSize}" LostFocus="OnEditorLostFocus"
+                   AutomationProperties.Name="{l:Loc Settings.Editor.FontSize}" />
 
           <CheckBox Grid.Row="2" Grid.Column="1" x:Name="ReadableLineLength" Content="{l:Loc Settings.Editor.ReadableLineLength}"
                     IsChecked="{Binding Editor.Settings.ReadableLineLength}" Click="OnEditorToggle" />
@@ -54,19 +57,23 @@
                    FontWeight="SemiBold" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
         <Grid ColumnDefinitions="220,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="4">
           <TextBlock Text="{l:Loc Settings.FilesLinks.AttachmentFolder}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
-          <TextBox Grid.Column="1" x:Name="AttachmentFolder" Text="{Binding FilesAndLinks.Settings.AttachmentFolder}" LostFocus="OnVaultFoldersLostFocus" />
+          <TextBox Grid.Column="1" x:Name="AttachmentFolder" Text="{Binding FilesAndLinks.Settings.AttachmentFolder}" LostFocus="OnVaultFoldersLostFocus"
+                   AutomationProperties.Name="{l:Loc Settings.FilesLinks.AttachmentFolder}" />
 
           <TextBlock Grid.Row="1" Text="{l:Loc Settings.FilesLinks.NewNoteFolder}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
-          <TextBox Grid.Row="1" Grid.Column="1" x:Name="NewNoteFolder" Text="{Binding FilesAndLinks.Settings.NewNoteFolder}" LostFocus="OnVaultFoldersLostFocus" />
+          <TextBox Grid.Row="1" Grid.Column="1" x:Name="NewNoteFolder" Text="{Binding FilesAndLinks.Settings.NewNoteFolder}" LostFocus="OnVaultFoldersLostFocus"
+                   AutomationProperties.Name="{l:Loc Settings.FilesLinks.NewNoteFolder}" />
 
           <TextBlock Grid.Row="2" Text="{l:Loc Settings.FilesLinks.LinkFormat}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
-          <ComboBox Grid.Row="2" Grid.Column="1" x:Name="LinkFormatBox" HorizontalAlignment="Left" SelectionChanged="OnLinkFormatChanged">
+          <ComboBox Grid.Row="2" Grid.Column="1" x:Name="LinkFormatBox" HorizontalAlignment="Left" SelectionChanged="OnLinkFormatChanged"
+                    AutomationProperties.Name="{l:Loc Settings.FilesLinks.LinkFormat}">
             <ComboBoxItem Content="{l:Loc Settings.LinkFormat.Wikilink}" />
             <ComboBoxItem Content="{l:Loc Settings.LinkFormat.Markdown}" />
           </ComboBox>
 
           <TextBlock Grid.Row="3" Text="{l:Loc Settings.FilesLinks.LinkPathStyle}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
-          <ComboBox Grid.Row="3" Grid.Column="1" x:Name="LinkPathStyleBox" HorizontalAlignment="Left" SelectionChanged="OnLinkPathStyleChanged">
+          <ComboBox Grid.Row="3" Grid.Column="1" x:Name="LinkPathStyleBox" HorizontalAlignment="Left" SelectionChanged="OnLinkPathStyleChanged"
+                    AutomationProperties.Name="{l:Loc Settings.FilesLinks.LinkPathStyle}">
             <ComboBoxItem Content="{l:Loc Settings.LinkPathStyle.Shortest}" />
             <ComboBoxItem Content="{l:Loc Settings.LinkPathStyle.Relative}" />
             <ComboBoxItem Content="{l:Loc Settings.LinkPathStyle.Absolute}" />
@@ -82,7 +89,8 @@
                    FontWeight="SemiBold" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
         <Grid ColumnDefinitions="220,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="4">
           <TextBlock Text="{l:Loc Settings.Appearance.Theme}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
-          <ComboBox Grid.Column="1" x:Name="ThemeBox" HorizontalAlignment="Left" SelectionChanged="OnThemeChanged">
+          <ComboBox Grid.Column="1" x:Name="ThemeBox" HorizontalAlignment="Left" SelectionChanged="OnThemeChanged"
+                    AutomationProperties.Name="{l:Loc Settings.Appearance.Theme}">
             <ComboBoxItem Content="{l:Loc Settings.Appearance.ThemeSystem}" />
             <ComboBoxItem Content="{l:Loc Settings.Appearance.ThemeLight}" />
             <ComboBoxItem Content="{l:Loc Settings.Appearance.ThemeDark}" />
@@ -90,11 +98,13 @@
 
           <TextBlock Grid.Row="1" Text="{l:Loc Settings.Appearance.Accent}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
           <TextBox Grid.Row="1" Grid.Column="1" x:Name="AccentColor" Width="140" HorizontalAlignment="Left"
-                   Text="{Binding Appearance.AccentColor}" LostFocus="OnAppearanceLostFocus" />
+                   Text="{Binding Appearance.AccentColor}" LostFocus="OnAppearanceLostFocus"
+                   AutomationProperties.Name="{l:Loc Settings.Appearance.Accent}" />
 
           <TextBlock Grid.Row="2" Text="{l:Loc Settings.Appearance.InterfaceFontSize}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
           <TextBox Grid.Row="2" Grid.Column="1" x:Name="InterfaceFontSize" Width="100" HorizontalAlignment="Left"
-                   Text="{Binding Appearance.InterfaceFontSize}" LostFocus="OnAppearanceLostFocus" />
+                   Text="{Binding Appearance.InterfaceFontSize}" LostFocus="OnAppearanceLostFocus"
+                   AutomationProperties.Name="{l:Loc Settings.Appearance.InterfaceFontSize}" />
         </Grid>
       </StackPanel>
 
@@ -102,12 +112,13 @@
         <TextBlock x:Name="HotkeysHeader" Text="{l:Loc Settings.Hotkeys}" FontSize="{StaticResource BasaltFontSizeTitle}"
                    FontWeight="SemiBold" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
         <ListBox x:Name="HotkeysList" ItemsSource="{Binding Hotkeys.Rows}" MaxHeight="320"
-                 Background="Transparent" BorderThickness="0">
+                 Background="Transparent" BorderThickness="0" AutomationProperties.Name="{l:Loc Settings.Hotkeys}">
           <ListBox.ItemTemplate>
             <DataTemplate x:DataType="settings:HotkeyRow">
               <Grid ColumnDefinitions="*,200,90,90" RowDefinitions="Auto,Auto" ColumnSpacing="4">
                 <TextBlock Text="{Binding Title}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
-                <TextBox Grid.Column="1" x:Name="GestureBox" Text="{Binding Gesture, Mode=OneWay}" />
+                <TextBox Grid.Column="1" x:Name="GestureBox" Text="{Binding Gesture, Mode=OneWay}"
+                         AutomationProperties.Name="{Binding Title}" />
                 <Button Grid.Column="2" Content="{l:Loc Settings.Hotkeys.Assign}" Click="OnAssignHotkey" />
                 <Button Grid.Column="3" Content="{l:Loc Settings.Hotkeys.Reset}" Click="OnResetHotkey"
                         IsEnabled="{Binding IsCustom}" />
@@ -126,13 +137,16 @@
                    FontWeight="SemiBold" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
         <Grid ColumnDefinitions="220,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="4">
           <TextBlock Text="{l:Loc Settings.DailyNotes.Folder}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
-          <TextBox Grid.Column="1" x:Name="DailyFolder" Text="{Binding DailyNotes.Settings.Folder}" LostFocus="OnDailyNotesLostFocus" />
+          <TextBox Grid.Column="1" x:Name="DailyFolder" Text="{Binding DailyNotes.Settings.Folder}" LostFocus="OnDailyNotesLostFocus"
+                   AutomationProperties.Name="{l:Loc Settings.DailyNotes.Folder}" />
 
           <TextBlock Grid.Row="1" Text="{l:Loc Settings.DailyNotes.DateFormat}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
-          <TextBox Grid.Row="1" Grid.Column="1" x:Name="DailyDateFormat" Text="{Binding DailyNotes.Settings.DateFormat}" LostFocus="OnDailyNotesLostFocus" />
+          <TextBox Grid.Row="1" Grid.Column="1" x:Name="DailyDateFormat" Text="{Binding DailyNotes.Settings.DateFormat}" LostFocus="OnDailyNotesLostFocus"
+                   AutomationProperties.Name="{l:Loc Settings.DailyNotes.DateFormat}" />
 
           <TextBlock Grid.Row="2" Text="{l:Loc Settings.DailyNotes.Template}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
-          <TextBox Grid.Row="2" Grid.Column="1" x:Name="DailyTemplate" Text="{Binding DailyNotes.Settings.TemplatePath}" LostFocus="OnDailyNotesLostFocus" />
+          <TextBox Grid.Row="2" Grid.Column="1" x:Name="DailyTemplate" Text="{Binding DailyNotes.Settings.TemplatePath}" LostFocus="OnDailyNotesLostFocus"
+                   AutomationProperties.Name="{l:Loc Settings.DailyNotes.Template}" />
 
           <TextBlock Grid.Row="3" Text="{l:Loc Settings.DailyNotes.Preview}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
           <TextBlock Grid.Row="3" Grid.Column="1" x:Name="DailyPreview" Text="{Binding DailyNotes.Preview}"
@@ -146,7 +160,8 @@
                    FontWeight="SemiBold" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
         <Grid ColumnDefinitions="220,*">
           <TextBlock Text="{l:Loc Settings.Templates.Folder}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
-          <TextBox Grid.Column="1" x:Name="TemplatesFolder" Text="{Binding Templates.Folder}" LostFocus="OnTemplatesFolderLostFocus" />
+          <TextBox Grid.Column="1" x:Name="TemplatesFolder" Text="{Binding Templates.Folder}" LostFocus="OnTemplatesFolderLostFocus"
+                   AutomationProperties.Name="{l:Loc Settings.Templates.Folder}" />
         </Grid>
       </StackPanel>
 
@@ -157,7 +172,7 @@
         <TextBlock x:Name="AccountsEmpty" Text="{l:Loc Settings.Accounts.Empty}" IsVisible="{Binding Accounts.IsEmpty}"
                    Foreground="{DynamicResource BasaltTextMutedBrush}" />
         <ListBox x:Name="AccountsList" ItemsSource="{Binding Accounts.Accounts}" SelectedItem="{Binding Accounts.Selected}"
-                 Background="Transparent" BorderThickness="0">
+                 Background="Transparent" BorderThickness="0" AutomationProperties.Name="{l:Loc Settings.Accounts}">
           <ListBox.ItemTemplate>
             <DataTemplate x:DataType="accounts:GitHubAccount">
               <StackPanel Orientation="Horizontal" Spacing="8">

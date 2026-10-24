@@ -79,7 +79,7 @@
           <DataTemplate x:DataType="vm:TabGroupViewModel">
             <DockPanel>
               <ListBox DockPanel.Dock="Top" x:Name="Tabs" ItemsSource="{Binding Tabs}" SelectedItem="{Binding ActiveTab}"
-                       Background="{DynamicResource BasaltSurfaceAltBrush}">
+                       Background="{DynamicResource BasaltSurfaceAltBrush}" AutomationProperties.Name="{l:Loc Workspace.Tabs}">
                 <ListBox.ItemsPanel>
                   <ItemsPanelTemplate>
                     <StackPanel Orientation="Horizontal" />

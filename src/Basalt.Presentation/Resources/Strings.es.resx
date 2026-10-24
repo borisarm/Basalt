@@ -276,9 +276,12 @@
   <data name="VaultPicker.RemoveMessage" xml:space="preserve"><value>«{0}» se quitará de la lista. Sus ficheros no se borran.</value></data>
   <data name="VaultPicker.Title" xml:space="preserve"><value>Vaults</value></data>
   <data name="Workspace.CloseTab" xml:space="preserve"><value>Cerrar pestaña</value></data>
+  <data name="Workspace.Editor" xml:space="preserve"><value>Editor de la nota</value></data>
   <data name="Workspace.NoFile" xml:space="preserve"><value>Ningún fichero abierto</value></data>
+  <data name="Workspace.Reading" xml:space="preserve"><value>Vista de lectura</value></data>
   <data name="Workspace.SplitDown" xml:space="preserve"><value>Dividir hacia abajo</value></data>
   <data name="Workspace.SplitRight" xml:space="preserve"><value>Dividir a la derecha</value></data>
+  <data name="Workspace.Tabs" xml:space="preserve"><value>Pestañas abiertas</value></data>
   <data name="Workspace.ToggleLeftSidebar" xml:space="preserve"><value>Mostrar u ocultar la barra izquierda</value></data>
   <data name="Workspace.ToggleRightSidebar" xml:space="preserve"><value>Mostrar u ocultar la barra derecha</value></data>
   <data name="Workspace.Unsaved" xml:space="preserve"><value>Cambios sin guardar</value></data>

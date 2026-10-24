@@ -15,7 +15,8 @@
         <Button x:Name="PreviewButton" Content="{l:Loc Sync.Preview}" Command="{Binding PreviewCommand}" />
         <Button x:Name="RestoreButton" Content="{l:Loc Sync.Restore}" Command="{Binding RestoreCommand}" />
       </StackPanel>
-      <ListBox x:Name="CommitsList" ItemsSource="{Binding Commits}" SelectedItem="{Binding Selected}" Background="Transparent">
+      <ListBox x:Name="CommitsList" ItemsSource="{Binding Commits}" SelectedItem="{Binding Selected}" Background="Transparent"
+               AutomationProperties.Name="{l:Loc Sync.History}">
         <ListBox.ItemTemplate>
           <DataTemplate x:DataType="remote:RemoteCommitInfo">
             <StackPanel Spacing="2">

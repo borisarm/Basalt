@@ -6,7 +6,8 @@
              xmlns:l="clr-namespace:Basalt.UI.Localization"
              x:Class="Basalt.UI.Views.OutlineView"
              x:DataType="p:OutlineViewModel">
-  <TreeView x:Name="Tree" ItemsSource="{Binding Roots}" SelectedItem="{Binding Current, Mode=OneWay}">
+  <TreeView x:Name="Tree" ItemsSource="{Binding Roots}" SelectedItem="{Binding Current, Mode=OneWay}"
+            AutomationProperties.Name="{l:Loc Panel.outline}">
     <TreeView.Styles>
       <Style Selector="TreeViewItem">
         <Setter Property="IsExpanded" Value="True" />

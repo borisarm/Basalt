@@ -8,6 +8,12 @@
              x:Class="Basalt.UI.Views.MobileWorkspaceView"
              x:DataType="vm:WorkspaceViewModel">
   <!-- Spec 07 §4: iPhone navigation stack (explorer → note), bottom bar and bottom sheets. -->
+  <UserControl.Styles>
+    <Style Selector="Button">
+      <Setter Property="MinWidth" Value="44" />
+      <Setter Property="MinHeight" Value="44" />
+    </Style>
+  </UserControl.Styles>
   <Grid RowDefinitions="Auto,*,Auto">
     <Border Grid.Row="0" Background="{DynamicResource BasaltSurfaceAltBrush}" Padding="8,6">
       <Grid ColumnDefinitions="Auto,*,Auto">

@@ -12,7 +12,8 @@
     <Panel Grid.Row="1">
       <TextBlock x:Name="EmptyText" Text="{l:Loc VaultPicker.Empty}" IsVisible="{Binding IsEmpty}"
                  Foreground="{DynamicResource BasaltTextSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-      <ListBox x:Name="VaultList" ItemsSource="{Binding Vaults}" Background="Transparent">
+      <ListBox x:Name="VaultList" ItemsSource="{Binding Vaults}" Background="Transparent"
+               AutomationProperties.Name="{l:Loc VaultPicker.Title}">
         <ListBox.ItemTemplate>
           <DataTemplate x:DataType="vm:VaultItemViewModel">
             <Grid ColumnDefinitions="*,Auto,Auto" Margin="{StaticResource BasaltSpacingS}">

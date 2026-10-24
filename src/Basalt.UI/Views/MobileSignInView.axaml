@@ -5,6 +5,12 @@
              x:Class="Basalt.UI.Views.MobileSignInView"
              x:DataType="sync:GitHubSignInViewModel">
   <!-- Spec 04 F-015.1 on iOS: device flow inside the navigation stack. -->
+  <UserControl.Styles>
+    <Style Selector="Button">
+      <Setter Property="MinWidth" Value="44" />
+      <Setter Property="MinHeight" Value="44" />
+    </Style>
+  </UserControl.Styles>
   <StackPanel Spacing="16" Margin="16">
     <TextBlock Text="{l:Loc SignIn.Instructions}" TextWrapping="Wrap" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
     <SelectableTextBlock x:Name="UserCode" Text="{Binding UserCode}" FontSize="32" HorizontalAlignment="Center"

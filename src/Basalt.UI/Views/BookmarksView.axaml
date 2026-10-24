@@ -9,7 +9,7 @@
   <DockPanel>
     <TextBlock DockPanel.Dock="Top" x:Name="Warning" Text="{Binding Warning}" IsVisible="{Binding Warning, Converter={x:Static ObjectConverters.IsNotNull}}"
                Foreground="{DynamicResource BasaltWarningBrush}" TextWrapping="Wrap" Margin="{StaticResource BasaltSpacingS}" />
-    <TreeView x:Name="Tree" ItemsSource="{Binding Items}">
+    <TreeView x:Name="Tree" ItemsSource="{Binding Items}" AutomationProperties.Name="{l:Loc Panel.bookmarks}">
       <TreeView.Styles>
         <Style Selector="TreeViewItem" x:DataType="p:BookmarkItemViewModel">
           <Setter Property="IsExpanded" Value="{Binding IsExpanded}" />

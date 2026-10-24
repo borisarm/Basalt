@@ -11,7 +11,8 @@
   <StackPanel Margin="{StaticResource BasaltSpacingXl}" Spacing="12">
     <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="6">
       <TextBlock Text="{l:Loc Sync.Setup.Account}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
-      <ComboBox Grid.Column="1" x:Name="AccountBox" ItemsSource="{Binding Accounts}" SelectedItem="{Binding SelectedAccount}">
+      <ComboBox Grid.Column="1" x:Name="AccountBox" ItemsSource="{Binding Accounts}" SelectedItem="{Binding SelectedAccount}"
+                AutomationProperties.Name="{l:Loc Sync.Setup.Account}">
         <ComboBox.ItemTemplate>
           <DataTemplate x:DataType="accounts:GitHubAccount">
             <TextBlock Text="{Binding Login}" />
@@ -20,13 +21,16 @@
       </ComboBox>
 
       <TextBlock Grid.Row="1" Text="{l:Loc Sync.Setup.Owner}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
-      <TextBox Grid.Row="1" Grid.Column="1" x:Name="OwnerBox" Text="{Binding Owner}" />
+      <TextBox Grid.Row="1" Grid.Column="1" x:Name="OwnerBox" Text="{Binding Owner}"
+               AutomationProperties.Name="{l:Loc Sync.Setup.Owner}" />
 
       <TextBlock Grid.Row="2" Text="{l:Loc Sync.Setup.Repository}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
-      <TextBox Grid.Row="2" Grid.Column="1" x:Name="RepositoryBox" Text="{Binding RepositoryName}" />
+      <TextBox Grid.Row="2" Grid.Column="1" x:Name="RepositoryBox" Text="{Binding RepositoryName}"
+               AutomationProperties.Name="{l:Loc Sync.Setup.Repository}" />
 
       <TextBlock Grid.Row="3" Text="{l:Loc Sync.Setup.Branch}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
-      <TextBox Grid.Row="3" Grid.Column="1" x:Name="BranchBox" Text="{Binding Branch}" Width="180" HorizontalAlignment="Left" />
+      <TextBox Grid.Row="3" Grid.Column="1" x:Name="BranchBox" Text="{Binding Branch}" Width="180" HorizontalAlignment="Left"
+               AutomationProperties.Name="{l:Loc Sync.Setup.Branch}" />
 
       <CheckBox Grid.Row="4" Grid.Column="1" x:Name="PrivateBox" Content="{l:Loc Sync.Setup.Private}" IsChecked="{Binding IsPrivate}" />
     </Grid>

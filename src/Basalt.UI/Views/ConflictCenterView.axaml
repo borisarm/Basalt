@@ -13,7 +13,8 @@
       </StackPanel>
       <TextBlock DockPanel.Dock="Top" Text="{l:Loc Sync.ConflictsTitle}" FontWeight="SemiBold"
                  Foreground="{DynamicResource BasaltTextPrimaryBrush}" Margin="0,0,0,8" />
-      <ListBox x:Name="ConflictsList" ItemsSource="{Binding Conflicts}" SelectedItem="{Binding Selected}" Background="Transparent">
+      <ListBox x:Name="ConflictsList" ItemsSource="{Binding Conflicts}" SelectedItem="{Binding Selected}" Background="Transparent"
+               AutomationProperties.Name="{l:Loc Sync.ConflictsTitle}">
         <ListBox.ItemTemplate>
           <DataTemplate x:DataType="s:SyncConflictEntry">
             <StackPanel Spacing="2">
@@ -31,7 +32,8 @@
       <StackPanel DockPanel.Dock="Top" Spacing="8">
         <StackPanel Orientation="Horizontal" Spacing="8">
           <TextBlock Text="{l:Loc Sync.Resolution}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
-          <ComboBox x:Name="ResolutionBox" SelectionChanged="OnResolutionChanged">
+          <ComboBox x:Name="ResolutionBox" SelectionChanged="OnResolutionChanged"
+                    AutomationProperties.Name="{l:Loc Sync.Resolution}">
             <ComboBoxItem Content="{l:Loc Sync.Resolution.KeepLocal}" />
             <ComboBoxItem Content="{l:Loc Sync.Resolution.KeepRemote}" />
             <ComboBoxItem Content="{l:Loc Sync.Resolution.KeepBoth}" />
@@ -42,6 +44,7 @@
         <TextBlock Text="{l:Loc Sync.MergedText}" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
       </StackPanel>
       <TextBox x:Name="MergedText" Text="{Binding MergedText}" AcceptsReturn="True" TextWrapping="NoWrap"
+               AutomationProperties.Name="{l:Loc Sync.MergedText}"
                FontFamily="Consolas, Menlo, monospace" VerticalContentAlignment="Top" />
     </DockPanel>
   </Grid>

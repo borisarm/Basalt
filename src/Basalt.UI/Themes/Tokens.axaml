@@ -9,7 +9,7 @@
       <Color x:Key="BasaltBorderColor">#D9D9DE</Color>
       <Color x:Key="BasaltTextPrimaryColor">#1F1F24</Color>
       <Color x:Key="BasaltTextSecondaryColor">#5C5C66</Color>
-      <Color x:Key="BasaltTextMutedColor">#6E6E78</Color>
+      <Color x:Key="BasaltTextMutedColor">#63636D</Color>
       <Color x:Key="BasaltAccentColor">#6D3FD6</Color>
       <Color x:Key="BasaltOnAccentColor">#FFFFFF</Color>
       <Color x:Key="BasaltDangerColor">#B3261E</Color>
@@ -17,7 +17,7 @@
       <Color x:Key="BasaltSuccessColor">#1E6B34</Color>
       <Color x:Key="BasaltHighlightColor">#FFF2A8</Color>
       <Color x:Key="BasaltLinkColor">#5B32C2</Color>
-      <Color x:Key="BasaltUnresolvedLinkColor">#8E7DBE</Color>
+      <Color x:Key="BasaltUnresolvedLinkColor">#6F5BA5</Color>
       <Color x:Key="BasaltTagColor">#3E5FB8</Color>
       <Color x:Key="BasaltCodeBackgroundColor">#F1F1F4</Color>
       <Color x:Key="BasaltDiffAddedColor">#DDF4E4</Color>
@@ -35,7 +35,7 @@
       <Color x:Key="BasaltBorderColor">#3B3B44</Color>
       <Color x:Key="BasaltTextPrimaryColor">#E8E8EC</Color>
       <Color x:Key="BasaltTextSecondaryColor">#B4B4BD</Color>
-      <Color x:Key="BasaltTextMutedColor">#9A9AA4</Color>
+      <Color x:Key="BasaltTextMutedColor">#9E9EA8</Color>
       <Color x:Key="BasaltAccentColor">#A88BFA</Color>
       <Color x:Key="BasaltOnAccentColor">#14121A</Color>
       <Color x:Key="BasaltDangerColor">#FF8A80</Color>
@@ -43,7 +43,7 @@
       <Color x:Key="BasaltSuccessColor">#7BD88F</Color>
       <Color x:Key="BasaltHighlightColor">#5C4A00</Color>
       <Color x:Key="BasaltLinkColor">#B9A2FF</Color>
-      <Color x:Key="BasaltUnresolvedLinkColor">#8C80B0</Color>
+      <Color x:Key="BasaltUnresolvedLinkColor">#9F93C4</Color>
       <Color x:Key="BasaltTagColor">#8FB0FF</Color>
       <Color x:Key="BasaltCodeBackgroundColor">#2A2A31</Color>
       <Color x:Key="BasaltDiffAddedColor">#1E3A28</Color>

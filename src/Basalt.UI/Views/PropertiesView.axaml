@@ -14,7 +14,8 @@
         <DataTemplate x:DataType="p:PropertyRow">
           <Grid ColumnDefinitions="110,*,Auto" Margin="0,0,0,4">
             <TextBlock Text="{Binding Key}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" TextTrimming="CharacterEllipsis" />
-            <TextBox Grid.Column="1" Text="{Binding Text, Mode=OneWay}" Tag="{Binding}" Classes="property" />
+            <TextBox Grid.Column="1" Text="{Binding Text, Mode=OneWay}" Tag="{Binding}" Classes="property"
+                     AutomationProperties.Name="{Binding Key}" />
             <Button Grid.Column="2" Content="×" Margin="4,0,0,0" AutomationProperties.Name="{l:Loc Properties.Remove}"
                     Command="{Binding $parent[UserControl].((p:PropertiesViewModel)DataContext).RemoveCommand}" CommandParameter="{Binding}" />
           </Grid>

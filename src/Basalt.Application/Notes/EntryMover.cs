@@ -119,7 +119,10 @@ public sealed class EntryMover(IMarkdownAnalyzer analyzer, IEventBus events)
             }
 
             var text = file.Value.Content.Text;
-            var links = analyzer.Analyze(text).AllLinks.ToList();
+            var cached = before.Files.GetValueOrDefault(sourceBefore);
+            var links = cached is not null && cached.Stamp.Sha == file.Value.Sha
+                ? cached.Metadata.AllLinks.ToList()
+                : analyzer.Analyze(text).AllLinks.ToList();
             var result = LinkRewriter.Rewrite(text, links, new RewriteRequest(sourceBefore, sourceAfter, map, before, after, session.Settings));
             if (result.ChangedLinks == 0)
             {

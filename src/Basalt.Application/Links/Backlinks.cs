@@ -56,7 +56,11 @@ public sealed class GetBacklinksHandler(IVaultSessions sessions, IMarkdownAnalyz
             }
 
             var text = file.Value.Content.Text;
-            var links = analyzer.Analyze(text).AllLinks
+            var cached = snapshot.Files.GetValueOrDefault(source);
+            var metadata = cached is not null && cached.Stamp.Sha == file.Value.Sha
+                ? cached.Metadata
+                : analyzer.Analyze(text);
+            var links = metadata.AllLinks
                 .Where(l => LinkResolver.Resolve(l, source, snapshot).TargetPath == query.Path)
                 .Select(l => new LinkedMention(l, LinkTexts.Context(text, new TextRange(l.Span.Start, l.Span.Length))))
                 .ToList();

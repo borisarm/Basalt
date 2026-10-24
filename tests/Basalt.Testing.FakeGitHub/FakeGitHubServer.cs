@@ -171,10 +171,28 @@ public sealed class FakeGitHubServer : IAsyncDisposable
         IReadOnlyDictionary<string, string> files,
         string message = "Commit from another device",
         GitSignature? author = null,
+        GitSignature? committer = null) =>
+        CommitFiles(
+            owner,
+            name,
+            branch,
+            files.ToDictionary(pair => pair.Key, pair => Encoding.UTF8.GetBytes(pair.Value), StringComparer.Ordinal),
+            message,
+            author,
+            committer);
+
+    public string CommitFiles(
+        string owner,
+        string name,
+        string branch,
+        IReadOnlyDictionary<string, byte[]> files,
+        string message = "Commit from another device",
+        GitSignature? author = null,
         GitSignature? committer = null)
     {
+        ArgumentNullException.ThrowIfNull(files);
         var repository = GetRepo(owner, name);
-        var bytes = files.ToDictionary(pair => pair.Key, pair => Encoding.UTF8.GetBytes(pair.Value), StringComparer.Ordinal);
+        var bytes = files;
         var head = repository.Head(branch);
         var parents = head is null ? new List<CommitSha>() : [CommitSha.Parse(head).Value];
         var merged = new Dictionary<string, byte[]>(StringComparer.Ordinal);

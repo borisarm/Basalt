@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsTestProject>false</IsTestProject>
+    <TestingPlatformDotnetTestSupport>false</TestingPlatformDotnetTestSupport>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Basalt.Adapters.FileSystem/Basalt.Adapters.FileSystem.csproj" />
+    <ProjectReference Include="../../src/Basalt.Application/Basalt.Application.csproj" />
+    <ProjectReference Include="../../src/Basalt.Domain/Basalt.Domain.csproj" />
+    <ProjectReference Include="../Basalt.Testing/Basalt.Testing.csproj" />
+    <ProjectReference Include="../../tools/Basalt.VaultGenerator/Basalt.VaultGenerator.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+  </ItemGroup>
+</Project>

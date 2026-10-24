@@ -23,6 +23,7 @@
     <Project Path="tests/Basalt.Adapters.Platform.Tests/Basalt.Adapters.Platform.Tests.csproj" />
     <Project Path="tests/Basalt.Application.Tests/Basalt.Application.Tests.csproj" />
     <Project Path="tests/Basalt.Architecture.Tests/Basalt.Architecture.Tests.csproj" />
+    <Project Path="tests/Basalt.Benchmarks/Basalt.Benchmarks.csproj" />
     <Project Path="tests/Basalt.Domain.Tests/Basalt.Domain.Tests.csproj" />
     <Project Path="tests/Basalt.Presentation.Tests/Basalt.Presentation.Tests.csproj" />
     <Project Path="tests/Basalt.Sync.IntegrationTests/Basalt.Sync.IntegrationTests.csproj" />

@@ -4,6 +4,9 @@
     <ProjectReference Include="../Basalt.Domain/Basalt.Domain.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="Basalt.Sync.IntegrationTests" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Http" />
     <PackageReference Include="Microsoft.Extensions.Http.Resilience" />
     <PackageReference Include="Microsoft.Extensions.Options" />

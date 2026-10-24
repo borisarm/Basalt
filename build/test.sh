@@ -9,7 +9,7 @@ if [[ "${1:-}" == "--coverage" ]]; then
   shift
 fi
 
-excluded=("Basalt.Testing" "Basalt.Testing.FakeGitHub" "$@")
+excluded=("Basalt.Testing" "Basalt.Testing.FakeGitHub" "Basalt.Benchmarks" "$@")
 status=0
 for project in tests/*/*.csproj; do
   name=$(basename "$project" .csproj)

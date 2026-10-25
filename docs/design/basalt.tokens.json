@@ -1,0 +1,98 @@
+{
+  "$description": "Basalt design tokens (W3C Design Tokens / DTCG format). Mirrors src/Basalt.UI/Themes/Tokens.axaml; entries marked 'new' are proposed by the 2026-10 design and not yet in the XAML.",
+  "color": {
+    "light": {
+      "background":      { "$type": "color", "$value": "#FFFFFF" },
+      "surface":         { "$type": "color", "$value": "#F6F6F7" },
+      "surface-alt":     { "$type": "color", "$value": "#ECECEF" },
+      "border":          { "$type": "color", "$value": "#D9D9DE" },
+      "text-primary":    { "$type": "color", "$value": "#1F1F24" },
+      "text-secondary":  { "$type": "color", "$value": "#5C5C66" },
+      "text-muted":      { "$type": "color", "$value": "#63636D" },
+      "accent":          { "$type": "color", "$value": "#6D3FD6" },
+      "accent-hover":    { "$type": "color", "$value": "#7D55DD" },
+      "accent-soft":     { "$type": "color", "$value": "#F1ECFD" },
+      "on-accent":       { "$type": "color", "$value": "#FFFFFF" },
+      "danger":          { "$type": "color", "$value": "#B3261E" },
+      "warning":         { "$type": "color", "$value": "#8A5300" },
+      "success":         { "$type": "color", "$value": "#1E6B34" },
+      "highlight":       { "$type": "color", "$value": "#FFF2A8" },
+      "link":            { "$type": "color", "$value": "#5B32C2" },
+      "unresolved-link": { "$type": "color", "$value": "#6F5BA5" },
+      "tag":             { "$type": "color", "$value": "#3E5FB8" },
+      "tag-soft":        { "$type": "color", "$value": "#EAF0FC", "$description": "new" },
+      "code-background": { "$type": "color", "$value": "#F1F1F4" },
+      "diff-added":      { "$type": "color", "$value": "#DDF4E4" },
+      "diff-removed":    { "$type": "color", "$value": "#FBE3E1" },
+      "diff-changed":    { "$type": "color", "$value": "#FFF4CC" },
+      "graph-group-0":   { "$type": "color", "$value": "#D9713C" },
+      "graph-group-1":   { "$type": "color", "$value": "#2E9E6B" },
+      "graph-group-2":   { "$type": "color", "$value": "#C2499E" },
+      "graph-group-3":   { "$type": "color", "$value": "#3E8FD0" }
+    },
+    "dark": {
+      "chrome":          { "$type": "color", "$value": "#18181C", "$description": "new: title bar, ribbon, status bar" },
+      "sidebar":         { "$type": "color", "$value": "#202025", "$description": "new: explorer and context rail" },
+      "background":      { "$type": "color", "$value": "#1C1C21" },
+      "surface":         { "$type": "color", "$value": "#24242A" },
+      "surface-alt":     { "$type": "color", "$value": "#2D2D34" },
+      "border":          { "$type": "color", "$value": "#3B3B44" },
+      "text-primary":    { "$type": "color", "$value": "#E8E8EC" },
+      "text-secondary":  { "$type": "color", "$value": "#B4B4BD" },
+      "text-muted":      { "$type": "color", "$value": "#9E9EA8" },
+      "accent":          { "$type": "color", "$value": "#A88BFA" },
+      "accent-hover":    { "$type": "color", "$value": "#B79CFF" },
+      "accent-soft":     { "$type": "color", "$value": "#2E2545" },
+      "on-accent":       { "$type": "color", "$value": "#14121A" },
+      "danger":          { "$type": "color", "$value": "#FF8A80" },
+      "warning":         { "$type": "color", "$value": "#F2C14E" },
+      "success":         { "$type": "color", "$value": "#7BD88F" },
+      "highlight":       { "$type": "color", "$value": "#5C4A00" },
+      "link":            { "$type": "color", "$value": "#B9A2FF" },
+      "unresolved-link": { "$type": "color", "$value": "#9F93C4" },
+      "tag":             { "$type": "color", "$value": "#8FB0FF" },
+      "tag-soft":        { "$type": "color", "$value": "#1F2740", "$description": "new" },
+      "callout":         { "$type": "color", "$value": "#2A2436", "$description": "new" },
+      "code-background": { "$type": "color", "$value": "#2A2A31" },
+      "diff-added":      { "$type": "color", "$value": "#1E3A28" },
+      "diff-removed":    { "$type": "color", "$value": "#3D2321" },
+      "diff-changed":    { "$type": "color", "$value": "#3A3320" },
+      "graph-group-0":   { "$type": "color", "$value": "#F2A06B" },
+      "graph-group-1":   { "$type": "color", "$value": "#6BC79B" },
+      "graph-group-2":   { "$type": "color", "$value": "#E88BC2" },
+      "graph-group-3":   { "$type": "color", "$value": "#7FB4F0" }
+    }
+  },
+  "font": {
+    "family": {
+      "ui":      { "$type": "fontFamily", "$value": ["Inter", "system-ui", "sans-serif"] },
+      "reading": { "$type": "fontFamily", "$value": ["Literata", "Georgia", "serif"], "$description": "new: note body and headings" },
+      "mono":    { "$type": "fontFamily", "$value": ["JetBrains Mono", "monospace"] }
+    },
+    "size": {
+      "small":      { "$type": "dimension", "$value": "12px" },
+      "body":       { "$type": "dimension", "$value": "14px" },
+      "reading":    { "$type": "dimension", "$value": "17px", "$description": "new" },
+      "title":      { "$type": "dimension", "$value": "18px" },
+      "heading":    { "$type": "dimension", "$value": "24px" },
+      "note-title": { "$type": "dimension", "$value": "36px", "$description": "new" }
+    }
+  },
+  "spacing": {
+    "xs": { "$type": "dimension", "$value": "2px" },
+    "s":  { "$type": "dimension", "$value": "4px" },
+    "m":  { "$type": "dimension", "$value": "8px" },
+    "l":  { "$type": "dimension", "$value": "12px" },
+    "xl": { "$type": "dimension", "$value": "20px" }
+  },
+  "radius": {
+    "s": { "$type": "dimension", "$value": "4px" },
+    "m": { "$type": "dimension", "$value": "6px" },
+    "l": { "$type": "dimension", "$value": "10px" }
+  },
+  "size": {
+    "sidebar-width": { "$type": "dimension", "$value": "260px", "$description": "design proposes 260; XAML currently 280" },
+    "ribbon-width":  { "$type": "dimension", "$value": "48px" },
+    "touch-min":     { "$type": "dimension", "$value": "44px" }
+  }
+}

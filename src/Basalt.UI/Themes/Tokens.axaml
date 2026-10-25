@@ -27,6 +27,15 @@
       <Color x:Key="BasaltGraphGroup1Color">#2E9E6B</Color>
       <Color x:Key="BasaltGraphGroup2Color">#C2499E</Color>
       <Color x:Key="BasaltGraphGroup3Color">#3E8FD0</Color>
+      <Color x:Key="BasaltAccentHoverColor">#7D55DD</Color>
+      <Color x:Key="BasaltAccentSoftColor">#F1ECFD</Color>
+      <Color x:Key="SystemAccentColor">#6D3FD6</Color>
+      <Color x:Key="SystemAccentColorLight1">#7D55DD</Color>
+      <Color x:Key="SystemAccentColorLight2">#8E6BE4</Color>
+      <Color x:Key="SystemAccentColorLight3">#A082EB</Color>
+      <Color x:Key="SystemAccentColorDark1">#5B32C2</Color>
+      <Color x:Key="SystemAccentColorDark2">#4A28A8</Color>
+      <Color x:Key="SystemAccentColorDark3">#3A1F8E</Color>
     </ResourceDictionary>
     <ResourceDictionary x:Key="Dark">
       <Color x:Key="BasaltBackgroundColor">#1C1C21</Color>
@@ -53,6 +62,15 @@
       <Color x:Key="BasaltGraphGroup1Color">#6BC79B</Color>
       <Color x:Key="BasaltGraphGroup2Color">#E88BC2</Color>
       <Color x:Key="BasaltGraphGroup3Color">#7FB4F0</Color>
+      <Color x:Key="BasaltAccentHoverColor">#B79CFF</Color>
+      <Color x:Key="BasaltAccentSoftColor">#2E2545</Color>
+      <Color x:Key="SystemAccentColor">#A88BFA</Color>
+      <Color x:Key="SystemAccentColorLight1">#B79CFF</Color>
+      <Color x:Key="SystemAccentColorLight2">#C7B2FF</Color>
+      <Color x:Key="SystemAccentColorLight3">#D7C8FF</Color>
+      <Color x:Key="SystemAccentColorDark1">#9477E8</Color>
+      <Color x:Key="SystemAccentColorDark2">#8064D6</Color>
+      <Color x:Key="SystemAccentColorDark3">#6D51C4</Color>
     </ResourceDictionary>
   </ResourceDictionary.ThemeDictionaries>
 
@@ -64,6 +82,8 @@
   <SolidColorBrush x:Key="BasaltTextSecondaryBrush" Color="{DynamicResource BasaltTextSecondaryColor}" />
   <SolidColorBrush x:Key="BasaltTextMutedBrush" Color="{DynamicResource BasaltTextMutedColor}" />
   <SolidColorBrush x:Key="BasaltAccentBrush" Color="{DynamicResource BasaltAccentColor}" />
+  <SolidColorBrush x:Key="BasaltAccentHoverBrush" Color="{DynamicResource BasaltAccentHoverColor}" />
+  <SolidColorBrush x:Key="BasaltAccentSoftBrush" Color="{DynamicResource BasaltAccentSoftColor}" />
   <SolidColorBrush x:Key="BasaltOnAccentBrush" Color="{DynamicResource BasaltOnAccentColor}" />
   <SolidColorBrush x:Key="BasaltDangerBrush" Color="{DynamicResource BasaltDangerColor}" />
   <SolidColorBrush x:Key="BasaltWarningBrush" Color="{DynamicResource BasaltWarningColor}" />

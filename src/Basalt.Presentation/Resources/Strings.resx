@@ -274,6 +274,7 @@
   <data name="VaultPicker.OpenFolder" xml:space="preserve"><value>Open folder as vault</value></data>
   <data name="VaultPicker.Remove" xml:space="preserve"><value>Remove from list</value></data>
   <data name="VaultPicker.RemoveMessage" xml:space="preserve"><value>“{0}” will be removed from the list. Its files are not deleted.</value></data>
+  <data name="VaultPicker.Subtitle" xml:space="preserve"><value>Local-first Markdown, synced through GitHub</value></data>
   <data name="VaultPicker.Title" xml:space="preserve"><value>Vaults</value></data>
   <data name="Workspace.CloseTab" xml:space="preserve"><value>Close tab</value></data>
   <data name="Workspace.Editor" xml:space="preserve"><value>Note editor</value></data>

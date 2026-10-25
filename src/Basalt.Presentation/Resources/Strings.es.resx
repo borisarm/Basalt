@@ -274,6 +274,7 @@
   <data name="VaultPicker.OpenFolder" xml:space="preserve"><value>Abrir carpeta como vault</value></data>
   <data name="VaultPicker.Remove" xml:space="preserve"><value>Quitar de la lista</value></data>
   <data name="VaultPicker.RemoveMessage" xml:space="preserve"><value>«{0}» se quitará de la lista. Sus ficheros no se borran.</value></data>
+  <data name="VaultPicker.Subtitle" xml:space="preserve"><value>Markdown local-first, sincronizado con GitHub</value></data>
   <data name="VaultPicker.Title" xml:space="preserve"><value>Vaults</value></data>
   <data name="Workspace.CloseTab" xml:space="preserve"><value>Cerrar pestaña</value></data>
   <data name="Workspace.Editor" xml:space="preserve"><value>Editor de la nota</value></data>

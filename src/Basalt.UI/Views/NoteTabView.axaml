@@ -5,7 +5,8 @@
              xmlns:l="clr-namespace:Basalt.UI.Localization"
              xmlns:reading="clr-namespace:Basalt.UI.Reading"
              x:Class="Basalt.UI.Views.NoteTabView"
-             x:DataType="vm:NoteTabViewModel">
+             x:DataType="vm:NoteTabViewModel"
+             Background="{DynamicResource BasaltBackgroundBrush}">
   <DockPanel>
     <!-- F-003.3: a conflicting external change waits for the user's decision. -->
     <Border DockPanel.Dock="Top" x:Name="ConflictBanner" IsVisible="{Binding Conflict, Converter={x:Static ObjectConverters.IsNotNull}}"

@@ -8,12 +8,12 @@
   <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
     <TextBlock x:Name="SummaryText" Text="{Binding Summary}" VerticalAlignment="Center"
                Foreground="{DynamicResource BasaltTextMutedBrush}" />
-    <Button x:Name="SyncNowButton" Content="{l:Loc Sync.SyncNow}" Command="{Binding SyncNowCommand}"
+    <Button x:Name="SyncNowButton" Classes="subtle" Content="{l:Loc Sync.SyncNow}" Command="{Binding SyncNowCommand}"
             AutomationProperties.Name="{l:Loc Sync.SyncNow}" ToolTip.Tip="{l:Loc Sync.SyncNow}" />
-    <Button x:Name="PauseButton" Content="{l:Loc Sync.Pause}" Command="{Binding PauseCommand}"
+    <Button x:Name="PauseButton" Classes="subtle" Content="{l:Loc Sync.Pause}" Command="{Binding PauseCommand}"
             IsVisible="{Binding !IsPaused}" IsEnabled="{Binding IsConfigured}"
             AutomationProperties.Name="{l:Loc Sync.Pause}" ToolTip.Tip="{l:Loc Sync.Pause}" />
-    <Button x:Name="ResumeButton" Content="{l:Loc Sync.Resume}" Command="{Binding ResumeCommand}"
+    <Button x:Name="ResumeButton" Classes="subtle" Content="{l:Loc Sync.Resume}" Command="{Binding ResumeCommand}"
             IsVisible="{Binding IsPaused}"
             AutomationProperties.Name="{l:Loc Sync.Resume}" ToolTip.Tip="{l:Loc Sync.Resume}" />
     <TextBlock x:Name="ConflictText" Text="{Binding ConflictSummary}" IsVisible="{Binding HasConflicts}"

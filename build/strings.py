@@ -19,6 +19,7 @@ STRINGS = {
     "Shell.Title": ("Basalt", "Basalt"),
     "Shell.TitleWithVault": ("{0} — Basalt", "{0} — Basalt"),
     "VaultPicker.Title": ("Vaults", "Vaults"),
+    "VaultPicker.Subtitle": ("Local-first Markdown, synced through GitHub", "Markdown local-first, sincronizado con GitHub"),
     "VaultPicker.Create": ("Create vault", "Crear vault"),
     "VaultPicker.NameLabel": ("Vault name", "Nombre del vault"),
     "VaultPicker.ChooseLocation": ("Choose where to create the vault", "Elige dónde crear el vault"),

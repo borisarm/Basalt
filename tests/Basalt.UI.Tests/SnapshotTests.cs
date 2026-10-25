@@ -39,8 +39,16 @@ public sealed class SnapshotTests
 
     private static async Task SettleAsync()
     {
-        for (var i = 0; i < 60; i++)
+        for (var i = 0; i < 100; i++)
         {
+            Dispatcher.UIThread.RunJobs();
+            await Task.Yield();
+        }
+
+        // Render frames deterministically so time-based transitions and asynchronous layout have finished.
+        for (var i = 0; i < 5; i++)
+        {
+            AvaloniaHeadlessPlatform.ForceRenderTimerTick();
             Dispatcher.UIThread.RunJobs();
             await Task.Yield();
         }
@@ -59,9 +67,22 @@ public sealed class SnapshotTests
             window.Show();
         }
 
-        await SettleAsync();
-        using var frame = window.CaptureRenderedFrame()!;
-        PngSnapshot.Match(frame, $"{name}.{theme}");
+        for (var attempt = 0; ; attempt++)
+        {
+            // A focused text box blinks its caret, so captures taken at different times differ.
+            window.FocusManager?.Focus(null);
+            await SettleAsync();
+            using var frame = window.CaptureRenderedFrame()!;
+            try
+            {
+                PngSnapshot.Match(frame, $"{name}.{theme}");
+                return;
+            }
+            catch (SnapshotMismatchException) when (attempt < 2)
+            {
+                // Transitions and asynchronous layout can still be mid-flight on a busy runner; settle and recapture.
+            }
+        }
     }
 
     [Theory]

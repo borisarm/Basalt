@@ -175,6 +175,8 @@ public sealed class RemotePublisherTests
             .PublishAsync(new PublishRequest(plan, remote, Manifest.Empty), Options(), null, Ct);
 
         result.Error.Code.Should().Be(SyncErrors.TreeMismatch);
+        result.Error.Message.Should().Be("The remote tree does not match the local target tree.");
+        result.Error.Metadata!.Keys.Should().BeEquivalentTo(["expected", "actual"]);
         await repository.DidNotReceive().CreateCommitAsync(
             Arg.Any<string>(),
             Arg.Any<TreeSha>(),
@@ -261,6 +263,7 @@ public sealed class RemotePublisherTests
             Ct);
 
         result.Error.Code.Should().Be(RemoteErrors.NonFastForward);
+        result.Error.Message.Should().Be("moved");
         refreshes.Should().Be(1);
     }
 
@@ -316,6 +319,9 @@ public sealed class RemotePublisherTests
             .PublishAsync(request, Options(), null, Ct);
 
         result.Error.Code.Should().Be(SyncErrors.LocalFileMissing);
+        result.Error.Message.Should().Be("The local file disappeared before it could be uploaded.");
+        result.Error.Metadata!["path"].Should().Be("a.md");
+        result.Error.Metadata!["cause"].Should().Be(Basalt.Application.Errors.ErrorCodes.FsNotFound);
     }
 
     [Fact]
@@ -331,6 +337,8 @@ public sealed class RemotePublisherTests
         var result = await Publisher(fileSystem, repository).PublishAsync(request, Options(), null, Ct);
 
         result.Error.Code.Should().Be(SyncErrors.ShaMismatch);
+        result.Error.Message.Should().Be("A blob does not match its SHA.");
+        result.Error.Metadata!.Keys.Should().BeEquivalentTo(["path", "expected", "actual"]);
     }
 
     [Fact]
@@ -367,6 +375,8 @@ public sealed class RemotePublisherTests
             .PublishAsync(new PublishRequest(plan, remote, Manifest.Empty), Options(), null, Ct);
 
         result.Error.Code.Should().Be(SyncErrors.LocalFileMissing);
+        result.Error.Message.Should().Be("The vault configuration is missing from the target manifest.");
+        result.Error.Metadata!["path"].Should().Be(".basalt/vault.json");
         await repository.DidNotReceive().CreateInitialCommitAsync(
             Arg.Any<VaultPath>(),
             Arg.Any<ReadOnlyMemory<byte>>(),
@@ -463,6 +473,8 @@ public sealed class RemotePublisherTests
             .PublishAsync(new PublishRequest(plan, remote, Manifest.Empty), Options(), null, Ct);
 
         result.Error.Code.Should().Be(SyncErrors.ShaMismatch);
+        result.Error.Message.Should().Be("A blob does not match its SHA.");
+        result.Error.Metadata!.Keys.Should().BeEquivalentTo(["path", "expected", "actual"]);
     }
 
     [Fact]
@@ -499,7 +511,6 @@ public sealed class RemotePublisherTests
             .PublishAsync(new PublishRequest(plan, remote, Manifest.Empty), Options(), null, Ct);
 
         result.Error.Code.Should().Be(RemoteErrors.RepositoryEmpty);
+        result.Error.Message.Should().Be("The repository is still empty after its initial commit.");
     }
 }
-
-

@@ -2,8 +2,8 @@ using System.Text;
 using Basalt.Application.Errors;
 using Basalt.Application.Notes;
 using Basalt.Application.Ports.Platform;
-using Basalt.Application.Vaults;
 using Basalt.Application.Tests.TestSupport;
+using Basalt.Application.Vaults;
 using Basalt.Domain.Common;
 using Basalt.Domain.Notes;
 using Basalt.Domain.Sync;
@@ -686,6 +686,58 @@ public sealed class FileUseCasesTests
 
         (await handler.HandleAsync(new GetFileTree(Id, FileTreeSort.ModifiedNewest), Ct)).Value.Children.Select(c => c.Path.ToString()).Should().Equal("new.md", "old.md");
         (await handler.HandleAsync(new GetFileTree(Id, FileTreeSort.ModifiedOldest), Ct)).Value.Children.Select(c => c.Path.ToString()).Should().Equal("old.md", "new.md");
+    }
+
+    [Fact]
+    public async Task ReadNote_PropagatesNonNotFoundReadFailuresAndDescribesMissingFiles()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("A.md", "a")));
+        var missing = await new ReadNoteHandler(v.Sessions, v.Analyzer).HandleAsync(new ReadNote(Id, P("none.md")), Ct);
+        v.FileSystem.FailNextRead(P("A.md"), new Error(ErrorCodes.FsIo, "disk"));
+        var failed = await new ReadNoteHandler(v.Sessions, v.Analyzer).HandleAsync(new ReadNote(Id, P("A.md")), Ct);
+
+        missing.Error.Code.Should().Be(ErrorCodes.EntryNotFound);
+        missing.Error.Message.Should().Be("The file or folder does not exist.");
+        missing.Error.Metadata!["path"].Should().Be("none.md");
+        failed.Error.Code.Should().Be(ErrorCodes.FsIo);
+    }
+
+    [Fact]
+    public async Task CreateNote_Duplicate_DescribesTheExistingPath()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("A.md", "")));
+        var handler = new CreateNoteHandler(v.Sessions, v.Events, v.Clock, v.Culture);
+
+        var result = await handler.HandleAsync(new CreateNote(Id, Title: "A"), Ct);
+
+        result.Error.Code.Should().Be(ErrorCodes.PathAlreadyExists);
+        result.Error.Message.Should().Be("A file or folder with that name already exists.");
+        result.Error.Metadata!["path"].Should().Be("A.md");
+    }
+
+    [Fact]
+    public async Task Delete_WhenTheTrashNameHasMultipleExtensions_KeepsTheLastOne()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("A.tar.gz", "x"), (".trash/A.tar.gz", "old")));
+
+        var result = await new DeleteEntriesHandler(v.Sessions, v.Events)
+            .HandleAsync(new DeleteEntries(Id, [P("A.tar.gz")]), Ct);
+
+        result.IsSuccess.Should().BeTrue();
+        (await v.ExistsAsync(".trash/A.tar 2.gz")).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Delete_Missing_DescribesThePath()
+    {
+        await using var v = await VaultFixture.CreateAsync();
+
+        var result = await new DeleteEntriesHandler(v.Sessions, v.Events)
+            .HandleAsync(new DeleteEntries(Id, [P("none.md")]), Ct);
+
+        result.Error.Code.Should().Be(ErrorCodes.EntryNotFound);
+        result.Error.Message.Should().Be("The file or folder does not exist.");
+        result.Error.Metadata!["path"].Should().Be("none.md");
     }
 
     [Fact]

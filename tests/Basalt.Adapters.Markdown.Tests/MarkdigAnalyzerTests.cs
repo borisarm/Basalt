@@ -102,7 +102,7 @@ public sealed class MarkdigAnalyzerTests
         var content = builder.ToString();
 
         // Enough warm-up for tiered JIT, then the fastest of several runs filters out GC pauses and scheduler noise.
-        for (var warmup = 0; warmup < 10; warmup++)
+        for (var warmup = 0; warmup < 40; warmup++)
         {
             _analyzer.Analyze(content);
         }

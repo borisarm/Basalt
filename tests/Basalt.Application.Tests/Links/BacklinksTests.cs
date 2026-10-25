@@ -69,6 +69,22 @@ public sealed class BacklinksTests
 
     [Fact]
     [Trait("Spec", "F-005.2")]
+    public async Task UnlinkedMentions_AtTheStartAndEndOfFile_HaveTheWholeLineAsContext()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(
+            ("Proyecto X.md", ""),
+            ("Inicio.md", "Proyecto X al principio"),
+            ("Fin.md", "termina en Proyecto X")));
+
+        var result = (await Backlinks(v).HandleAsync(new GetBacklinks(Id, P("Proyecto X.md")), Ct)).Value;
+
+        result.Unlinked.Select(g => g.Source).Should().Equal(P("Fin.md"), P("Inicio.md"));
+        result.Unlinked.Single(g => g.Source == P("Inicio.md")).Mentions.Single().Context.Text.Should().Be("Proyecto X al principio");
+        result.Unlinked.Single(g => g.Source == P("Fin.md")).Mentions.Single().Context.Text.Should().Be("termina en Proyecto X");
+    }
+
+    [Fact]
+    [Trait("Spec", "F-005.2")]
     public async Task LinkUnlinkedMention_RewritesTheMentionAsALinkWithAlias()
     {
         await using var v = await VaultFixture.CreateAsync(Files(("A.md", "hablé de proyecto x ayer"), ("Proyecto X.md", "")));

@@ -1,11 +1,11 @@
 using Basalt.Application.Bookmarks;
 using Basalt.Application.Errors;
 using Basalt.Application.Notes;
+using Basalt.Application.Ports.FileSystem;
+using Basalt.Application.Ports.Storage;
 using Basalt.Application.Search;
 using Basalt.Application.Templates;
 using Basalt.Application.Tests.TestSupport;
-using Basalt.Application.Ports.FileSystem;
-using Basalt.Application.Ports.Storage;
 using Basalt.Application.Workspace;
 using Basalt.Domain.Common;
 using Basalt.Domain.Notes;
@@ -299,6 +299,31 @@ public sealed class ProductivityTests
         await new SaveWorkspaceHandler(v.Sessions, v.Session.Get<BookmarkList>().Store, device).HandleAsync(new SaveWorkspace(Id, state), Ct);
 
         (await new LoadWorkspaceHandler(v.Sessions, v.Session.Get<BookmarkList>().Store, device).HandleAsync(new LoadWorkspace(Id), Ct)).Value.Should().BeEquivalentTo(state);
+    }
+
+    [Fact]
+    public async Task RecentFiles_RemoveChecksEveryRemovedPath()
+    {
+        var store = NSubstitute.Substitute.For<IRecentFilesStore>();
+        store.LoadAsync(Id, Arg.Any<CancellationToken>()).Returns([P("Dir/X.md"), P("A.md")]);
+        store.SaveAsync(Id, Arg.Any<IReadOnlyList<VaultPath>>(), Arg.Any<CancellationToken>()).Returns(Result.Success());
+        var recents = new RecentFiles(Id, store);
+
+        await recents.RemoveAsync([P("Dir"), P("Nada")], Ct);
+
+        await store.Received(1).SaveAsync(Id, Arg.Is<IReadOnlyList<VaultPath>>(files => files.SequenceEqual(new[] { P("A.md") })), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task RecentFiles_RecordingTheFirstEntryAgain_DoesNotSave()
+    {
+        var store = NSubstitute.Substitute.For<IRecentFilesStore>();
+        store.LoadAsync(Id, Arg.Any<CancellationToken>()).Returns([P("A.md"), P("B.md")]);
+        var recents = new RecentFiles(Id, store);
+
+        await recents.RecordAsync(P("A.md"), Ct);
+
+        await store.DidNotReceive().SaveAsync(Id, Arg.Any<IReadOnlyList<VaultPath>>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]

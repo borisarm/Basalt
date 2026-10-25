@@ -8,7 +8,7 @@
              x:DataType="settings:SettingsViewModel">
   <!-- Spec 04 F-014: settings sections; every change applies and is saved immediately. -->
   <ScrollViewer x:Name="Scroll">
-    <Border Margin="24" MaxWidth="860" HorizontalAlignment="Center" Background="{DynamicResource BasaltSurfaceBrush}"
+    <Border Margin="24" MaxWidth="860" HorizontalAlignment="Stretch" Background="{DynamicResource BasaltSurfaceBrush}"
             BorderBrush="{DynamicResource BasaltBorderBrush}" BorderThickness="1" CornerRadius="14" Padding="32,28">
     <StackPanel Spacing="28">
       <StackPanel Spacing="8">

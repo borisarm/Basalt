@@ -258,6 +258,32 @@ public sealed class PlanMaterializerTests
             .MaterializeAsync(plan, Manifest.Empty, remote, SyncPolicy.Default, Now, Device, Ct);
 
         result.Error.Code.Should().Be(SyncErrors.ShaMismatch);
+        result.Error.Message.Should().Be("A downloaded blob does not match its SHA.");
+        result.Error.Metadata!.Keys.Should().BeEquivalentTo(["expected", "actual"]);
+    }
+
+    [Fact]
+    public async Task MergeText_WhenTheLocalFileDisappeared_FailsWithLocalFileMissing()
+    {
+        var baseText = "base\n";
+        var localText = "local\n";
+        var remoteText = "remote\n";
+        var repository = await RemoteAsync(("a.md", Utf8(remoteText)));
+        (await repository.CreateBlobAsync(Utf8(baseText), Ct)).IsSuccess.Should().BeTrue();
+        var remote = await SnapshotAsync(repository);
+        var fileSystem = await LocalAsync(("a.md", Utf8(localText)));
+        var local = ManifestOf(("a.md", Utf8(localText)));
+        var baseline = new SyncBase(null, null, ManifestOf(("a.md", Utf8(baseText))));
+        var plan = SyncPlanner.Plan(baseline, local, remote.Manifest, SyncPolicy.Default);
+        await fileSystem.DeleteAsync(P("a.md"), Ct);
+
+        var result = await Materializer(fileSystem, repository)
+            .MaterializeAsync(plan, local, remote, SyncPolicy.Default, Now, Device, Ct);
+
+        result.Error.Code.Should().Be(SyncErrors.LocalFileMissing);
+        result.Error.Message.Should().Be("The local file disappeared during the sync.");
+        result.Error.Metadata!["path"].Should().Be("a.md");
+        result.Error.Metadata!["cause"].Should().Be(Basalt.Application.Errors.ErrorCodes.FsNotFound);
     }
 
     [Fact]

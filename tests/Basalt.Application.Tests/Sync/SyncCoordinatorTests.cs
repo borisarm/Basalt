@@ -250,9 +250,15 @@ public sealed class SyncCoordinatorTests
         var vault = new VaultId(Guid.NewGuid());
         await using var coordinator = Coordinator(_ => runner, Time());
         var statuses = new List<SyncStatus>();
-        coordinator.StatusChanged += status => statuses.Add(status);
+        var raised = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        coordinator.StatusChanged += status =>
+        {
+            statuses.Add(status);
+            raised.TrySetResult();
+        };
 
         await coordinator.RequestAsync(Profile(vault), SyncTriggerReason.Manual, null, Ct);
+        await raised.Task.WaitAsync(TimeSpan.FromSeconds(5), Ct);
 
         statuses.Should().ContainSingle().Which.LastResult!.Status.Should().Be(SyncCycleStatus.UpToDate);
     }

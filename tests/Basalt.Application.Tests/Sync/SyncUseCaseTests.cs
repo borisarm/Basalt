@@ -135,6 +135,7 @@ public sealed class SyncUseCaseTests
 
         result.IsFailure.Should().BeTrue();
         result.Error.Code.Should().Be(SyncErrors.NotConfigured);
+        result.Error.Message.Should().Be("The vault has no sync profile.");
     }
 
     [Fact]
@@ -340,6 +341,7 @@ public sealed class SyncUseCaseTests
             : await new ResumeSyncHandler(profiles, coordinator).HandleAsync(new ResumeSync(Vault), Ct);
 
         result.Error.Code.Should().Be(SyncErrors.NotConfigured);
+        result.Error.Message.Should().Be("The vault has no sync profile.");
     }
 
     [Theory]
@@ -465,6 +467,3 @@ public sealed class SyncUseCaseTests
         public IVaultSyncRunner Create(SyncProfile profile) => runner;
     }
 }
-
-
-

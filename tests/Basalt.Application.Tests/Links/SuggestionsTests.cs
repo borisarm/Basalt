@@ -189,4 +189,27 @@ public sealed class SuggestionsTests
 
         suggestions.Should().HaveCount(2);
     }
+    [Fact]
+    public async Task SuggestLinkTargets_ReadsBlockIdsFromParagraphsAndCodeBlocks()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(
+            ("n.md", "# T\n\n```\ncode\n```\n^abc\n\npara ^def\n")));
+        var handler = new SuggestLinkTargetsHandler(v.Sessions, v.Analyzer);
+
+        var suggestions = (await handler.HandleAsync(new SuggestLinkTargets(Id, P("n.md"), "n#^"), Ct)).Value;
+
+        suggestions.Select(s => s.Subpath).Should().Contain(["^abc", "^def"]);
+        suggestions.Should().OnlyContain(s => s.Kind == LinkSuggestionKind.Block);
+    }
+
+    [Fact]
+    public async Task SuggestLinkTargets_WithAnEmptyPartialAfterTheHash_ListsHeadings()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("n.md", "# Uno\n## Dos")));
+
+        var suggestions = (await new SuggestLinkTargetsHandler(v.Sessions, v.Analyzer)
+            .HandleAsync(new SuggestLinkTargets(Id, P("n.md"), "n#"), Ct)).Value;
+
+        suggestions.Select(s => s.Display).Should().Equal("Uno", "Dos");
+    }
 }

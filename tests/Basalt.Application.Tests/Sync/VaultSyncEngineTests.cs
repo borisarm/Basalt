@@ -1,9 +1,11 @@
 using System.Text;
 using Basalt.Application.Common;
+using Basalt.Application.Errors;
 using Basalt.Application.Events;
 using Basalt.Application.Ports.Remote;
 using Basalt.Application.Sync;
 using Basalt.Domain.Accounts;
+using Basalt.Domain.Common;
 using Basalt.Domain.Notes;
 using Basalt.Domain.Sync;
 using Basalt.Domain.Vaults;
@@ -284,5 +286,113 @@ public sealed class VaultSyncEngineTests
         var result = await harness.Engine.RunAsync(harness.Request(), cancellation.Token);
 
         result.Status.Should().Be(SyncCycleStatus.Cancelled);
+        result.Base.Should().Be(SyncBase.Empty);
+        result.Conflicts.Should().BeEmpty();
+        result.HasDeferred.Should().BeFalse();
+        result.Error.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Run_WhenTheFlushTimesOut_ContinuesTheCycle()
+    {
+        var cancelled = new CancellationTokenSource();
+        cancelled.Cancel();
+        await using var harness = new Harness(flush: (_, _) => Task.FromException(new OperationCanceledException(cancelled.Token)));
+
+        var result = await harness.Engine.RunAsync(harness.Request(), Ct);
+
+        result.Status.Should().Be(SyncCycleStatus.UpToDate);
+    }
+
+    [Fact]
+    public async Task Constructor_RejectsNullDependencies()
+    {
+        await using var harness = new Harness();
+        var valid = new VaultSyncEngine(
+            harness.Vault, harness.FileSystem, harness.Repository, harness.Store, harness.Events,
+            harness.Clock, harness.Device, TimeProvider.System, harness.Locks, harness.VaultLocks);
+
+        FluentActions.Invoking(() => new VaultSyncEngine(harness.Vault, null!, harness.Repository, harness.Store, harness.Events, harness.Clock, harness.Device, TimeProvider.System, harness.Locks, harness.VaultLocks)).Should().Throw<ArgumentNullException>();
+        FluentActions.Invoking(() => new VaultSyncEngine(harness.Vault, harness.FileSystem, null!, harness.Store, harness.Events, harness.Clock, harness.Device, TimeProvider.System, harness.Locks, harness.VaultLocks)).Should().Throw<ArgumentNullException>();
+        FluentActions.Invoking(() => new VaultSyncEngine(harness.Vault, harness.FileSystem, harness.Repository, null!, harness.Events, harness.Clock, harness.Device, TimeProvider.System, harness.Locks, harness.VaultLocks)).Should().Throw<ArgumentNullException>();
+        FluentActions.Invoking(() => new VaultSyncEngine(harness.Vault, harness.FileSystem, harness.Repository, harness.Store, null!, harness.Clock, harness.Device, TimeProvider.System, harness.Locks, harness.VaultLocks)).Should().Throw<ArgumentNullException>();
+        FluentActions.Invoking(() => new VaultSyncEngine(harness.Vault, harness.FileSystem, harness.Repository, harness.Store, harness.Events, null!, harness.Device, TimeProvider.System, harness.Locks, harness.VaultLocks)).Should().Throw<ArgumentNullException>();
+        FluentActions.Invoking(() => new VaultSyncEngine(harness.Vault, harness.FileSystem, harness.Repository, harness.Store, harness.Events, harness.Clock, null!, TimeProvider.System, harness.Locks, harness.VaultLocks)).Should().Throw<ArgumentNullException>();
+        FluentActions.Invoking(() => new VaultSyncEngine(harness.Vault, harness.FileSystem, harness.Repository, harness.Store, harness.Events, harness.Clock, harness.Device, TimeProvider.System, null!, harness.VaultLocks)).Should().Throw<ArgumentNullException>();
+        FluentActions.Invoking(() => new VaultSyncEngine(harness.Vault, harness.FileSystem, harness.Repository, harness.Store, harness.Events, harness.Clock, harness.Device, TimeProvider.System, harness.Locks, null!)).Should().Throw<ArgumentNullException>();
+        valid.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task Run_RejectsNullRequests()
+    {
+        await using var harness = new Harness();
+
+        await FluentActions.Awaiting(() => harness.Engine.RunAsync(null!, Ct)).Should().ThrowAsync<ArgumentNullException>();
+    }
+
+    [Fact]
+    public async Task Run_WhenPreconditionsFail_ReturnsAnEmptyResult()
+    {
+        await using var harness = new Harness();
+        var requests = new[]
+        {
+            (harness.Request() with { Profile = harness.Profile with { Enabled = false } }, SyncCycleStatus.Disabled),
+            (harness.Request() with { Profile = harness.Profile with { Paused = true } }, SyncCycleStatus.Paused),
+            (harness.Request(online: false), SyncCycleStatus.Offline),
+            (harness.Request(token: false), SyncCycleStatus.AuthRequired),
+        };
+
+        foreach (var (request, status) in requests)
+        {
+            var result = await harness.Engine.RunAsync(request, Ct);
+            result.Status.Should().Be(status);
+            result.Base.Should().Be(SyncBase.Empty);
+            result.Conflicts.Should().BeEmpty();
+            result.HasDeferred.Should().BeFalse();
+            result.Error.Should().BeNull();
+        }
+    }
+
+    [Fact]
+    public async Task Run_WhenTheJournalCannotBeSaved_FailsWithoutPublishing()
+    {
+        await using var harness = new Harness();
+        await WriteAsync(harness.FileSystem, "A.md", "A");
+        harness.Store.FailNextSave = nameof(InMemorySyncStateStore.SaveJournalAsync);
+
+        var result = await harness.Engine.RunAsync(harness.Request(), Ct);
+
+        result.Status.Should().Be(SyncCycleStatus.Failed);
+        result.Error.Should().NotBeNull();
+        harness.Repository.CommitWrites.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task Run_WhenTheStateCannotBeCommitted_Fails()
+    {
+        await using var harness = new Harness();
+        await WriteAsync(harness.FileSystem, "A.md", "A");
+        harness.Store.FailNextSave = nameof(InMemorySyncStateStore.SaveBaseAsync);
+
+        var result = await harness.Engine.RunAsync(harness.Request(), Ct);
+
+        result.Status.Should().Be(SyncCycleStatus.Failed);
+        result.Error.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task Run_WhenTheSyncIgnoreCannotBeReadForAnotherReason_Fails()
+    {
+        await using var harness = new Harness();
+        await WriteAsync(harness.FileSystem, "A.md", "A");
+        harness.FileSystem.FailNextRead(P(".basalt/syncignore"), new Error(ErrorCodes.FsIo, "disk"));
+
+        var result = await harness.Engine.RunAsync(harness.Request(), Ct);
+
+        result.Status.Should().Be(SyncCycleStatus.Failed);
+        result.Error!.Code.Should().Be(ErrorCodes.FsIo);
     }
 }
+
+

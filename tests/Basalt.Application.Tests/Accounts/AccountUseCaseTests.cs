@@ -132,6 +132,104 @@ public sealed class AccountUseCaseTests
         result.Value.FullName.Should().Be("acme/notes");
         result.Value.IsPrivate.Should().BeTrue();
     }
+    [Fact]
+    public async Task CompleteSignIn_WhenTheUserCannotBeRead_ReturnsTheError()
+    {
+        var authenticator = Substitute.For<IGitHubAuthenticator>();
+        var challenge = new DeviceCodeChallenge(Host, "device", "USER", "https://github.com/login/device", TimeSpan.Zero, DateTimeOffset.MaxValue);
+        authenticator.PollForTokenAsync(challenge, Arg.Any<CancellationToken>())
+            .Returns(Result.Success(new GitHubToken("token")));
+        authenticator.GetUserAsync(Host, Arg.Any<GitHubToken>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Failure<GitHubUserInfo>(new Error("auth.user_failed", "nope")));
+
+        var result = await Handler(authenticator, TokenProvider(), Store())
+            .HandleAsync(new CompleteGitHubSignIn(challenge), Ct);
+
+        result.Error.Code.Should().Be("auth.user_failed");
+    }
+
+    [Fact]
+    public async Task CompleteSignIn_WhenTheAccountCannotBeSaved_ReturnsTheError()
+    {
+        var authenticator = new FakeGitHubAuthenticator(Host);
+        var accounts = Substitute.For<IAccountStore>();
+        var failure = new Error("store.io", "disk full");
+        accounts.SaveAsync(Arg.Any<GitHubAccount>(), Arg.Any<CancellationToken>()).Returns(Result<Unit>.Failure(failure));
+
+        var result = await Handler(authenticator, TokenProvider(), accounts)
+            .HandleAsync(new CompleteGitHubSignIn((await authenticator.StartDeviceFlowAsync(Host, Ct)).Value), Ct);
+
+        result.Error.Should().Be(failure);
+    }
+
+    [Fact]
+    public async Task CompleteSignIn_WhenTheTokenCannotBeStored_ReturnsTheError()
+    {
+        var authenticator = new FakeGitHubAuthenticator(Host);
+        var tokens = Substitute.For<IGitHubTokenProvider>();
+        var failure = new Error("store.io", "disk full");
+        tokens.StoreAsync(Arg.Any<GitHubAccountId>(), Arg.Any<GitHubHost>(), Arg.Any<GitHubToken>(), Arg.Any<CancellationToken>())
+            .Returns(Result<Unit>.Failure(failure));
+
+        var result = await Handler(authenticator, tokens, Store())
+            .HandleAsync(new CompleteGitHubSignIn((await authenticator.StartDeviceFlowAsync(Host, Ct)).Value), Ct);
+
+        result.Error.Should().Be(failure);
+        (await Store().GetAllAsync(Ct)).Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task CompleteSignIn_AfterTooManyPolls_Expires()
+    {
+        var authenticator = new PendingForeverAuthenticator();
+        var challenge = await authenticator.StartDeviceFlowAsync(Host, Ct);
+
+        var result = await Handler(authenticator, TokenProvider(), Store())
+            .HandleAsync(new CompleteGitHubSignIn(challenge.Value), Ct);
+
+        result.Error.Code.Should().Be(AuthErrors.ExpiredToken);
+        authenticator.Polls.Should().Be(120);
+    }
+
+    [Fact]
+    public async Task RemoveAccount_PropagatesStoreAndTokenFailures()
+    {
+        var account = new GitHubAccount(new GitHubAccountId(Guid.NewGuid()), "octocat", Host, null, ["repo"], Now);
+        var accounts = Store();
+        await accounts.SaveAsync(account, Ct);
+        var failingAccounts = Substitute.For<IAccountStore>();
+        failingAccounts.RemoveAsync(Arg.Any<GitHubAccountId>(), Arg.Any<CancellationToken>())
+            .Returns(Result<Unit>.Failure(new Error("account.not_found", "missing")));
+        var tokens = TokenProvider();
+        tokens.RemoveAsync(Arg.Any<GitHubAccountId>(), Arg.Any<CancellationToken>())
+            .Returns(Result<Unit>.Failure(new Error("token.io", "disk")));
+
+        var accountFailure = await new RemoveAccountHandler(failingAccounts, tokens).HandleAsync(new RemoveAccount(account.Id), Ct);
+        var tokenFailure = await new RemoveAccountHandler(accounts, tokens).HandleAsync(new RemoveAccount(account.Id), Ct);
+
+        accountFailure.Error.Code.Should().Be("account.not_found");
+        tokenFailure.Error.Code.Should().Be("token.io");
+    }
+
+    [Fact]
+    public async Task AccountHandlers_RejectNullArguments()
+    {
+        var authenticator = new FakeGitHubAuthenticator(Host);
+        var tokens = TokenProvider();
+        var accounts = Store();
+        var admin = new InMemoryRepositoryAdministration();
+
+        await FluentActions.Awaiting(() => new StartGitHubSignInHandler(authenticator).HandleAsync(null!, Ct))
+            .Should().ThrowAsync<ArgumentNullException>();
+        await FluentActions.Awaiting(() => Handler(authenticator, tokens, accounts).HandleAsync(null!, Ct))
+            .Should().ThrowAsync<ArgumentNullException>();
+        await FluentActions.Awaiting(() => new RemoveAccountHandler(accounts, tokens).HandleAsync(null!, Ct))
+            .Should().ThrowAsync<ArgumentNullException>();
+        await FluentActions.Awaiting(() => new ListRepositoriesHandler(admin).HandleAsync(null!, Ct))
+            .Should().ThrowAsync<ArgumentNullException>();
+        await FluentActions.Awaiting(() => new CreateRepositoryForVaultHandler(admin).HandleAsync(null!, Ct))
+            .Should().ThrowAsync<ArgumentNullException>();
+    }
     private static CompleteGitHubSignInHandler Handler(
         IGitHubAuthenticator authenticator,
         IGitHubTokenProvider tokens,
@@ -150,6 +248,29 @@ public sealed class AccountUseCaseTests
 
     private static AccountStore Store() =>
         new(new InMemoryStore<AccountsDocument>(() => AccountsDocument.Empty));
+
+    private sealed class PendingForeverAuthenticator : IGitHubAuthenticator
+    {
+        private int _polls;
+
+        public int Polls => _polls;
+
+        public Task<Result<DeviceCodeChallenge>> StartDeviceFlowAsync(GitHubHost host, CancellationToken ct) =>
+            Task.FromResult(Result<DeviceCodeChallenge>.Success(new DeviceCodeChallenge(
+                host, "device", "USER-CODE", "https://github.com/login/device", TimeSpan.Zero, DateTimeOffset.MaxValue)));
+
+        public Task<Result<GitHubToken>> PollForTokenAsync(DeviceCodeChallenge challenge, CancellationToken ct)
+        {
+            Interlocked.Increment(ref _polls);
+            return Task.FromResult(Result<GitHubToken>.Failure(new Error(AuthErrors.AuthorizationPending, "pending")));
+        }
+
+        public Task<Result<GitHubUserInfo>> GetUserAsync(GitHubHost host, GitHubToken token, CancellationToken ct) =>
+            throw new InvalidOperationException("Not reached.");
+
+        public Task<Result<GitHubToken>> RefreshAsync(GitHubHost host, GitHubToken token, CancellationToken ct) =>
+            throw new InvalidOperationException("Not reached.");
+    }
 
     private sealed class PendingOnceAuthenticator : IGitHubAuthenticator
     {
@@ -174,3 +295,5 @@ public sealed class AccountUseCaseTests
             _inner.RefreshAsync(host, token, ct);
     }
 }
+
+

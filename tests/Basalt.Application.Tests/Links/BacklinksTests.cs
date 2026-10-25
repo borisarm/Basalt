@@ -1,3 +1,4 @@
+using System.Text;
 using Basalt.Application.Errors;
 using Basalt.Application.Links;
 using Basalt.Application.Notes;
@@ -33,6 +34,18 @@ public sealed class BacklinksTests
         a[0].Context.Line.Should().Be(1);
         a[0].Context.Highlight.Should().Be(new TextRange(4, 5));
         result.Linked[1].Links.Single().Link.IsEmbed.Should().BeTrue();
+    }
+
+    [Fact]
+    [Trait("Spec", "F-005.1")]
+    public async Task Backlinks_WhenTheSourceChangedAfterIndexing_ReadsTheCurrentText()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("A.md", "[[C]]"), ("C.md", "")));
+        await v.FileSystem.WriteAllBytesAsync(P("A.md"), Encoding.UTF8.GetBytes("intro [[C]] y [[C]]"), null, Ct);
+
+        var result = (await Backlinks(v).HandleAsync(new GetBacklinks(Id, P("C.md")), Ct)).Value;
+
+        result.Linked.Single().Links.Should().HaveCount(2);
     }
 
     [Fact]

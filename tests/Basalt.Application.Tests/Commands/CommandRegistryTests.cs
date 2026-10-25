@@ -68,6 +68,46 @@ public sealed class CommandRegistryTests
     }
 
     [Fact]
+    public async Task RegistryErrors_DescribeTheCommand()
+    {
+        var registry = new CommandRegistry([new Contribution(Command("a", null, canExecute: _ => false))]);
+        var context = new CommandContext(null, null, new Host());
+
+        var unknown = (await registry.ExecuteAsync("nope", context, Ct)).Error;
+        var unavailable = (await registry.ExecuteAsync("a", context, Ct)).Error;
+
+        unknown.Message.Should().Be("There is no such command.");
+        unknown.Metadata!["command"].Should().Be("nope");
+        unavailable.Message.Should().Be("The command cannot run now.");
+        unavailable.Metadata!["command"].Should().Be("a");
+    }
+
+    [Fact]
+    public async Task Registry_RejectsNullArguments()
+    {
+        FluentActions.Invoking(() => new CommandRegistry(null!)).Should().Throw<ArgumentNullException>();
+        var registry = new CommandRegistry([]);
+        await FluentActions.Awaiting(() => registry.ExecuteAsync("a", null!, Ct)).Should().ThrowAsync<ArgumentNullException>();
+    }
+
+    [Fact]
+    public void CoreCommands_ExposeTheirMetadata()
+    {
+        var core = new CoreCommands(null!, null!, null!);
+        var commands = core.GetCommands().ToDictionary(c => c.Id);
+
+        commands[CoreCommands.NewNote].TitleKey.Should().Be("Commands.NewNote");
+        commands[CoreCommands.NewNote].Category.Should().Be("file");
+        commands[CoreCommands.NewNote].DefaultGesture.Should().Be("Mod+N");
+        commands[CoreCommands.OpenDailyNote].TitleKey.Should().Be("Commands.OpenDailyNote");
+        commands[CoreCommands.OpenDailyNote].Category.Should().Be("daily-notes");
+        commands[CoreCommands.OpenDailyNote].DefaultGesture.Should().Be("Mod+Shift+D");
+        commands[CoreCommands.BookmarkActiveFile].TitleKey.Should().Be("Commands.BookmarkActiveFile");
+        commands[CoreCommands.BookmarkActiveFile].Category.Should().Be("bookmarks");
+        commands[CoreCommands.BookmarkActiveFile].DefaultGesture.Should().BeNull();
+    }
+
+    [Fact]
     public void DuplicateIds_AreAProgrammingError()
     {
         var create = () => new CommandRegistry([new Contribution(Command("a", null)), new Contribution(Command("a", null))]);
@@ -103,7 +143,45 @@ public sealed class CommandRegistryTests
     [InlineData("A+B")]
     public void InvalidGestures_AreErrors(string text)
     {
-        Gesture.Parse(text, CommandPlatform.Windows).Error.Code.Should().Be(ErrorCodes.GestureInvalid);
+        var error = Gesture.Parse(text, CommandPlatform.Windows).Error;
+
+        error.Code.Should().Be(ErrorCodes.GestureInvalid);
+        error.Message.Should().Be("The key gesture is not valid.");
+        error.Metadata!["gesture"].Should().Be(text);
+    }
+
+    [Theory]
+    [InlineData("Control+K", CommandPlatform.Windows, "Ctrl+K")]
+    [InlineData("Command+K", CommandPlatform.MacOS, "Cmd+K")]
+    [InlineData("Meta+K", CommandPlatform.MacOS, "Cmd+K")]
+    [InlineData("Win+K", CommandPlatform.Windows, "Win+K")]
+    [InlineData("Super+K", CommandPlatform.Windows, "Win+K")]
+    [InlineData("Option+K", CommandPlatform.Windows, "Alt+K")]
+    [InlineData("Shift+K", CommandPlatform.Windows, "Shift+K")]
+    public void GestureModifierAliases_AreAccepted(string text, CommandPlatform platform, string normalised)
+    {
+        Gesture.Parse(text, platform).Value.ToString(platform).Should().Be(normalised);
+    }
+
+    [Theory]
+    [InlineData("Alt+Left;Mod+[", CommandPlatform.Windows, "Alt+Left")]
+    [InlineData("Alt+Left;Mod+[", CommandPlatform.MacOS, "Cmd+[")]
+    public void DefaultGestures_PickThePlatformVariant(string text, CommandPlatform platform, string normalised)
+    {
+        Gesture.ParseDefault(text, platform).Value.ToString(platform).Should().Be(normalised);
+    }
+
+    [Fact]
+    public void DefaultGestures_WithMoreThanTwoVariants_AreInvalid()
+    {
+        Gesture.ParseDefault("A;B;C", CommandPlatform.Windows).Error.Code.Should().Be(ErrorCodes.GestureInvalid);
+    }
+
+    [Fact]
+    public void GestureParsing_RejectsNull()
+    {
+        FluentActions.Invoking(() => Gesture.Parse(null!, CommandPlatform.Windows)).Should().Throw<ArgumentNullException>();
+        FluentActions.Invoking(() => Gesture.ParseDefault(null!, CommandPlatform.Windows)).Should().Throw<ArgumentNullException>();
     }
 
     [Fact]

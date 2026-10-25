@@ -251,6 +251,61 @@ public sealed class VaultIndexerTests : IAsyncDisposable
         Cache.Files.Keys.Should().Equal(P("A.md"));
     }
 
+    [Fact]
+    public async Task Open_SkipsHiddenFilesAndFolders()
+    {
+        await WriteAsync("A.md", "a");
+        await WriteAsync(".hidden.md", "h");
+        await WriteAsync(".git/HEAD", "ref");
+        await WriteAsync("Dir/.secret.md", "s");
+
+        await OpenAsync();
+
+        Cache.Files.Keys.Select(k => k.ToString()).Should().Equal("A.md");
+    }
+
+    [Fact]
+    public async Task Flush_WhenAScheduledPathIsANewFolder_IndexesItsContent()
+    {
+        await OpenAsync();
+        await WriteAsync("New/a.md", "[[B]]");
+        await WriteAsync("New/sub/b.md", "b");
+
+        Indexer.Schedule([P("New")]);
+        await Indexer.FlushAsync(Ct);
+
+        Cache.Files.Keys.Select(k => k.ToString()).Order().Should().Equal("New/a.md", "New/sub/b.md");
+        Cache.Graph.Incoming(P("New/sub/b.md")).Should().ContainSingle();
+    }
+
+    [Fact]
+    public async Task Flush_WhenAScheduledFileDisappeared_RemovesIt()
+    {
+        await WriteAsync("A.md", "a");
+        await OpenAsync();
+        await _fs.DeleteAsync(P("A.md"), Ct);
+
+        Indexer.Schedule([P("A.md")]);
+        await Indexer.FlushAsync(Ct);
+
+        Cache.Files.Should().BeEmpty();
+        (await _indexes.For(Vault).GetAsync(P("A.md"), Ct)).Should().BeNull();
+    }
+
+    [Fact]
+    public async Task RenameAndRemove_WithNoMatches_DoNotPublishChanges()
+    {
+        await WriteAsync("A.md", "a");
+        await OpenAsync();
+        var changes = 0;
+        using var subscription = _events.Subscribe<MetadataChanged>((_, _) => { changes++; return ValueTask.CompletedTask; });
+
+        await Indexer.RenameAsync(P("none.md"), P("other.md"), Ct);
+        await Indexer.RemoveAsync([P("none.md")], Ct);
+        await _events.WaitForIdleAsync(Ct);
+
+        changes.Should().Be(0);
+    }
     private static async Task WaitUntilAsync(Func<bool> condition)
     {
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
@@ -261,3 +316,5 @@ public sealed class VaultIndexerTests : IAsyncDisposable
         }
     }
 }
+
+

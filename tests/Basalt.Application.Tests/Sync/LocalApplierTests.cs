@@ -12,6 +12,7 @@ using Basalt.Domain.Sync;
 using Basalt.Domain.Vaults;
 using Basalt.Testing.Fakes;
 using Microsoft.Extensions.Logging.Abstractions;
+using NSubstitute;
 
 namespace Basalt.Application.Tests.Sync;
 
@@ -289,4 +290,69 @@ public sealed class LocalApplierTests
 
         result.Error.Code.Should().Be(ErrorCodes.FsAccessDenied);
     }
+    [Fact]
+    public void Constructor_RejectsNullDependencies()
+    {
+        using var locks = new VaultLocks();
+        var events = NSubstitute.Substitute.For<IEventBus>();
+
+        FluentActions.Invoking(() => new LocalApplier(null!, locks, events)).Should().Throw<ArgumentNullException>();
+        FluentActions.Invoking(() => new LocalApplier(NSubstitute.Substitute.For<IVaultFileSystem>(), null!, events)).Should().Throw<ArgumentNullException>();
+        FluentActions.Invoking(() => new LocalApplier(NSubstitute.Substitute.For<IVaultFileSystem>(), locks, null!)).Should().Throw<ArgumentNullException>();
+    }
+
+    [Fact]
+    public async Task Apply_RejectsNullArguments()
+    {
+        using var locks = new VaultLocks();
+        await using var events = new InMemoryEventBus(NullLogger<InMemoryEventBus>.Instance);
+        var applier = new LocalApplier(new InMemoryVaultFileSystem(), locks, events);
+
+        await FluentActions.Awaiting(() => applier.ApplyAsync(Vault, null!, Manifest.Empty, new Dictionary<BlobSha, byte[]>(), Ct))
+            .Should().ThrowAsync<ArgumentNullException>();
+        await FluentActions.Awaiting(() => applier.ApplyAsync(Vault, Manifest.Empty, null!, new Dictionary<BlobSha, byte[]>(), Ct))
+            .Should().ThrowAsync<ArgumentNullException>();
+        await FluentActions.Awaiting(() => applier.ApplyAsync(Vault, Manifest.Empty, Manifest.Empty, null!, Ct))
+            .Should().ThrowAsync<ArgumentNullException>();
+    }
+
+    [Fact]
+    public async Task Apply_WhenPruningAFolderFails_ReturnsTheError()
+    {
+        var failure = new Error(ErrorCodes.FsAccessDenied, "denied");
+        var fileSystem = NSubstitute.Substitute.For<IVaultFileSystem>();
+        fileSystem.DeleteIfUnchangedAsync(P("Dir/a.md"), Arg.Any<BlobSha>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(Result.Success()));
+        fileSystem.DeleteDirectoryIfEmptyAsync(P("Dir"), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(Result<Unit>.Failure(failure)));
+        using var locks = new VaultLocks();
+        await using var events = new InMemoryEventBus(NullLogger<InMemoryEventBus>.Instance);
+        var local = ManifestOf(("Dir/a.md", Utf8("A")));
+
+        var result = await new LocalApplier(fileSystem, locks, events)
+            .ApplyAsync(Vault, local, Manifest.Empty, new Dictionary<BlobSha, byte[]>(), Ct);
+
+        result.Error.Should().Be(failure);
+    }
+
+    [Fact]
+    public async Task Apply_WhenEverythingIsDeferred_DoesNotPublish()
+    {
+        var fileSystem = new InMemoryVaultFileSystem();
+        var target = ManifestOf(("a.md", Utf8("A")));
+        fileSystem.FailNextWrite(P("a.md"), new Error(ErrorCodes.FsAlreadyExists, "appeared"));
+        using var locks = new VaultLocks();
+        await using var events = new InMemoryEventBus(NullLogger<InMemoryEventBus>.Instance);
+        var changed = 0;
+        using var subscription = events.Subscribe<FilesChangedBySync>((_, _) => { changed++; return ValueTask.CompletedTask; });
+
+        var result = await new LocalApplier(fileSystem, locks, events)
+            .ApplyAsync(Vault, Manifest.Empty, target, new Dictionary<BlobSha, byte[]> { [Sha("A")] = Utf8("A") }, Ct);
+        await events.WaitForIdleAsync(Ct);
+
+        result.Value.Applied.Should().BeEmpty();
+        result.Value.Deferred.Should().Equal(P("a.md"));
+        changed.Should().Be(0);
+    }
 }
+

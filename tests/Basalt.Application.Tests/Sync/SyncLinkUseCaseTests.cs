@@ -1,4 +1,6 @@
+using Basalt.Application.Errors;
 using Basalt.Application.Ports.Remote;
+using Basalt.Application.Ports.Storage;
 using Basalt.Application.Sync;
 using Basalt.Application.Vaults;
 using Basalt.Domain.Accounts;
@@ -188,5 +190,61 @@ public sealed class SyncLinkUseCaseTests : IAsyncLifetime
     {
         public IVaultSyncRunner Create(SyncProfile profile) =>
             throw new InvalidOperationException("No automatic run expected.");
+    }
+    [Fact]
+    public async Task Configure_UsesDefaultOptions()
+    {
+        await _files.WriteAllBytesAsync(VaultPath.Create("A.md").Value, "a"u8.ToArray(), null, Ct);
+        await using var coordinator = new SyncCoordinator(new NoRunnerFactory(), new FakeTimeProvider(DateTimeOffset.UnixEpoch));
+        var handler = new ConfigureSyncHandler(_sessions, _profiles, _admin, _repositories, coordinator);
+
+        var result = await handler.HandleAsync(new ConfigureSync(Vault, Account, Ref, Triggers: new SyncTriggers(OnVaultOpen: false)), Ct);
+        var profile = (await _profiles.GetAsync(Vault, Ct))!;
+
+        result.IsSuccess.Should().BeTrue();
+        profile.Scope.Should().Be(SyncScope.Default);
+        profile.Policy.Should().Be(SyncPolicy.Default);
+        profile.Commit.Should().Be(new CommitSettings());
+        profile.Enabled.Should().BeTrue();
+        profile.Paused.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task Configure_WhenSavingFails_ReturnsTheErrorAndDoesNotAttach()
+    {
+        await _files.WriteAllBytesAsync(VaultPath.Create("A.md").Value, "a"u8.ToArray(), null, Ct);
+        var failure = new Error(ErrorCodes.StorageIo, "disk");
+        var profiles = Substitute.For<ISyncProfileStore>();
+        profiles.SaveAsync(Arg.Any<SyncProfile>(), Arg.Any<CancellationToken>()).Returns(Result<Unit>.Failure(failure));
+        await using var coordinator = new SyncCoordinator(new NoRunnerFactory(), new FakeTimeProvider(DateTimeOffset.UnixEpoch));
+        var handler = new ConfigureSyncHandler(_sessions, profiles, _admin, _repositories, coordinator);
+
+        var result = await handler.HandleAsync(new ConfigureSync(Vault, Account, Ref, Triggers: new SyncTriggers(OnVaultOpen: false)), Ct);
+
+        result.Error.Should().Be(failure);
+        _sessions.Get(Vault).Value.TryGet<IRemoteRepository>().Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Preview_ReportsWhyTheRepositoryIsRefused()
+    {
+        var archived = await new PreviewSyncLinkHandler(_sessions, new InMemoryRepositoryAdministration(Info with { IsArchived = true }), _repositories)
+            .HandleAsync(new PreviewSyncLink(Vault, Account, Ref, SyncScope.Default, SyncPolicy.Default), Ct);
+        var readOnly = await new PreviewSyncLinkHandler(_sessions, new InMemoryRepositoryAdministration(Info with { CanPush = false }), _repositories)
+            .HandleAsync(new PreviewSyncLink(Vault, Account, Ref, SyncScope.Default, SyncPolicy.Default), Ct);
+
+        archived.Error.Message.Should().Be("The repository is archived.");
+        readOnly.Error.Message.Should().Be("The account cannot push to this repository.");
+    }
+
+    [Fact]
+    public async Task SyncLinkHandlers_RejectNulls()
+    {
+        await using var coordinator = new SyncCoordinator(new NoRunnerFactory(), new FakeTimeProvider(DateTimeOffset.UnixEpoch));
+
+        await FluentActions.Awaiting(() => new PreviewSyncLinkHandler(_sessions, _admin, _repositories).HandleAsync(null!, Ct))
+            .Should().ThrowAsync<ArgumentNullException>();
+        await FluentActions.Awaiting(() => new ConfigureSyncHandler(_sessions, _profiles, _admin, _repositories, coordinator).HandleAsync(null!, Ct))
+            .Should().ThrowAsync<ArgumentNullException>();
     }
 }

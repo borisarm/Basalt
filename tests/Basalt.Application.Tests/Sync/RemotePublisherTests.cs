@@ -373,4 +373,133 @@ public sealed class RemotePublisherTests
             Arg.Any<string>(),
             Arg.Any<CancellationToken>());
     }
+    [Fact]
+    public void Publisher_RejectsNullDependencies()
+    {
+        FluentActions.Invoking(() => new RemotePublisher(null!, Substitute.For<IRemoteRepository>()))
+            .Should().Throw<ArgumentNullException>();
+        FluentActions.Invoking(() => new RemotePublisher(Substitute.For<IVaultFileSystem>(), null!))
+            .Should().Throw<ArgumentNullException>();
+    }
+
+    [Fact]
+    public async Task Publish_RejectsNullArgumentsAndAnInvalidAttemptCount()
+    {
+        var publisher = new RemotePublisher(Substitute.For<IVaultFileSystem>(), Substitute.For<IRemoteRepository>());
+        var request = new PublishRequest(Plan(Manifest.Empty), new RemoteSnapshot(null, Manifest.Empty, null, [], false), Manifest.Empty);
+
+        await FluentActions.Awaiting(() => publisher.PublishAsync(null!, Options(), null, Ct)).Should().ThrowAsync<ArgumentNullException>();
+        await FluentActions.Awaiting(() => publisher.PublishAsync(request, null!, null, Ct)).Should().ThrowAsync<ArgumentNullException>();
+        await FluentActions.Awaiting(() => publisher.PublishAsync(request, Options(attempts: 0), null, Ct))
+            .Should().ThrowAsync<ArgumentOutOfRangeException>();
+    }
+
+    [Fact]
+    public async Task Publish_WhenTheRefreshFails_ReturnsItsError()
+    {
+        var head = new RemoteHead(CommitSha.Parse("1111111111111111111111111111111111111111").Value, TreeSha.Parse("2222222222222222222222222222222222222222").Value);
+        var remote = new RemoteSnapshot(head, Manifest.Empty, "\"etag\"", [], false);
+        var target = ManifestOf((".basalt/vault.json", Utf8("{}")), ("a.md", Utf8("A")));
+        var plan = Plan(target, (".basalt/vault.json", Utf8("{}")), ("a.md", Utf8("A")));
+        var expectedTree = GitTreeHasher.Compute(target.Entries.ToDictionary(entry => entry.Path, entry => entry.Sha));
+        var repository = Substitute.For<IRemoteRepository>();
+        repository.CreateTreeAsync(Arg.Any<TreeSha?>(), Arg.Any<IReadOnlyList<TreeChange>>(), Arg.Any<CancellationToken>()).Returns(Result.Success(expectedTree));
+        repository.CreateCommitAsync(Arg.Any<string>(), Arg.Any<TreeSha>(), Arg.Any<IReadOnlyList<CommitSha>>(), Arg.Any<CommitAuthor>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Success(CommitSha.Parse("4444444444444444444444444444444444444444").Value));
+        repository.UpdateBranchAsync(Arg.Any<CommitSha>(), Arg.Any<CommitSha?>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Failure<Unit>(new Error(RemoteErrors.NonFastForward, "moved")));
+        var failure = new Error("refresh.failed", "nope");
+
+        var result = await Publisher(new InMemoryVaultFileSystem(), repository).PublishAsync(
+            new PublishRequest(plan, remote, Manifest.Empty),
+            Options(),
+            _ => Task.FromResult(Result<PublishRequest>.Failure(failure)),
+            Ct);
+
+        result.Error.Should().Be(failure);
+    }
+
+    [Fact]
+    public async Task Publish_WithA_MaxAttemptsOfOne_DoesNotRefresh()
+    {
+        var head = new RemoteHead(CommitSha.Parse("1111111111111111111111111111111111111111").Value, TreeSha.Parse("2222222222222222222222222222222222222222").Value);
+        var remote = new RemoteSnapshot(head, Manifest.Empty, "\"etag\"", [], false);
+        var target = ManifestOf((".basalt/vault.json", Utf8("{}")), ("a.md", Utf8("A")));
+        var plan = Plan(target, (".basalt/vault.json", Utf8("{}")), ("a.md", Utf8("A")));
+        var expectedTree = GitTreeHasher.Compute(target.Entries.ToDictionary(entry => entry.Path, entry => entry.Sha));
+        var repository = Substitute.For<IRemoteRepository>();
+        repository.CreateTreeAsync(Arg.Any<TreeSha?>(), Arg.Any<IReadOnlyList<TreeChange>>(), Arg.Any<CancellationToken>()).Returns(Result.Success(expectedTree));
+        repository.CreateCommitAsync(Arg.Any<string>(), Arg.Any<TreeSha>(), Arg.Any<IReadOnlyList<CommitSha>>(), Arg.Any<CommitAuthor>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Success(CommitSha.Parse("4444444444444444444444444444444444444444").Value));
+        repository.UpdateBranchAsync(Arg.Any<CommitSha>(), Arg.Any<CommitSha?>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Failure<Unit>(new Error(RemoteErrors.NonFastForward, "moved")));
+        var refreshes = 0;
+
+        var result = await Publisher(new InMemoryVaultFileSystem(), repository).PublishAsync(
+            new PublishRequest(plan, remote, Manifest.Empty),
+            Options(attempts: 1),
+            _ => { refreshes++; return Task.FromResult(Result.Success(new PublishRequest(plan, remote, Manifest.Empty))); },
+            Ct);
+
+        result.Error.Code.Should().Be(RemoteErrors.NonFastForward);
+        refreshes.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task Publish_WhenTheBlobShaDoesNotMatch_Fails()
+    {
+        var repository = await InitializedAsync();
+        var remote = await SnapshotAsync(repository);
+        var binary = new byte[] { 1, 2, 3 };
+        var target = ManifestOf((".basalt/vault.json", Utf8("{}")), ("image.png", binary));
+        var plan = Plan(target, (".basalt/vault.json", Utf8("{}")), ("image.png", binary));
+        var writer = Substitute.For<IRemoteRepository>();
+        writer.GetTreeAsync(Arg.Any<TreeSha>(), Arg.Any<CancellationToken>()).Returns(ci => repository.GetTreeAsync(ci.Arg<TreeSha>(), ci.Arg<CancellationToken>()));
+        writer.GetBlobAsync(Arg.Any<BlobSha>(), Arg.Any<CancellationToken>()).Returns(ci => repository.GetBlobAsync(ci.Arg<BlobSha>(), ci.Arg<CancellationToken>()));
+        writer.CreateBlobAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Success(BlobSha.Parse(new string('f', 40)).Value));
+
+        var result = await Publisher(new InMemoryVaultFileSystem(), writer)
+            .PublishAsync(new PublishRequest(plan, remote, Manifest.Empty), Options(), null, Ct);
+
+        result.Error.Code.Should().Be(SyncErrors.ShaMismatch);
+    }
+
+    [Fact]
+    public async Task Publish_WhenTheHeadCannotBeReadAfterInitialization_Fails()
+    {
+        var target = ManifestOf((".basalt/vault.json", Utf8("{}")));
+        var plan = Plan(target, (".basalt/vault.json", Utf8("{}")));
+        var repository = Substitute.For<IRemoteRepository>();
+        repository.GetHeadAsync(null, Arg.Any<CancellationToken>())
+            .Returns(Result.Failure<RemoteHeadCheck>(new Error("remote.io", "down")));
+        repository.CreateInitialCommitAsync(Arg.Any<VaultPath>(), Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Success());
+        var remote = new RemoteSnapshot(null, Manifest.Empty, null, [], false);
+
+        var result = await Publisher(new InMemoryVaultFileSystem(), repository)
+            .PublishAsync(new PublishRequest(plan, remote, Manifest.Empty), Options(), null, Ct);
+
+        result.Error.Code.Should().Be("remote.io");
+    }
+
+    [Fact]
+    public async Task Publish_WhenTheRepositoryStaysEmptyAfterInitialization_Fails()
+    {
+        var target = ManifestOf((".basalt/vault.json", Utf8("{}")));
+        var plan = Plan(target, (".basalt/vault.json", Utf8("{}")));
+        var repository = Substitute.For<IRemoteRepository>();
+        repository.GetHeadAsync(null, Arg.Any<CancellationToken>())
+            .Returns(Result.Success(new RemoteHeadCheck(null, null, false)));
+        repository.CreateInitialCommitAsync(Arg.Any<VaultPath>(), Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Success());
+        var remote = new RemoteSnapshot(null, Manifest.Empty, null, [], false);
+
+        var result = await Publisher(new InMemoryVaultFileSystem(), repository)
+            .PublishAsync(new PublishRequest(plan, remote, Manifest.Empty), Options(), null, Ct);
+
+        result.Error.Code.Should().Be(RemoteErrors.RepositoryEmpty);
+    }
 }
+
+

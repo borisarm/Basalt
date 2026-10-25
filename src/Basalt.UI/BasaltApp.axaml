@@ -12,6 +12,8 @@
   </Application.Resources>
   <Application.Styles>
     <FluentTheme />
+    <!-- The source editor's control templates: without them TextEditor shows nothing. -->
+    <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />
     <StyleInclude Source="avares://Basalt.UI/Themes/Styles.axaml" />
   </Application.Styles>
 </Application>

@@ -70,6 +70,21 @@ public sealed class EditorTests
 
     [Fact]
     [Trait("Spec", "F-003.1")]
+    public Task Editor_DrawsTheNoteText() => Headless.RunAsync(async () =>
+    {
+        var (editor, _, window, _) = await OpenAsync("# Título\ntexto");
+        window.UpdateLayout();
+        Dispatcher.UIThread.RunJobs();
+
+        // Without AvaloniaEdit's theme the editor has no template: it holds the text but never lays out a line.
+        var view = editor.Editor.TextArea.TextView;
+        view.VisualLinesValid.Should().BeTrue();
+        view.VisualLines.Select(l => l.FirstDocumentLine.LineNumber).Should().Equal(1, 2);
+        view.Bounds.Width.Should().BeGreaterThan(0);
+    });
+
+    [Fact]
+    [Trait("Spec", "F-003.1")]
     public Task Editor_ShowsTheNote_AndTypingMarksItDirty() => Headless.RunAsync(async () =>
     {
         var (editor, tab, window, _) = await OpenAsync("# Título\ntexto");

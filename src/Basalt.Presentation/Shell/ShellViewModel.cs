@@ -128,6 +128,11 @@ public sealed partial class ShellViewModel : ViewModelBase, IVaultOpener
         Content = _workspaceFactory(opened.Value);
         ActiveVault = vault;
         Title = Localizer.Format("Shell.TitleWithVault", opened.Value.Name);
+        if (Content is IInitializable initializable)
+        {
+            await initializable.InitializeAsync(ct).ConfigureAwait(true);
+        }
+
         VaultOpened?.Invoke(this, vault);
         return Result.Success();
     }

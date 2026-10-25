@@ -365,7 +365,7 @@ public sealed record WorkspaceUseCases(
 /// One open vault (spec 07 §2): its panes and tabs, navigation (<see cref="IWorkspaceNavigator"/>), recent files,
 /// reopening closed tabs and the per-device layout, restored on open and saved on close (F-013).
 /// </summary>
-public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNavigator, IClosable, IWorkspaceCommandHost
+public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNavigator, IClosable, IInitializable, IWorkspaceCommandHost
 {
     private readonly VaultSessionInfo _vault;
     private readonly WorkspaceUseCases _useCases;
@@ -496,6 +496,11 @@ public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNaviga
     /// <summary>Restores the layout saved on this device.</summary>
     public async Task InitializeAsync(CancellationToken ct)
     {
+        if (_panels is { } panels)
+        {
+            await panels.LoadAsync().ConfigureAwait(true);
+        }
+
         var state = await RunAsync(token => _useCases.Load.HandleAsync(new LoadWorkspace(_vault.Id), token), notifyErrors: false).ConfigureAwait(true);
         if (state.IsFailure || state.Value is not { } saved)
         {
@@ -756,6 +761,13 @@ public sealed record WorkspacePanels(
     Overlays.QuickSwitcherViewModel QuickSwitcher,
     Overlays.CommandPaletteViewModel CommandPalette) : IDisposable
 {
+    /// <summary>First load of the panels that only refresh on changes afterwards (the tags follow the index scan).</summary>
+    public async Task LoadAsync()
+    {
+        await Explorer.RefreshCommand.ExecuteAsync(null).ConfigureAwait(true);
+        await Bookmarks.RefreshCommand.ExecuteAsync(null).ConfigureAwait(true);
+    }
+
     public void Dispose()
     {
         foreach (var panel in new ViewModelBase[] { Explorer, Search, Bookmarks, Tags, Backlinks, Outgoing, Outline, Properties, LocalGraph, QuickSwitcher, CommandPalette })

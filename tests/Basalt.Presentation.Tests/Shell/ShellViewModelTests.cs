@@ -17,11 +17,19 @@ public sealed class ShellViewModelTests
     private static readonly VaultId IdA = new(Guid.Parse("aaaaaaaa-0000-4000-8000-000000000001"));
     private static readonly VaultId IdB = new(Guid.Parse("bbbbbbbb-0000-4000-8000-000000000002"));
 
-    private sealed class FakeWorkspace(ViewModelServices services, VaultSessionInfo info) : ViewModelBase(services), IClosable
+    private sealed class FakeWorkspace(ViewModelServices services, VaultSessionInfo info) : ViewModelBase(services), IClosable, IInitializable
     {
         public VaultSessionInfo Info { get; } = info;
 
         public int Closed { get; private set; }
+
+        public int Initialized { get; private set; }
+
+        public Task InitializeAsync(CancellationToken ct)
+        {
+            Initialized++;
+            return Task.CompletedTask;
+        }
 
         public Task CloseAsync(CancellationToken ct)
         {
@@ -75,6 +83,16 @@ public sealed class ShellViewModelTests
         ((FakeWorkspace)shell.Content).Info.Id.Should().Be(IdA);
         shell.Title.Should().Be("Notas — Basalt");
         shell.ActiveVault.Should().Be(IdA);
+    }
+
+    [Fact]
+    [Trait("Spec", "F-013")]
+    public async Task OpeningAVault_InitializesItsWorkspace()
+    {
+        var shell = Shell();
+        await shell.InitializeAsync(IdA, Ct);
+
+        ((FakeWorkspace)shell.Content).Initialized.Should().Be(1, "the workspace restores its layout and loads its panels when the vault opens");
     }
 
     [Fact]

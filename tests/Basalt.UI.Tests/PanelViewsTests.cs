@@ -64,6 +64,22 @@ public sealed class PanelViewsTests
 
     [Fact]
     [Trait("Spec", "F-002")]
+    [Trait("Spec", "F-013")]
+    public Task FilesAndBookmarks_AreShown_AsSoonAsTheVaultOpens() => Headless.RunAsync(async () =>
+    {
+        await using var v = await ComposedVault.CreateAsync(new Dictionary<string, string>(Files)
+        {
+            [".basalt/bookmarks.json"] = """{ "items": [ { "type": "file", "path": "B.md" } ] }""",
+        });
+
+        v.Workspace.Panels!.Explorer.Roots.Select(n => n.Name).Should().Equal("Carpeta", "A", "B");
+        v.Workspace.Panels.Bookmarks.Items.Select(i => i.Title).Should().Equal("B");
+        await SettleAsync();
+        Texts(v.Window.GetVisualDescendants().OfType<FileExplorerView>().Single()).Should().Contain(["Carpeta", "A", "B"]);
+    });
+
+    [Fact]
+    [Trait("Spec", "F-002")]
     public Task Explorer_ShowsTheTree_AndOpensNotes() => Headless.RunAsync(async () =>
     {
         await using var v = await ComposedVault.CreateAsync(Files);

@@ -54,6 +54,12 @@ public interface IDialogService
     Task<string?> PickFolderAsync(string title, CancellationToken ct);
 }
 
+/// <summary>Content that loads its state once it is shown (a workspace restores its layout and panels when its vault opens).</summary>
+public interface IInitializable
+{
+    Task InitializeAsync(CancellationToken ct);
+}
+
 /// <summary>Content that must save its state before it goes away (a workspace before its vault closes).</summary>
 public interface IClosable
 {

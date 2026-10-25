@@ -80,6 +80,23 @@ public sealed class PanelViewsTests
 
     [Fact]
     [Trait("Spec", "F-002")]
+    public Task Explorer_ShowsAnIconPerKind() => Headless.RunAsync(async () =>
+    {
+        await using var v = await ComposedVault.CreateAsync(new Dictionary<string, string>(Files) { ["img.png"] = "x" });
+        await SettleAsync();
+
+        var app = Avalonia.Application.Current!;
+        object? Icon(string key) => app.FindResource(key);
+        var rows = v.Window.GetVisualDescendants().OfType<TreeViewItem>()
+            .ToDictionary(i => ((FileTreeNodeViewModel)i.DataContext!).Name, i => i.GetVisualDescendants().OfType<PathIcon>().First().Data);
+
+        rows["Carpeta"].Should().BeSameAs(Icon("IconFolder"));
+        rows["A"].Should().BeSameAs(Icon("IconNote"));
+        rows["img.png"].Should().BeSameAs(Icon("IconFile"));
+    });
+
+    [Fact]
+    [Trait("Spec", "F-002")]
     public Task Explorer_ShowsTheTree_AndOpensNotes() => Headless.RunAsync(async () =>
     {
         await using var v = await ComposedVault.CreateAsync(Files);

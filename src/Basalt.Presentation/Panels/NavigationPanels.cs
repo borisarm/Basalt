@@ -31,6 +31,9 @@ public sealed partial class FileTreeNodeViewModel(FileTreeNode node) : Observabl
 
     public bool IsFolder { get; } = node.IsFolder;
 
+    /// <summary>A Markdown note, as opposed to a folder or an attachment (the explorer gives each its own icon).</summary>
+    public bool IsNote { get; } = !node.IsFolder && node.Kind == FileKind.Note;
+
     /// <summary>Notes are shown without <c>.md</c>.</summary>
     public string Name { get; } = node.Kind == FileKind.Note ? node.Path.NameWithoutExtension : node.Path.Name;
 

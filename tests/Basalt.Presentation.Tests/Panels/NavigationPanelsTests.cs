@@ -43,6 +43,15 @@ public sealed class FileExplorerViewModelTests : PanelTestBase
     }
 
     [Fact]
+    [Trait("Spec", "F-002")]
+    public async Task Nodes_TellNotesApartFromFoldersAndAttachments()
+    {
+        await _vm.RefreshCommand.ExecuteAsync(null);
+
+        _vm.Roots.Select(n => (n.Name, n.IsNote)).Should().Equal(("Proyectos", false), ("A", true), ("img.png", false));
+    }
+
+    [Fact]
     [Trait("Spec", "F-002.1")]
     public async Task NewNote_InTheSelectedFolder_IsOpened()
     {

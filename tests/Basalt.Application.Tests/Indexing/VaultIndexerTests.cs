@@ -297,7 +297,7 @@ public sealed class VaultIndexerTests : IAsyncDisposable
     {
         await WriteAsync("A.md", "a");
         await OpenAsync();
-        await Indexer.FlushAsync(Ct);
+        await _events.WaitForIdleAsync(Ct);
         var changes = 0;
         using var subscription = _events.Subscribe<MetadataChanged>((_, _) => { changes++; return ValueTask.CompletedTask; });
 

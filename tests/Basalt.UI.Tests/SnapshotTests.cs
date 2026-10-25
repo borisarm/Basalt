@@ -69,9 +69,12 @@ public sealed class SnapshotTests
 
         for (var attempt = 0; ; attempt++)
         {
-            // A focused text box blinks its caret, so captures taken at different times differ.
-            window.FocusManager?.Focus(null);
+            // Views may focus their input from a posted job, so settle first and only then drop focus: a focused text
+            // box draws a blinking caret and an accent border that differ from run to run.
             await SettleAsync();
+            window.FocusManager?.Focus(null);
+            AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+            Dispatcher.UIThread.RunJobs();
             using var frame = window.CaptureRenderedFrame()!;
             try
             {

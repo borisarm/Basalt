@@ -2,12 +2,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:Basalt.Presentation.Vaults;assembly=Basalt.Presentation"
              xmlns:l="clr-namespace:Basalt.UI.Localization"
+             xmlns:ui="clr-namespace:Basalt.UI"
              x:Class="Basalt.UI.Views.VaultPickerView"
              x:DataType="vm:VaultPickerViewModel"
              Background="{DynamicResource BasaltBackgroundBrush}">
   <!-- F-001: the start screen. -->
   <Grid>
-    <Border Width="640" MaxWidth="640" Margin="40" HorizontalAlignment="Center" VerticalAlignment="Center"
+    <Border MaxWidth="640" Margin="16" HorizontalAlignment="Stretch" VerticalAlignment="Center"
             Background="{DynamicResource BasaltSurfaceBrush}" BorderBrush="{DynamicResource BasaltBorderBrush}"
             BorderThickness="1" CornerRadius="16" Padding="36">
       <StackPanel Spacing="24">
@@ -26,7 +27,7 @@
         </StackPanel>
 
         <Border Background="{DynamicResource BasaltBackgroundBrush}" BorderBrush="{DynamicResource BasaltBorderBrush}"
-                BorderThickness="1" CornerRadius="12" Padding="8" MinHeight="240">
+                BorderThickness="1" CornerRadius="{StaticResource BasaltRadiusL}" Padding="6" MinHeight="240">
           <Panel>
             <TextBlock x:Name="EmptyText" Text="{l:Loc VaultPicker.Empty}" IsVisible="{Binding IsEmpty}"
                        Foreground="{DynamicResource BasaltTextSecondaryBrush}" TextWrapping="Wrap" TextAlignment="Center"
@@ -35,21 +36,22 @@
                      AutomationProperties.Name="{l:Loc VaultPicker.Title}">
               <ListBox.ItemTemplate>
                 <DataTemplate x:DataType="vm:VaultItemViewModel">
-                  <Border Background="{DynamicResource BasaltSurfaceBrush}" BorderBrush="{DynamicResource BasaltBorderBrush}"
-                          BorderThickness="1" CornerRadius="10" Padding="14,10">
-                    <Grid ColumnDefinitions="*,Auto,Auto">
-                      <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="15"
-                                   Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
-                        <TextBlock Text="{Binding Location}" FontSize="{StaticResource BasaltFontSizeSmall}"
-                                   Foreground="{DynamicResource BasaltTextMutedBrush}" />
-                      </StackPanel>
-                      <Button Grid.Column="1" Classes="subtle" Content="{l:Loc VaultPicker.Open}" Margin="8,0,0,0"
-                              Command="{Binding $parent[ListBox].((vm:VaultPickerViewModel)DataContext).OpenCommand}" CommandParameter="{Binding}" />
-                      <Button Grid.Column="2" Classes="subtle" Content="{l:Loc VaultPicker.Remove}" Margin="4,0,0,0"
-                              Command="{Binding $parent[ListBox].((vm:VaultPickerViewModel)DataContext).RemoveCommand}" CommandParameter="{Binding}" />
-                    </Grid>
-                  </Border>
+                  <Grid ColumnDefinitions="Auto,*,Auto,Auto" Margin="2,4">
+                    <Border Grid.Column="0" Width="40" Height="40" CornerRadius="{StaticResource BasaltRadiusL}"
+                            Background="{Binding Name, Converter={x:Static ui:Converters.AvatarBrush}}">
+                      <TextBlock Text="{Binding Name, Converter={x:Static ui:Converters.Initial}}" FontSize="17" FontWeight="Bold"
+                                 Foreground="{DynamicResource BasaltOnAccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center" Margin="14,0,0,0">
+                      <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="15"
+                                 Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
+                      <TextBlock Text="{Binding Location}" Classes="muted" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                    <Button Grid.Column="2" Classes="quiet" Content="{l:Loc VaultPicker.Open}" Margin="8,0,0,0" VerticalAlignment="Center"
+                            Command="{Binding $parent[ListBox].((vm:VaultPickerViewModel)DataContext).OpenCommand}" CommandParameter="{Binding}" />
+                    <Button Grid.Column="3" Classes="subtle" Content="{l:Loc VaultPicker.Remove}" Margin="4,0,0,0" VerticalAlignment="Center"
+                            Command="{Binding $parent[ListBox].((vm:VaultPickerViewModel)DataContext).RemoveCommand}" CommandParameter="{Binding}" />
+                  </Grid>
                 </DataTemplate>
               </ListBox.ItemTemplate>
             </ListBox>

@@ -3,6 +3,9 @@
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
   <ItemGroup>
+    <AvaloniaResource Include="Assets/Fonts/*.ttf" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="../Basalt.Presentation/Basalt.Presentation.csproj" />
   </ItemGroup>
   <ItemGroup>

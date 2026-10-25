@@ -5,7 +5,9 @@
 - **MVVM estricto**: `Basalt.Presentation` (ViewModels, sin Avalonia) + `Basalt.UI` (Views XAML compiladas, `x:CompileBindings="True"` y `x:DataType` obligatorio en todas las vistas).
 - Las vistas no contienen lógica de negocio; el code-behind solo se permite para: enfoque, integración con controles de terceros (AvaloniaEdit), gestos y animaciones.
 - Localización: todos los textos mediante `ILocalizer` / extensión de marcado `{l:Loc Key}`; recursos `Strings.resx` (en) y `Strings.es.resx`.
-- Tema: `FluentTheme` con paleta propia (claro/oscuro), tokens de diseño en `Basalt.UI/Themes/Tokens.axaml` (colores, espaciados, radios, tipografía). Ningún color literal fuera de los tokens.
+- Tema: `FluentTheme` con paleta propia (claro/oscuro), tokens de diseño en `Basalt.UI/Themes/Tokens.axaml` (colores, espaciados, radios, tipografía). Ningún color literal fuera de los tokens. El sistema visual de referencia está en `docs/design/` (maqueta y `basalt.tokens.json`, que refleja `Tokens.axaml` 1:1): acento violeta, grises neutros, superficies `Chrome` (ribbon, pestañas, barra de estado) y `Sidebar` en oscuro.
+- Tipografía: Inter para la interfaz, **Literata** para el modo lectura (cuerpo 17 con interlineado 1,7; encabezados desde 24) y **JetBrains Mono** para código; Literata y JetBrains Mono van incluidas en `Basalt.UI/Assets/Fonts` (OFL) con las fuentes del sistema como respaldo.
+- Componentes del sistema (`Themes/Styles.axaml`): botones primario (`accent`), secundario (por defecto), discreto (`quiet`) y destructivo (`danger`); chips (`chip`, `chip tag`), insignias (`badge`), tarjetas (`card`), interruptor segmentado (`segmented`), pestañas subrayadas (`tab`) y la píldora de sincronización (`sync-pill` con tono `success`/`accent`/`warning`/`danger` según `SyncStatusViewModel.Tone`).
 - Accesibilidad: `AutomationProperties.Name` en todos los controles interactivos sin texto, orden de tabulación lógico, navegación completa con teclado en escritorio, contraste AA.
 
 ## 2. ViewModels (Presentation)
@@ -69,7 +71,10 @@ Reglas:
 └──────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-- Ribbon vertical izquierdo con accesos (explorador, búsqueda, marcadores, etiquetas, nota diaria, grafo, paleta).
+- Ribbon vertical izquierdo con accesos (explorador, búsqueda, marcadores, etiquetas, nota diaria, grafo; abajo conflictos con contador, historial, paleta, ajustes y la barra derecha). Los botones de paneles marcan el panel activo.
+- Barra izquierda: cabecera con la inicial y el nombre del vault y un acceso al selector rápido; debajo, el panel activo. Barra derecha: pestañas subrayadas (enlaces entrantes, salientes, esquema, grafo local, propiedades).
+- Cabecera de la nota: ruta de carpetas (`TabViewModel.Folders`) y el título, con el interruptor **Fuente / Lectura** (`ShowSourceCommand` / `ShowReadingCommand`).
+- Barra de estado: píldora de sincronización siempre visible (estado, "N cambios pendientes", conflictos) con sincronizar ahora y pausar/reanudar; a la derecha, el fichero activo.
 - Sidebars redimensionables con `GridSplitter`, plegables, recuerdan ancho.
 - macOS: menú de aplicación nativo (`NativeMenu`) con Archivo/Editar/Ver/Ventana/Ayuda; barra de título integrada (`ExtendClientAreaToDecorationsHint`) con semáforo a la izquierda.
 - Windows: barra de título personalizada con botones del sistema; menú en el botón ≡.

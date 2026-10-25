@@ -73,6 +73,36 @@ public sealed class NoteTabReadingTests : IAsyncLifetime
     }
 
     [Fact]
+    [Trait("Spec", "UI-6")]
+    public async Task ShowReadingAndShowSource_SetTheModeWithoutToggling()
+    {
+        await _tab.ShowReadingCommand.ExecuteAsync(null);
+        await _tab.ShowReadingCommand.ExecuteAsync(null);
+
+        _tab.IsReadingMode.Should().BeTrue("asking for the mode it already shows keeps it");
+        _tab.Rendered.Should().NotBeNull();
+
+        await _tab.ShowSourceCommand.ExecuteAsync(null);
+        await _tab.ShowSourceCommand.ExecuteAsync(null);
+
+        _tab.IsReadingMode.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task Folders_AreTheFoldersOfTheShownNote()
+    {
+        _tab.Folders.Should().BeEmpty("the note is at the root of the vault");
+        _notes.Write(P("Trips/Iceland/Reykjanes.md"), "texto");
+        var changed = new List<string?>();
+        _tab.PropertyChanged += (_, e) => changed.Add(e.PropertyName);
+
+        await _tab.ShowAsync(new OpenRequest(P("Trips/Iceland/Reykjanes.md")), Ct);
+
+        _tab.Folders.Should().Equal("Trips", "Iceland");
+        changed.Should().Contain(nameof(NoteTabViewModel.Folders));
+    }
+
+    [Fact]
     public async Task Links_NavigateOrCreateTheMissingNote()
     {
         _resolve.HandleAsync(new ResolveLink(Vault, Note, "B"), Arg.Any<CancellationToken>()).Returns(Result.Success<VaultPath?>(P("B.md")));

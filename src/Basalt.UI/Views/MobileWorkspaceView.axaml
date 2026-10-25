@@ -13,17 +13,44 @@
       <Setter Property="MinWidth" Value="44" />
       <Setter Property="MinHeight" Value="44" />
     </Style>
+    <!-- iOS bars: flat, a hairline against the content; actions in the accent colour. -->
+    <Style Selector="Border.navbar">
+      <Setter Property="Background" Value="{DynamicResource BasaltBackgroundBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource BasaltBorderBrush}" />
+      <Setter Property="BorderThickness" Value="0,0,0,1" />
+      <Setter Property="Padding" Value="6,4" />
+    </Style>
+    <Style Selector="Border.navbar Button">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Foreground" Value="{DynamicResource BasaltAccentBrush}" />
+    </Style>
+    <Style Selector="Border.tabbar">
+      <Setter Property="Background" Value="{DynamicResource BasaltChromeBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource BasaltBorderBrush}" />
+      <Setter Property="BorderThickness" Value="0,1,0,0" />
+      <Setter Property="Padding" Value="4,2" />
+    </Style>
+    <Style Selector="Border.tabbar Button">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Padding" Value="2" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="Foreground" Value="{DynamicResource BasaltTextSecondaryBrush}" />
+    </Style>
   </UserControl.Styles>
   <Grid RowDefinitions="Auto,*,Auto">
-    <Border Grid.Row="0" Background="{DynamicResource BasaltSurfaceAltBrush}" Padding="8,6">
+    <Border Grid.Row="0" Classes="navbar">
       <Grid ColumnDefinitions="Auto,*,Auto">
-        <Button x:Name="ExplorerButton" Content="☰" Click="OnShowExplorer"
-                AutomationProperties.Name="{l:Loc Mobile.Explorer}" ToolTip.Tip="{l:Loc Mobile.Explorer}" />
+        <Button x:Name="ExplorerButton" Click="OnShowExplorer"
+                AutomationProperties.Name="{l:Loc Mobile.Explorer}" ToolTip.Tip="{l:Loc Mobile.Explorer}"><PathIcon Width="20" Height="20" Data="{StaticResource IconFolder}" /></Button>
         <TextBlock Grid.Column="1" Text="{Binding Layout.ActiveGroup.ActiveTab.Title}" VerticalAlignment="Center"
-                   Margin="8,0" TextTrimming="CharacterEllipsis" FontWeight="SemiBold"
+                   Margin="8,0" TextTrimming="CharacterEllipsis" FontWeight="SemiBold" HorizontalAlignment="Center"
                    Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
-        <Button Grid.Column="2" x:Name="PanelsButton" Content="⋯" Click="OnShowPanels"
-                AutomationProperties.Name="{l:Loc Mobile.More}" />
+        <Button Grid.Column="2" x:Name="PanelsButton" Click="OnShowPanels"
+                AutomationProperties.Name="{l:Loc Mobile.More}"><PathIcon Width="20" Height="20" Data="{StaticResource IconMore}" /></Button>
       </Grid>
     </Border>
 
@@ -40,9 +67,9 @@
       <!-- Explorer / search / bookmarks / tags as a full page of the navigation stack. -->
       <Border x:Name="PageOverlay" IsVisible="False" Background="{DynamicResource BasaltBackgroundBrush}">
         <DockPanel>
-          <Border DockPanel.Dock="Top" Background="{DynamicResource BasaltSurfaceAltBrush}" Padding="8,6">
+          <Border DockPanel.Dock="Top" Classes="navbar">
             <Grid ColumnDefinitions="Auto,*">
-              <Button x:Name="PageBack" Content="‹" Click="OnPageBack" AutomationProperties.Name="{l:Loc Mobile.Back}" />
+              <Button x:Name="PageBack" Click="OnPageBack" AutomationProperties.Name="{l:Loc Mobile.Back}"><PathIcon Width="18" Height="18" Data="{StaticResource IconChevronLeft}" /></Button>
               <TextBlock x:Name="PageTitle" Grid.Column="1" VerticalAlignment="Center" Margin="8,0" FontWeight="SemiBold"
                          Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
             </Grid>
@@ -53,23 +80,25 @@
 
       <!-- Right panels and the "more" menu as a bottom sheet. -->
       <Border x:Name="Sheet" IsVisible="False" VerticalAlignment="Bottom" Background="{DynamicResource BasaltSurfaceBrush}"
-              BorderBrush="{DynamicResource BasaltBorderBrush}" BorderThickness="0,1,0,0" CornerRadius="12,12,0,0"
-              MaxHeight="560">
+              BorderBrush="{DynamicResource BasaltBorderBrush}" BorderThickness="0,1,0,0" CornerRadius="18,18,0,0"
+              BoxShadow="0 -12 40 0 #33000000" MaxHeight="560">
         <DockPanel>
-          <Border DockPanel.Dock="Top" Background="{DynamicResource BasaltSurfaceAltBrush}" Padding="8,6" CornerRadius="12,12,0,0">
+          <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="16,8,8,0">
+            <Border Width="36" Height="5" CornerRadius="{StaticResource BasaltRadiusPill}" Background="{DynamicResource BasaltBorderBrush}"
+                    HorizontalAlignment="Center" />
             <Grid ColumnDefinitions="*,Auto">
-              <TextBlock x:Name="SheetTitle" VerticalAlignment="Center" FontWeight="SemiBold"
+              <TextBlock x:Name="SheetTitle" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="17"
                          Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
-              <Button Grid.Column="1" x:Name="SheetClose" Content="✕" Click="OnCloseSheet"
-                      AutomationProperties.Name="{l:Loc Mobile.Close}" />
+              <Button Grid.Column="1" x:Name="SheetClose" Background="Transparent" BorderThickness="0" Click="OnCloseSheet"
+                      AutomationProperties.Name="{l:Loc Mobile.Close}"><PathIcon Width="14" Height="14" Data="{StaticResource IconClose}" /></Button>
             </Grid>
-          </Border>
+          </StackPanel>
           <ContentControl x:Name="SheetHost" Margin="8" />
         </DockPanel>
       </Border>
     </Panel>
 
-    <Border Grid.Row="2" Background="{DynamicResource BasaltSurfaceAltBrush}" Padding="4">
+    <Border Grid.Row="2" Classes="tabbar">
       <Grid ColumnDefinitions="*,*,*,*,*">
         <Button x:Name="FilesTab" Grid.Column="0" Content="{l:Loc Mobile.Explorer}" Click="OnShowExplorer" />
         <Button x:Name="SearchTab" Grid.Column="1" Content="{l:Loc Panel.search}" Click="OnShowSearch" />

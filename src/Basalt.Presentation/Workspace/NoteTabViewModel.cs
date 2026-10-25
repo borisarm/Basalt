@@ -410,9 +410,24 @@ public sealed partial class NoteTabViewModel : TabViewModel
     }
 
     [RelayCommand]
-    private async Task ToggleReadingModeAsync()
+    private Task ToggleReadingModeAsync() => SetReadingModeAsync(!IsReadingMode);
+
+    /// <summary>The "Read" side of the mode switch in the note header.</summary>
+    [RelayCommand]
+    private Task ShowReadingAsync() => SetReadingModeAsync(true);
+
+    /// <summary>The "Source" side of the mode switch in the note header.</summary>
+    [RelayCommand]
+    private Task ShowSourceAsync() => SetReadingModeAsync(false);
+
+    private async Task SetReadingModeAsync(bool reading)
     {
-        IsReadingMode = !IsReadingMode;
+        if (IsReadingMode == reading)
+        {
+            return;
+        }
+
+        IsReadingMode = reading;
         if (IsReadingMode)
         {
             await RenderAsync().ConfigureAwait(true);

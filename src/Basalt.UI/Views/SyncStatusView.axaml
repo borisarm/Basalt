@@ -2,21 +2,36 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:sync="clr-namespace:Basalt.Presentation.Sync;assembly=Basalt.Presentation"
              xmlns:l="clr-namespace:Basalt.UI.Localization"
+             xmlns:ui="clr-namespace:Basalt.UI"
              x:Class="Basalt.UI.Views.SyncStatusView"
              x:DataType="sync:SyncStatusViewModel">
-  <!-- Spec 07 §8 and F-015.4: per-vault state in the status bar with the sync actions. -->
-  <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-    <TextBlock x:Name="SummaryText" Text="{Binding Summary}" VerticalAlignment="Center"
-               Foreground="{DynamicResource BasaltTextMutedBrush}" />
-    <Button x:Name="SyncNowButton" Classes="subtle" Content="{l:Loc Sync.SyncNow}" Command="{Binding SyncNowCommand}"
-            AutomationProperties.Name="{l:Loc Sync.SyncNow}" ToolTip.Tip="{l:Loc Sync.SyncNow}" />
-    <Button x:Name="PauseButton" Classes="subtle" Content="{l:Loc Sync.Pause}" Command="{Binding PauseCommand}"
+  <!-- Spec 07 §8 and F-015.4: one pill per vault with its state, the conflict pill and the sync actions. -->
+  <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+    <Border x:Name="StatePill" Classes="sync-pill"
+            Classes.success="{Binding Tone, Converter={x:Static ui:Converters.EqualsParameter}, ConverterParameter=Success}"
+            Classes.accent="{Binding Tone, Converter={x:Static ui:Converters.EqualsParameter}, ConverterParameter=Accent}"
+            Classes.danger="{Binding Tone, Converter={x:Static ui:Converters.EqualsParameter}, ConverterParameter=Danger}">
+      <StackPanel Orientation="Horizontal" Spacing="7">
+        <Ellipse x:Name="Dot" Width="7" Height="7" VerticalAlignment="Center" />
+        <TextBlock x:Name="SummaryText" Text="{Binding Summary}" FontSize="{StaticResource BasaltFontSizeSmall}"
+                   VerticalAlignment="Center" />
+      </StackPanel>
+    </Border>
+    <Border Classes="sync-pill warning" IsVisible="{Binding HasConflicts}">
+      <TextBlock x:Name="ConflictText" Text="{Binding ConflictSummary}" FontSize="{StaticResource BasaltFontSizeSmall}"
+                 VerticalAlignment="Center" />
+    </Border>
+    <Button x:Name="SyncNowButton" Classes="icon small" Command="{Binding SyncNowCommand}"
+            AutomationProperties.Name="{l:Loc Sync.SyncNow}" ToolTip.Tip="{l:Loc Sync.SyncNow}">
+      <PathIcon Width="14" Height="14" Data="{StaticResource IconRefresh}" />
+    </Button>
+    <Button x:Name="PauseButton" Classes="icon small" Command="{Binding PauseCommand}"
             IsVisible="{Binding !IsPaused}" IsEnabled="{Binding IsConfigured}"
-            AutomationProperties.Name="{l:Loc Sync.Pause}" ToolTip.Tip="{l:Loc Sync.Pause}" />
+            AutomationProperties.Name="{l:Loc Sync.Pause}" ToolTip.Tip="{l:Loc Sync.Pause}">
+      <PathIcon Width="14" Height="14" Data="{StaticResource IconPause}" />
+    </Button>
     <Button x:Name="ResumeButton" Classes="subtle" Content="{l:Loc Sync.Resume}" Command="{Binding ResumeCommand}"
             IsVisible="{Binding IsPaused}"
             AutomationProperties.Name="{l:Loc Sync.Resume}" ToolTip.Tip="{l:Loc Sync.Resume}" />
-    <TextBlock x:Name="ConflictText" Text="{Binding ConflictSummary}" IsVisible="{Binding HasConflicts}"
-               VerticalAlignment="Center" Foreground="{DynamicResource BasaltWarningBrush}" />
   </StackPanel>
 </UserControl>

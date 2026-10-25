@@ -29,6 +29,12 @@
       <Color x:Key="BasaltGraphGroup3Color">#3E8FD0</Color>
       <Color x:Key="BasaltAccentHoverColor">#7D55DD</Color>
       <Color x:Key="BasaltAccentSoftColor">#F1ECFD</Color>
+      <Color x:Key="BasaltChromeColor">#F1F1F3</Color>
+      <Color x:Key="BasaltSidebarColor">#F6F6F7</Color>
+      <Color x:Key="BasaltTagSoftColor">#EAF0FC</Color>
+      <Color x:Key="BasaltCalloutColor">#F4F0FD</Color>
+      <Color x:Key="BasaltWarningSoftColor">#FFF4CC</Color>
+      <Color x:Key="BasaltDangerSoftColor">#FBE3E1</Color>
       <Color x:Key="SystemAccentColor">#6D3FD6</Color>
       <Color x:Key="SystemAccentColorLight1">#7D55DD</Color>
       <Color x:Key="SystemAccentColorLight2">#8E6BE4</Color>
@@ -64,6 +70,12 @@
       <Color x:Key="BasaltGraphGroup3Color">#7FB4F0</Color>
       <Color x:Key="BasaltAccentHoverColor">#B79CFF</Color>
       <Color x:Key="BasaltAccentSoftColor">#2E2545</Color>
+      <Color x:Key="BasaltChromeColor">#18181C</Color>
+      <Color x:Key="BasaltSidebarColor">#202025</Color>
+      <Color x:Key="BasaltTagSoftColor">#1F2740</Color>
+      <Color x:Key="BasaltCalloutColor">#2A2436</Color>
+      <Color x:Key="BasaltWarningSoftColor">#3A3320</Color>
+      <Color x:Key="BasaltDangerSoftColor">#3D2321</Color>
       <Color x:Key="SystemAccentColor">#A88BFA</Color>
       <Color x:Key="SystemAccentColorLight1">#B79CFF</Color>
       <Color x:Key="SystemAccentColorLight2">#C7B2FF</Color>
@@ -100,6 +112,12 @@
   <SolidColorBrush x:Key="BasaltGraphGroup1Brush" Color="{DynamicResource BasaltGraphGroup1Color}" />
   <SolidColorBrush x:Key="BasaltGraphGroup2Brush" Color="{DynamicResource BasaltGraphGroup2Color}" />
   <SolidColorBrush x:Key="BasaltGraphGroup3Brush" Color="{DynamicResource BasaltGraphGroup3Color}" />
+  <SolidColorBrush x:Key="BasaltChromeBrush" Color="{DynamicResource BasaltChromeColor}" />
+  <SolidColorBrush x:Key="BasaltSidebarBrush" Color="{DynamicResource BasaltSidebarColor}" />
+  <SolidColorBrush x:Key="BasaltTagSoftBrush" Color="{DynamicResource BasaltTagSoftColor}" />
+  <SolidColorBrush x:Key="BasaltCalloutBrush" Color="{DynamicResource BasaltCalloutColor}" />
+  <SolidColorBrush x:Key="BasaltWarningSoftBrush" Color="{DynamicResource BasaltWarningSoftColor}" />
+  <SolidColorBrush x:Key="BasaltDangerSoftBrush" Color="{DynamicResource BasaltDangerSoftColor}" />
 
   <Thickness x:Key="BasaltSpacingXs">2</Thickness>
   <Thickness x:Key="BasaltSpacingS">4</Thickness>
@@ -109,9 +127,18 @@
   <CornerRadius x:Key="BasaltRadiusS">4</CornerRadius>
   <CornerRadius x:Key="BasaltRadiusM">6</CornerRadius>
   <CornerRadius x:Key="BasaltRadiusL">10</CornerRadius>
+  <CornerRadius x:Key="BasaltRadiusPill">999</CornerRadius>
   <x:Double x:Key="BasaltFontSizeSmall">12</x:Double>
   <x:Double x:Key="BasaltFontSizeBody">14</x:Double>
+  <x:Double x:Key="BasaltFontSizeReading">17</x:Double>
   <x:Double x:Key="BasaltFontSizeTitle">18</x:Double>
   <x:Double x:Key="BasaltFontSizeHeading">24</x:Double>
-  <x:Double x:Key="BasaltSidebarWidth">280</x:Double>
+  <x:Double x:Key="BasaltFontSizeNoteTitle">36</x:Double>
+  <x:Double x:Key="BasaltSidebarWidth">260</x:Double>
+  <x:Double x:Key="BasaltRibbonWidth">48</x:Double>
+  <x:Double x:Key="BasaltTouchMin">44</x:Double>
+  <!-- Inter for the interface, Literata for reading, JetBrains Mono for code (bundled; system fonts as fallback). -->
+  <FontFamily x:Key="BasaltFontUi">avares://Avalonia.Fonts.Inter/Assets#Inter, Segoe UI, SF Pro Text, Helvetica Neue, Arial</FontFamily>
+  <FontFamily x:Key="BasaltFontReading">avares://Basalt.UI/Assets/Fonts#Literata, Georgia, serif</FontFamily>
+  <FontFamily x:Key="BasaltFontMono">avares://Basalt.UI/Assets/Fonts#JetBrains Mono, Cascadia Code, Consolas, Menlo, monospace</FontFamily>
 </ResourceDictionary>

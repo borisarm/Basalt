@@ -134,6 +134,12 @@
   <data name="Mobile.Redo" xml:space="preserve"><value>Rehacer</value></data>
   <data name="Mobile.Undo" xml:space="preserve"><value>Deshacer</value></data>
   <data name="Mobile.Vaults" xml:space="preserve"><value>‹ Vaults</value></data>
+  <data name="Overlay.EscKey" xml:space="preserve"><value>esc</value></data>
+  <data name="Overlay.HintCreate" xml:space="preserve"><value>Mayús ↵ crear</value></data>
+  <data name="Overlay.HintNavigate" xml:space="preserve"><value>↑↓ moverse</value></data>
+  <data name="Overlay.HintNewTab" xml:space="preserve"><value>Ctrl ↵ nueva pestaña</value></data>
+  <data name="Overlay.HintOpen" xml:space="preserve"><value>↵ abrir</value></data>
+  <data name="Overlay.HintRun" xml:space="preserve"><value>↵ ejecutar</value></data>
   <data name="Panel.Refresh" xml:space="preserve"><value>Actualizar</value></data>
   <data name="Panel.backlinks" xml:space="preserve"><value>Enlaces entrantes</value></data>
   <data name="Panel.bookmarks" xml:space="preserve"><value>Marcadores</value></data>
@@ -216,11 +222,13 @@
   <data name="SignIn.Open" xml:space="preserve"><value>Copiar código y abrir GitHub</value></data>
   <data name="SignIn.Title" xml:space="preserve"><value>Iniciar sesión con GitHub</value></data>
   <data name="SignIn.Waiting" xml:space="preserve"><value>Esperando autorización…</value></data>
+  <data name="Sync.ChangesWaiting" xml:space="preserve"><value>{0} cambios pendientes</value></data>
   <data name="Sync.Completed" xml:space="preserve"><value>Sincronización completada.</value></data>
   <data name="Sync.Configured" xml:space="preserve"><value>Sincronización configurada.</value></data>
   <data name="Sync.ConflictCopy" xml:space="preserve"><value>Copia de conflicto</value></data>
   <data name="Sync.ConflictMarkers" xml:space="preserve"><value>Marcadores de fusión</value></data>
   <data name="Sync.Conflicts" xml:space="preserve"><value>Conflictos ({0})</value></data>
+  <data name="Sync.ConflictsSafe" xml:space="preserve"><value>Ambas versiones están a salvo en disco hasta que decidas.</value></data>
   <data name="Sync.ConflictsTitle" xml:space="preserve"><value>Conflictos</value></data>
   <data name="Sync.CurrentVersion" xml:space="preserve"><value>Versión actual</value></data>
   <data name="Sync.DaysAgo" xml:space="preserve"><value>hace {0} d</value></data>
@@ -236,9 +244,13 @@
   <data name="Sync.Refresh" xml:space="preserve"><value>Actualizar</value></data>
   <data name="Sync.Resolution" xml:space="preserve"><value>Resolución</value></data>
   <data name="Sync.Resolution.KeepBoth" xml:space="preserve"><value>Mantener ambos</value></data>
+  <data name="Sync.Resolution.KeepBoth.Hint" xml:space="preserve"><value>La otra copia se guarda al lado</value></data>
   <data name="Sync.Resolution.KeepLocal" xml:space="preserve"><value>Mantener el mío</value></data>
+  <data name="Sync.Resolution.KeepLocal.Hint" xml:space="preserve"><value>La otra versión queda en el historial</value></data>
   <data name="Sync.Resolution.KeepRemote" xml:space="preserve"><value>Usar el de remoto</value></data>
+  <data name="Sync.Resolution.KeepRemote.Hint" xml:space="preserve"><value>La versión de este dispositivo queda en el historial</value></data>
   <data name="Sync.Resolution.Merged" xml:space="preserve"><value>Usar el texto fusionado</value></data>
+  <data name="Sync.Resolution.Merged.Hint" xml:space="preserve"><value>Edita el resultado abajo</value></data>
   <data name="Sync.Resolve" xml:space="preserve"><value>Resolver</value></data>
   <data name="Sync.Restore" xml:space="preserve"><value>Restaurar</value></data>
   <data name="Sync.Restored" xml:space="preserve"><value>Versión restaurada.</value></data>
@@ -279,7 +291,9 @@
   <data name="Workspace.CloseTab" xml:space="preserve"><value>Cerrar pestaña</value></data>
   <data name="Workspace.Editor" xml:space="preserve"><value>Editor de la nota</value></data>
   <data name="Workspace.NoFile" xml:space="preserve"><value>Ningún fichero abierto</value></data>
+  <data name="Workspace.Read" xml:space="preserve"><value>Lectura</value></data>
   <data name="Workspace.Reading" xml:space="preserve"><value>Vista de lectura</value></data>
+  <data name="Workspace.Source" xml:space="preserve"><value>Código</value></data>
   <data name="Workspace.SplitDown" xml:space="preserve"><value>Dividir hacia abajo</value></data>
   <data name="Workspace.SplitRight" xml:space="preserve"><value>Dividir a la derecha</value></data>
   <data name="Workspace.Tabs" xml:space="preserve"><value>Pestañas abiertas</value></data>

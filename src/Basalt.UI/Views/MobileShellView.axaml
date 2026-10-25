@@ -17,10 +17,11 @@
     </Style>
   </UserControl.Styles>
   <DockPanel Background="{DynamicResource BasaltBackgroundBrush}">
-    <Border DockPanel.Dock="Top" Background="{DynamicResource BasaltSurfaceAltBrush}" Padding="8,6"
+    <Border DockPanel.Dock="Top" Background="{DynamicResource BasaltBackgroundBrush}" Padding="6,4"
+            BorderBrush="{DynamicResource BasaltBorderBrush}" BorderThickness="0,0,0,1"
             IsVisible="{Binding ActiveVault, Converter={x:Static converters:ObjectConverters.IsNotNull}}">
       <Grid ColumnDefinitions="Auto,*">
-        <Button x:Name="VaultsButton" Content="{l:Loc Mobile.Vaults}" Command="{Binding CloseVaultCommand}" />
+        <Button x:Name="VaultsButton" Classes="quiet" Content="{l:Loc Mobile.Vaults}" Command="{Binding CloseVaultCommand}" />
         <TextBlock Grid.Column="1" Text="{Binding Title}" VerticalAlignment="Center" Margin="8,0"
                    TextTrimming="CharacterEllipsis" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
       </Grid>

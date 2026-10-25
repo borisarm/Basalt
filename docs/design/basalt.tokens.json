@@ -1,5 +1,5 @@
 {
-  "$description": "Basalt design tokens (W3C Design Tokens / DTCG format). Mirrors src/Basalt.UI/Themes/Tokens.axaml; entries marked 'new' are proposed by the 2026-10 design and not yet in the XAML.",
+  "$description": "Basalt design tokens (W3C Design Tokens / DTCG format). Mirrors src/Basalt.UI/Themes/Tokens.axaml 1:1.",
   "color": {
     "light": {
       "background":      { "$type": "color", "$value": "#FFFFFF" },
@@ -20,7 +20,12 @@
       "link":            { "$type": "color", "$value": "#5B32C2" },
       "unresolved-link": { "$type": "color", "$value": "#6F5BA5" },
       "tag":             { "$type": "color", "$value": "#3E5FB8" },
-      "tag-soft":        { "$type": "color", "$value": "#EAF0FC", "$description": "new" },
+      "tag-soft":        { "$type": "color", "$value": "#EAF0FC" },
+      "callout":         { "$type": "color", "$value": "#F4F0FD" },
+      "chrome":          { "$type": "color", "$value": "#F1F1F3" },
+      "sidebar":         { "$type": "color", "$value": "#F6F6F7" },
+      "warning-soft":    { "$type": "color", "$value": "#FFF4CC" },
+      "danger-soft":     { "$type": "color", "$value": "#FBE3E1" },
       "code-background": { "$type": "color", "$value": "#F1F1F4" },
       "diff-added":      { "$type": "color", "$value": "#DDF4E4" },
       "diff-removed":    { "$type": "color", "$value": "#FBE3E1" },
@@ -31,8 +36,8 @@
       "graph-group-3":   { "$type": "color", "$value": "#3E8FD0" }
     },
     "dark": {
-      "chrome":          { "$type": "color", "$value": "#18181C", "$description": "new: title bar, ribbon, status bar" },
-      "sidebar":         { "$type": "color", "$value": "#202025", "$description": "new: explorer and context rail" },
+      "chrome":          { "$type": "color", "$value": "#18181C", "$description": "title bar, ribbon, tab strip, status bar" },
+      "sidebar":         { "$type": "color", "$value": "#202025", "$description": "explorer and context rail" },
       "background":      { "$type": "color", "$value": "#1C1C21" },
       "surface":         { "$type": "color", "$value": "#24242A" },
       "surface-alt":     { "$type": "color", "$value": "#2D2D34" },
@@ -51,8 +56,10 @@
       "link":            { "$type": "color", "$value": "#B9A2FF" },
       "unresolved-link": { "$type": "color", "$value": "#9F93C4" },
       "tag":             { "$type": "color", "$value": "#8FB0FF" },
-      "tag-soft":        { "$type": "color", "$value": "#1F2740", "$description": "new" },
-      "callout":         { "$type": "color", "$value": "#2A2436", "$description": "new" },
+      "tag-soft":        { "$type": "color", "$value": "#1F2740" },
+      "callout":         { "$type": "color", "$value": "#2A2436" },
+      "warning-soft":    { "$type": "color", "$value": "#3A3320" },
+      "danger-soft":     { "$type": "color", "$value": "#3D2321" },
       "code-background": { "$type": "color", "$value": "#2A2A31" },
       "diff-added":      { "$type": "color", "$value": "#1E3A28" },
       "diff-removed":    { "$type": "color", "$value": "#3D2321" },
@@ -66,16 +73,16 @@
   "font": {
     "family": {
       "ui":      { "$type": "fontFamily", "$value": ["Inter", "system-ui", "sans-serif"] },
-      "reading": { "$type": "fontFamily", "$value": ["Literata", "Georgia", "serif"], "$description": "new: note body and headings" },
+      "reading": { "$type": "fontFamily", "$value": ["Literata", "Georgia", "serif"], "$description": "note body and headings" },
       "mono":    { "$type": "fontFamily", "$value": ["JetBrains Mono", "monospace"] }
     },
     "size": {
       "small":      { "$type": "dimension", "$value": "12px" },
       "body":       { "$type": "dimension", "$value": "14px" },
-      "reading":    { "$type": "dimension", "$value": "17px", "$description": "new" },
+      "reading":    { "$type": "dimension", "$value": "17px" },
       "title":      { "$type": "dimension", "$value": "18px" },
       "heading":    { "$type": "dimension", "$value": "24px" },
-      "note-title": { "$type": "dimension", "$value": "36px", "$description": "new" }
+      "note-title": { "$type": "dimension", "$value": "36px" }
     }
   },
   "spacing": {
@@ -88,10 +95,11 @@
   "radius": {
     "s": { "$type": "dimension", "$value": "4px" },
     "m": { "$type": "dimension", "$value": "6px" },
-    "l": { "$type": "dimension", "$value": "10px" }
+    "l": { "$type": "dimension", "$value": "10px" },
+    "pill": { "$type": "dimension", "$value": "999px" }
   },
   "size": {
-    "sidebar-width": { "$type": "dimension", "$value": "260px", "$description": "design proposes 260; XAML currently 280" },
+    "sidebar-width": { "$type": "dimension", "$value": "260px" },
     "ribbon-width":  { "$type": "dimension", "$value": "48px" },
     "touch-min":     { "$type": "dimension", "$value": "44px" }
   }

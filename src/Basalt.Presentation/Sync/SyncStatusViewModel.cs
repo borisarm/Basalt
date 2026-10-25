@@ -14,6 +14,16 @@ public sealed record SyncStatusUseCases(
     ICommandHandler<PauseSync, Unit> Pause,
     ICommandHandler<ResumeSync, Unit> Resume);
 
+/// <summary>How the status pill is coloured (F-015.4): quiet, synced, working or waiting, needs attention, failed.</summary>
+public enum SyncTone
+{
+    Neutral,
+    Success,
+    Accent,
+    Warning,
+    Danger,
+}
+
 /// <summary>Sync state, manual trigger, pause/resume (F-015.1, F-015.2).</summary>
 public sealed partial class SyncStatusViewModel(ViewModelServices services, SyncStatusUseCases useCases)
     : ViewModelBase(services)
@@ -61,8 +71,19 @@ public sealed partial class SyncStatusViewModel(ViewModelServices services, Sync
         SyncState.Paused => Localizer.Get("Sync.State.Paused"),
         SyncState.Syncing => Localizer.Get("Sync.State.Syncing"),
         SyncState.Error => Localizer.Get("Sync.State.Error"),
+        _ when PendingChanges > 0 => Localizer.Format("Sync.ChangesWaiting", PendingChanges),
         _ when LastFinished is { } finished => Localizer.Format("Sync.SyncedAgo", Relative(finished)),
         _ => Localizer.Get("Sync.State.UpToDate"),
+    };
+
+    /// <summary>The colour of the status pill, following <see cref="Summary"/>.</summary>
+    public SyncTone Tone => State switch
+    {
+        SyncState.NotConfigured or SyncState.Disabled or SyncState.Paused => SyncTone.Neutral,
+        SyncState.Syncing => SyncTone.Accent,
+        SyncState.Error => SyncTone.Danger,
+        _ when PendingChanges > 0 => SyncTone.Accent,
+        _ => SyncTone.Success,
     };
 
     /// <summary>Conflict count shown next to the status (F-015.4).</summary>
@@ -145,6 +166,7 @@ public sealed partial class SyncStatusViewModel(ViewModelServices services, Sync
         OnPropertyChanged(nameof(IsPaused));
         OnPropertyChanged(nameof(HasConflicts));
         OnPropertyChanged(nameof(Summary));
+        OnPropertyChanged(nameof(Tone));
         OnPropertyChanged(nameof(ConflictSummary));
     }
 

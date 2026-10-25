@@ -6,22 +6,34 @@
              xmlns:l="clr-namespace:Basalt.UI.Localization"
              x:Class="Basalt.UI.Views.CommandPaletteView"
              x:DataType="o:CommandPaletteViewModel">
-  <Border Classes="overlay" Width="560" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,80,0,0" Padding="14"
-          Background="{DynamicResource BasaltSurfaceBrush}" BorderBrush="{DynamicResource BasaltBorderBrush}" BorderThickness="1" CornerRadius="12"
-          BoxShadow="0 18 48 0 #33000000">
+  <Border Classes="overlay" Width="620" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,72,0,0">
     <DockPanel>
-      <TextBox DockPanel.Dock="Top" x:Name="Input" Text="{Binding Text}" PlaceholderText="{l:Loc CommandPalette.Placeholder}" AutomationProperties.Name="{l:Loc CommandPalette.Placeholder}" />
-      <ListBox x:Name="List" ItemsSource="{Binding Items}" SelectedIndex="{Binding SelectedIndex}" MaxHeight="360" Margin="0,8,0,0"
-               AutomationProperties.Name="{l:Loc Menu.CommandPalette}">
-        <ListBox.ItemTemplate>
-          <DataTemplate x:DataType="o:CommandItem">
-            <DockPanel>
-              <TextBlock DockPanel.Dock="Right" Text="{Binding Gesture, FallbackValue=''}" Foreground="{DynamicResource BasaltTextMutedBrush}" />
-              <TextBlock Text="{Binding Title}" />
-            </DockPanel>
-          </DataTemplate>
-        </ListBox.ItemTemplate>
-      </ListBox>
+      <DockPanel DockPanel.Dock="Top" Margin="18,8,14,8">
+        <Border DockPanel.Dock="Right" Classes="kbd"><TextBlock Text="{l:Loc Overlay.EscKey}" /></Border>
+        <PathIcon DockPanel.Dock="Left" Width="16" Height="16" Data="{StaticResource IconCommand}" Foreground="{DynamicResource BasaltTextMutedBrush}" />
+        <TextBox x:Name="Input" Classes="bare" Margin="10,0" Text="{Binding Text}" PlaceholderText="{l:Loc CommandPalette.Placeholder}" AutomationProperties.Name="{l:Loc CommandPalette.Placeholder}" />
+      </DockPanel>
+      <Border DockPanel.Dock="Bottom" BorderBrush="{DynamicResource BasaltBorderBrush}" BorderThickness="0,1,0,0" Padding="18,8">
+        <StackPanel Orientation="Horizontal" Spacing="18">
+          <TextBlock Classes="muted" Text="{l:Loc Overlay.HintNavigate}" />
+          <TextBlock Classes="muted" Text="{l:Loc Overlay.HintRun}" />
+        </StackPanel>
+      </Border>
+      <Border BorderBrush="{DynamicResource BasaltBorderBrush}" BorderThickness="0,1,0,0" Padding="8">
+        <ListBox x:Name="List" ItemsSource="{Binding Items}" SelectedIndex="{Binding SelectedIndex}" MaxHeight="380"
+                 AutomationProperties.Name="{l:Loc Menu.CommandPalette}">
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="o:CommandItem">
+              <DockPanel>
+                <Border DockPanel.Dock="Right" Classes="kbd" IsVisible="{Binding Gesture, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                  <TextBlock Text="{Binding Gesture, FallbackValue=''}" />
+                </Border>
+                <TextBlock Text="{Binding Title}" VerticalAlignment="Center" />
+              </DockPanel>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </Border>
     </DockPanel>
   </Border>
 </UserControl>

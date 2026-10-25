@@ -24,7 +24,7 @@
                          FontSize="{StaticResource BasaltFontSizeSmall}" Foreground="{DynamicResource BasaltTextMutedBrush}" />
             </Border>
             <Border Grid.Column="1" Classes.removed="{Binding IsRemoved}" Classes.changed="{Binding IsChanged}">
-              <TextBlock Text="{Binding LeftText}" FontFamily="Consolas, Menlo, monospace" TextWrapping="NoWrap"
+              <TextBlock Text="{Binding LeftText}" FontFamily="{StaticResource BasaltFontMono}" TextWrapping="NoWrap"
                          Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
             </Border>
             <Border Grid.Column="2" Classes.added="{Binding IsAdded}" Classes.changed="{Binding IsChanged}">
@@ -32,7 +32,7 @@
                          FontSize="{StaticResource BasaltFontSizeSmall}" Foreground="{DynamicResource BasaltTextMutedBrush}" />
             </Border>
             <Border Grid.Column="3" Classes.added="{Binding IsAdded}" Classes.changed="{Binding IsChanged}">
-              <TextBlock Text="{Binding RightText}" FontFamily="Consolas, Menlo, monospace" TextWrapping="NoWrap"
+              <TextBlock Text="{Binding RightText}" FontFamily="{StaticResource BasaltFontMono}" TextWrapping="NoWrap"
                          Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
             </Border>
           </Grid>

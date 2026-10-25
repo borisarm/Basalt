@@ -14,7 +14,7 @@
   <StackPanel Spacing="16" Margin="16">
     <TextBlock Text="{l:Loc SignIn.Instructions}" TextWrapping="Wrap" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
     <SelectableTextBlock x:Name="UserCode" Text="{Binding UserCode}" FontSize="32" HorizontalAlignment="Center"
-                         FontFamily="Menlo, Menlo-Regular, monospace" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
+                         FontFamily="{StaticResource BasaltFontMono}" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
     <Button x:Name="OpenGitHub" Content="{l:Loc SignIn.Open}" Click="OnOpenGitHub" HorizontalAlignment="Center" />
     <StackPanel Spacing="6" IsVisible="{Binding IsWaitingForApproval}">
       <ProgressBar IsIndeterminate="True" Height="4" />

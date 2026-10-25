@@ -6,22 +6,38 @@
              xmlns:l="clr-namespace:Basalt.UI.Localization"
              x:Class="Basalt.UI.Views.QuickSwitcherView"
              x:DataType="o:QuickSwitcherViewModel">
-  <Border Classes="overlay" Width="560" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,80,0,0" Padding="14"
-          Background="{DynamicResource BasaltSurfaceBrush}" BorderBrush="{DynamicResource BasaltBorderBrush}" BorderThickness="1" CornerRadius="12"
-          BoxShadow="0 18 48 0 #33000000">
+  <Border Classes="overlay" Width="620" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,72,0,0">
     <DockPanel>
-      <TextBox DockPanel.Dock="Top" x:Name="Input" Text="{Binding Text}" PlaceholderText="{l:Loc QuickSwitcher.Placeholder}" AutomationProperties.Name="{l:Loc QuickSwitcher.Placeholder}" />
-      <ListBox x:Name="List" ItemsSource="{Binding Items}" SelectedIndex="{Binding SelectedIndex, Mode=OneWay}" MaxHeight="360" Margin="0,8,0,0"
-               AutomationProperties.Name="{l:Loc Menu.QuickSwitcher}">
-        <ListBox.ItemTemplate>
-          <DataTemplate x:DataType="s:QuickSwitchItem">
-            <StackPanel>
-              <TextBlock Text="{Binding Display}" />
-              <TextBlock Text="{Binding Path, FallbackValue=''}" FontSize="{StaticResource BasaltFontSizeSmall}" Foreground="{DynamicResource BasaltTextMutedBrush}" />
-            </StackPanel>
-          </DataTemplate>
-        </ListBox.ItemTemplate>
-      </ListBox>
+      <DockPanel DockPanel.Dock="Top" Margin="18,8,14,8">
+        <Border DockPanel.Dock="Right" Classes="kbd"><TextBlock Text="{l:Loc Overlay.EscKey}" /></Border>
+        <PathIcon DockPanel.Dock="Left" Width="16" Height="16" Data="{StaticResource IconSearch}" Foreground="{DynamicResource BasaltTextMutedBrush}" />
+        <TextBox x:Name="Input" Classes="bare" Margin="10,0" Text="{Binding Text}" PlaceholderText="{l:Loc QuickSwitcher.Placeholder}" AutomationProperties.Name="{l:Loc QuickSwitcher.Placeholder}" />
+      </DockPanel>
+      <Border DockPanel.Dock="Bottom" BorderBrush="{DynamicResource BasaltBorderBrush}" BorderThickness="0,1,0,0" Padding="18,8">
+        <StackPanel Orientation="Horizontal" Spacing="18">
+          <TextBlock Classes="muted" Text="{l:Loc Overlay.HintNavigate}" />
+          <TextBlock Classes="muted" Text="{l:Loc Overlay.HintOpen}" />
+          <TextBlock Classes="muted" Text="{l:Loc Overlay.HintNewTab}" />
+          <TextBlock Classes="muted" Text="{l:Loc Overlay.HintCreate}" />
+        </StackPanel>
+      </Border>
+      <Border BorderBrush="{DynamicResource BasaltBorderBrush}" BorderThickness="0,1,0,0" Padding="8">
+        <ListBox x:Name="List" ItemsSource="{Binding Items}" SelectedIndex="{Binding SelectedIndex, Mode=OneWay}" MaxHeight="380"
+                 AutomationProperties.Name="{l:Loc Menu.QuickSwitcher}">
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="s:QuickSwitchItem">
+              <DockPanel>
+                <PathIcon DockPanel.Dock="Left" Width="15" Height="15" Margin="2,2,12,0" VerticalAlignment="Top"
+                          Data="{StaticResource IconNote}" Foreground="{DynamicResource BasaltTextMutedBrush}" />
+                <StackPanel Spacing="1">
+                  <TextBlock Text="{Binding Display}" />
+                  <TextBlock Text="{Binding Path, FallbackValue=''}" Classes="muted" />
+                </StackPanel>
+              </DockPanel>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </Border>
     </DockPanel>
   </Border>
 </UserControl>

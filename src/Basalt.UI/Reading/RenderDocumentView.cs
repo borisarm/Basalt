@@ -35,10 +35,11 @@ public sealed class RenderDocumentView : UserControl
         };
         Content = new ScrollViewer
         {
+            FontFamily = BlockRenderer.Font("BasaltFontReading"),
             Content = new Border
             {
-                Padding = new Thickness(56, 40, 56, 72),
-                MaxWidth = 840,
+                Padding = new Thickness(56, 48, 56, 72),
+                MaxWidth = 860,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 Child = _blocks,
             },
@@ -76,12 +77,17 @@ public sealed class RenderDocumentView : UserControl
 /// <summary>Builds the control of one block.</summary>
 internal sealed class BlockRenderer(NoteTabViewModel tab, IReadOnlyList<VaultPath> ancestors)
 {
-    private static readonly double[] HeadingSizes = [26, 22, 19, 17, 15, 14];
+    // Design system: note title 36, headings from 24 down, reading text 17 with a 1.7 line height (Literata).
+    private const double ReadingSize = 17;
+    private const double ReadingLineHeight = 29;
+    private static readonly double[] HeadingSizes = [34, 24, 20, 18, 17, 16];
+
+    private double _size = ReadingSize;
 
     public Control Block(RenderBlock block) => block switch
     {
-        HeadingBlock heading => Text(heading.Inlines, HeadingSizes[Math.Clamp(heading.Level, 1, 6) - 1], FontWeight.SemiBold, new Thickness(0, 16, 0, 6)),
-        ParagraphBlock paragraph => Text(paragraph.Inlines, 15.5, FontWeight.Normal, new Thickness(0, 0, 0, 12), lineHeight: 25),
+        HeadingBlock heading => Heading(heading),
+        ParagraphBlock paragraph => Text(paragraph.Inlines, ReadingSize, FontWeight.Normal, new Thickness(0, 0, 0, 14), lineHeight: ReadingLineHeight),
         ListBlock list => List(list),
         QuoteBlock quote => Quote(quote.Blocks, null),
         CalloutBlock callout => Quote(callout.Blocks, callout),
@@ -93,6 +99,16 @@ internal sealed class BlockRenderer(NoteTabViewModel tab, IReadOnlyList<VaultPat
         FootnotesBlock notes => Footnotes(notes),
         _ => new TextBlock { Text = string.Empty },
     };
+
+    internal static FontFamily Font(string key) =>
+        Avalonia.Application.Current?.TryFindResource(key, out var value) == true && value is FontFamily family ? family : FontFamily.Default;
+
+    private SelectableTextBlock Heading(HeadingBlock heading)
+    {
+        var level = Math.Clamp(heading.Level, 1, 6);
+        var margin = level == 1 ? new Thickness(0, 0, 0, 16) : new Thickness(0, 22, 0, 10);
+        return Text(heading.Inlines, HeadingSizes[level - 1], level == 1 ? FontWeight.Bold : FontWeight.SemiBold, margin);
+    }
 
     private SelectableTextBlock Text(
         IReadOnlyList<RenderInline> inlines,
@@ -107,6 +123,7 @@ internal sealed class BlockRenderer(NoteTabViewModel tab, IReadOnlyList<VaultPat
             text.LineHeight = lineHeight;
         }
 
+        _size = size;
         text.Inlines = [.. inlines.Select(Inline)];
         return text;
     }
@@ -118,9 +135,9 @@ internal sealed class BlockRenderer(NoteTabViewModel tab, IReadOnlyList<VaultPat
         EmphasisInline emphasis => Span(emphasis.Children, s => s.FontStyle = FontStyle.Italic),
         StrikethroughInline strike => Span(strike.Children, s => s.TextDecorations = TextDecorations.Strikethrough),
         HighlightInline highlight => Span(highlight.Children, s => s.Background = Brush("BasaltHighlightBrush")),
-        CodeInline code => new Run(code.Code) { FontFamily = new FontFamily("Cascadia Code,Consolas,Menlo,monospace"), Background = Brush("BasaltCodeBackgroundBrush") },
+        CodeInline code => new Run(code.Code) { FontFamily = Font("BasaltFontMono"), FontSize = _size * 0.85, Background = Brush("BasaltCodeBackgroundBrush") },
         LinkInline link => Link(link),
-        TagInline tag => new Run("#" + tag.Tag) { Foreground = Brush("BasaltTagBrush") },
+        TagInline tag => new Run("#" + tag.Tag) { Foreground = Brush("BasaltTagBrush"), Background = Brush("BasaltTagSoftBrush") },
         LineBreakInline breaks => breaks.IsHard ? new LineBreak() : new Run(" "),
         FootnoteReferenceInline reference => new Run($"[{reference.Label}]") { FontSize = 11, Foreground = Brush("BasaltLinkBrush") },
         EmbedInline embed => new Run(embed.Alias ?? embed.Target) { Foreground = Brush("BasaltLinkBrush") },
@@ -142,7 +159,8 @@ internal sealed class BlockRenderer(NoteTabViewModel tab, IReadOnlyList<VaultPat
         {
             Text = PlainText(link.Children) is { Length: > 0 } text ? text : link.Target,
             Foreground = Brush("BasaltLinkBrush"),
-            TextDecorations = TextDecorations.Underline,
+            FontSize = _size,
+            TextDecorations = link.IsExternal ? TextDecorations.Underline : null,
             Cursor = new Cursor(StandardCursorType.Hand),
         };
         label.PointerPressed += (_, e) =>
@@ -157,6 +175,8 @@ internal sealed class BlockRenderer(NoteTabViewModel tab, IReadOnlyList<VaultPat
                 _ = tab.OpenLinkAsync(link.Target, link.Subpath, newTab, CancellationToken.None);
             }
         };
+        // An inline control sits on the baseline by its bottom edge; pull it down by the descent to line up the text.
+        label.Margin = new Thickness(0, 0, 0, -Math.Round(_size * 0.28));
         return new InlineUIContainer(label);
     }
 
@@ -188,7 +208,7 @@ internal sealed class BlockRenderer(NoteTabViewModel tab, IReadOnlyList<VaultPat
 
     private CheckBox TaskBox(ListItemBlock item, char status)
     {
-        var box = new CheckBox { IsChecked = status != ' ', Margin = new Thickness(0, 0, 6, 0), VerticalAlignment = VerticalAlignment.Top };
+        var box = new CheckBox { IsChecked = status != ' ', Margin = new Thickness(0, 0, 4, 0), VerticalAlignment = VerticalAlignment.Top };
         box.IsCheckedChanged += (_, _) => _ = tab.ToggleTaskAsync(item.Line, CancellationToken.None);
         return box;
     }
@@ -198,7 +218,8 @@ internal sealed class BlockRenderer(NoteTabViewModel tab, IReadOnlyList<VaultPat
         var content = new StackPanel();
         if (callout is not null)
         {
-            var title = Text(callout.Title, 15, FontWeight.SemiBold, new Thickness(0, 0, 0, 6));
+            var title = Text(callout.Title, 15, FontWeight.SemiBold, new Thickness(0, 0, 0, 4));
+            title.FontFamily = Font("BasaltFontUi");
             if (title.Inlines!.Count == 0)
             {
                 title.Text = char.ToUpperInvariant(callout.Type[0]) + callout.Type[1..];
@@ -212,14 +233,20 @@ internal sealed class BlockRenderer(NoteTabViewModel tab, IReadOnlyList<VaultPat
             content.Children.Add(Block(block));
         }
 
+        if (callout is not null)
+        {
+            // Callouts read as UI (the design's "Safety" box): interface font on the callout surface, no rule.
+            content.SetValue(TextElement.FontFamilyProperty, Font("BasaltFontUi"));
+        }
+
         return new Border
         {
-            BorderBrush = Brush(callout is null ? "BasaltBorderBrush" : "BasaltAccentBrush"),
-            BorderThickness = new Thickness(3, 0, 0, 0),
-            Background = callout is null ? null : Brush("BasaltAccentSoftBrush"),
-            CornerRadius = callout is null ? new CornerRadius(0, 6, 6, 0) : new CornerRadius(8),
-            Padding = new Thickness(16, 10),
-            Margin = new Thickness(0, 0, 0, 10),
+            BorderBrush = Brush("BasaltAccentSoftBrush"),
+            BorderThickness = callout is null ? new Thickness(3, 0, 0, 0) : default,
+            Background = callout is null ? null : Brush("BasaltCalloutBrush"),
+            CornerRadius = callout is null ? new CornerRadius(0) : new CornerRadius(10),
+            Padding = callout is null ? new Thickness(18, 2, 0, 2) : new Thickness(18, 14, 18, 4),
+            Margin = new Thickness(0, 4, 0, 16),
             Child = callout?.Folding == CalloutFolding.Collapsed ? new Expander { Header = content.Children[0], Content = content } : content,
         };
     }
@@ -244,14 +271,14 @@ internal sealed class BlockRenderer(NoteTabViewModel tab, IReadOnlyList<VaultPat
         return new Border
         {
             Background = Brush("BasaltCodeBackgroundBrush"),
-            CornerRadius = new CornerRadius(6),
-            Padding = new Thickness(12),
-            Margin = new Thickness(0, 0, 0, 10),
+            CornerRadius = new CornerRadius(8),
+            Padding = new Thickness(14, 12),
+            Margin = new Thickness(0, 0, 0, 14),
             Child = new Panel
             {
                 Children =
                 {
-                    new SelectableTextBlock { Text = code.Code, FontFamily = new FontFamily("Cascadia Code,Consolas,Menlo,monospace"), TextWrapping = TextWrapping.NoWrap },
+                    new SelectableTextBlock { Text = code.Code, FontFamily = Font("BasaltFontMono"), FontSize = 13, TextWrapping = TextWrapping.NoWrap },
                     copy,
                 },
             },

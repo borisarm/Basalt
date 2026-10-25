@@ -12,26 +12,39 @@
       <Setter Property="MinWidth" Value="44" />
       <Setter Property="MinHeight" Value="44" />
     </Style>
+    <Style Selector="Border.accessory Button">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="FontFamily" Value="{StaticResource BasaltFontMono}" />
+      <Setter Property="FontSize" Value="15" />
+      <Setter Property="Foreground" Value="{DynamicResource BasaltTextPrimaryBrush}" />
+    </Style>
+    <Style Selector="Border.accessory Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource BasaltBackgroundBrush}" />
+    </Style>
   </UserControl.Styles>
   <DockPanel>
-    <Border DockPanel.Dock="Top" Background="{DynamicResource BasaltSurfaceAltBrush}" Padding="8,6">
+    <Border DockPanel.Dock="Top" Background="{DynamicResource BasaltBackgroundBrush}" BorderBrush="{DynamicResource BasaltBorderBrush}"
+            BorderThickness="0,0,0,1" Padding="12,4,6,4">
       <Grid ColumnDefinitions="*,Auto">
         <TextBlock Text="{Binding Title}" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
                    Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
-        <Button Grid.Column="1" x:Name="ReadingButton" Content="{l:Loc Mobile.Reading}"
+        <Button Grid.Column="1" x:Name="ReadingButton" Classes="quiet" Content="{l:Loc Mobile.Reading}"
                 Command="{Binding ToggleReadingModeCommand}" />
       </Grid>
     </Border>
-    <Border DockPanel.Dock="Bottom" Background="{DynamicResource BasaltSurfaceAltBrush}" Padding="4"
+    <Border DockPanel.Dock="Bottom" Classes="accessory" Background="{DynamicResource BasaltSurfaceAltBrush}"
+            BorderBrush="{DynamicResource BasaltBorderBrush}" BorderThickness="0,1,0,0" Padding="6,2"
             IsVisible="{Binding !IsReadingMode}">
       <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
         <StackPanel Orientation="Horizontal" Spacing="4">
           <Button x:Name="InsertLink" Content="[[" Click="OnInsertLink"
                   AutomationProperties.Name="{l:Loc Mobile.InsertLink}" />
-          <Button x:Name="InsertHeading" Content="#" Click="OnInsertHeading"
-                  AutomationProperties.Name="{l:Loc Mobile.InsertHeading}" />
-          <Button x:Name="InsertTask" Content="- [ ]" Click="OnInsertTask"
-                  AutomationProperties.Name="{l:Loc Mobile.InsertTask}" />
+          <Button x:Name="InsertHeading" Click="OnInsertHeading"
+                  AutomationProperties.Name="{l:Loc Mobile.InsertHeading}"><PathIcon Width="18" Height="18" Data="{StaticResource IconHash}" /></Button>
+          <Button x:Name="InsertTask" Click="OnInsertTask"
+                  AutomationProperties.Name="{l:Loc Mobile.InsertTask}"><PathIcon Width="18" Height="18" Data="{StaticResource IconCheck}" /></Button>
           <Button x:Name="Undo" Content="↶" Click="OnUndo"
                   AutomationProperties.Name="{l:Loc Mobile.Undo}" />
           <Button x:Name="Redo" Content="↷" Click="OnRedo"
@@ -40,7 +53,7 @@
                   AutomationProperties.Name="{l:Loc Mobile.Indent}" />
           <Button x:Name="Outdent" Content="←" Click="OnOutdent"
                   AutomationProperties.Name="{l:Loc Mobile.Outdent}" />
-          <Button x:Name="HideKeyboard" Content="⌨" Click="OnHideKeyboard"
+          <Button x:Name="HideKeyboard" Content="⌨" Click="OnHideKeyboard" Foreground="{DynamicResource BasaltAccentBrush}"
                   AutomationProperties.Name="{l:Loc Mobile.HideKeyboard}" />
         </StackPanel>
       </ScrollViewer>

@@ -83,6 +83,43 @@ public sealed class SyncStatusViewModelTests
 
     [Fact]
     [Trait("Spec", "F-015.4")]
+    public async Task Summary_ShowsTheChangesWaitingToBePublished()
+    {
+        Status(SyncState.Idle, pending: 3);
+        _vm.Attach(Vault);
+
+        await _vm.RefreshAsync();
+
+        _vm.Summary.Should().Be("3 changes waiting");
+        _vm.Tone.Should().Be(SyncTone.Accent);
+    }
+
+    [Theory]
+    [Trait("Spec", "F-015.4")]
+    [InlineData(SyncState.NotConfigured, SyncTone.Neutral)]
+    [InlineData(SyncState.Disabled, SyncTone.Neutral)]
+    [InlineData(SyncState.Paused, SyncTone.Neutral)]
+    [InlineData(SyncState.Idle, SyncTone.Success)]
+    [InlineData(SyncState.UpToDate, SyncTone.Success)]
+    [InlineData(SyncState.Syncing, SyncTone.Accent)]
+    [InlineData(SyncState.Error, SyncTone.Danger)]
+    public async Task Tone_FollowsTheState(SyncState state, SyncTone tone)
+    {
+        Status(state);
+        _vm.Attach(Vault);
+
+        await _vm.RefreshAsync();
+
+        _vm.Tone.Should().Be(tone);
+    }
+
+    private void Status(SyncState state, int pending = 0) =>
+        _status.HandleAsync(Arg.Any<GetSyncStatus>(), Arg.Any<CancellationToken>())
+            .Returns(Result<SyncStatusView>.Success(new SyncStatusView(
+                Vault, state, false, null, null, Now, null, 0, PendingChanges: pending)));
+
+    [Fact]
+    [Trait("Spec", "F-015.4")]
     public async Task Summary_ShowsConflicts()
     {
         _status.HandleAsync(Arg.Any<GetSyncStatus>(), Arg.Any<CancellationToken>())

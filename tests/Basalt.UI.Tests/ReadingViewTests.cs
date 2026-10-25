@@ -128,6 +128,14 @@ public sealed class ReadingViewTests
 
         await toggle.Received(1).HandleAsync(new ToggleTask(Vault, Note, 1), Arg.Any<CancellationToken>());
         reading.GetVisualDescendants().OfType<CheckBox>().Single().IsChecked.Should().BeTrue();
+
+        view.FindControl<Button>("ReadModeButton")!.Classes.Should().Contain("checked");
+        var source = view.FindControl<Button>("SourceModeButton")!;
+        source.Command!.Execute(source.CommandParameter);
+        await Task.Delay(50, TestContext.Current.CancellationToken);
+        Dispatcher.UIThread.RunJobs();
+        tab.IsReadingMode.Should().BeFalse("the Source side of the header switch leaves reading mode");
+        source.Classes.Should().Contain("checked");
         window.Close();
     });
 }

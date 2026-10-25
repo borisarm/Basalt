@@ -9,63 +9,97 @@
              xmlns:syncvm="clr-namespace:Basalt.Presentation.Sync;assembly=Basalt.Presentation"
              x:Class="Basalt.UI.Views.WorkspaceView"
              x:DataType="vm:WorkspaceViewModel">
-  <!-- Spec 07 §3: ribbon | left sidebar | panes with tabs | right sidebar, status bar at the bottom. -->
+  <!-- Spec 07 §3: ribbon | left sidebar | panes with tabs | right sidebar, status bar at the bottom (docs/design). -->
   <UserControl.DataTemplates>
     <ui:ViewLocator />
   </UserControl.DataTemplates>
   <DockPanel>
-    <Border DockPanel.Dock="Bottom" x:Name="StatusBar" Background="{DynamicResource BasaltSurfaceBrush}"
-            BorderBrush="{DynamicResource BasaltBorderBrush}" BorderThickness="0,1,0,0" Padding="12,5" MinHeight="34">
-      <Grid ColumnDefinitions="*,Auto">
-        <TextBlock x:Name="ActiveFileText" Text="{Binding ActiveFile, FallbackValue=''}" FontSize="{StaticResource BasaltFontSizeSmall}"
-                   Foreground="{DynamicResource BasaltTextMutedBrush}" VerticalAlignment="Center" />
-        <views:SyncStatusView Grid.Column="1" x:Name="SyncStatus" DataContext="{Binding Sync}"
+    <Border DockPanel.Dock="Bottom" x:Name="StatusBar" Background="{DynamicResource BasaltChromeBrush}"
+            BorderBrush="{DynamicResource BasaltBorderBrush}" BorderThickness="0,1,0,0" Padding="10,3" MinHeight="30">
+      <Grid ColumnDefinitions="Auto,*">
+        <views:SyncStatusView Grid.Column="0" x:Name="SyncStatus" DataContext="{Binding Sync}"
                               x:DataType="syncvm:SyncStatusViewModel" />
+        <TextBlock Grid.Column="1" x:Name="ActiveFileText" Text="{Binding ActiveFile, FallbackValue=''}" Classes="muted"
+                   HorizontalAlignment="Right" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
       </Grid>
     </Border>
 
-    <!-- Ribbon -->
-    <Border DockPanel.Dock="Left" Background="{DynamicResource BasaltSurfaceBrush}" BorderBrush="{DynamicResource BasaltBorderBrush}" BorderThickness="0,0,1,0">
-      <StackPanel Spacing="6" Margin="{StaticResource BasaltSpacingM}">
-        <Button x:Name="ToggleLeft" Classes="icon" Command="{Binding LeftSidebar.ToggleCommand}"
-                AutomationProperties.Name="{l:Loc Workspace.ToggleLeftSidebar}" ToolTip.Tip="{l:Loc Workspace.ToggleLeftSidebar}" ><PathIcon Width="18" Height="18" Data="{StaticResource IconSidebarLeft}" /></Button>
-        <Button x:Name="QuickSwitcherButton" Classes="icon" Command="{Binding ShowQuickSwitcherCommand}"
-                AutomationProperties.Name="{l:Loc Menu.QuickSwitcher}" ToolTip.Tip="{l:Loc Menu.QuickSwitcher}" ><PathIcon Width="18" Height="18" Data="{StaticResource IconSearch}" /></Button>
-        <Button x:Name="PaletteButton" Classes="icon" Command="{Binding ShowCommandPaletteCommand}"
-                AutomationProperties.Name="{l:Loc Menu.CommandPalette}" ToolTip.Tip="{l:Loc Menu.CommandPalette}" ><PathIcon Width="18" Height="18" Data="{StaticResource IconCommand}" /></Button>
-        <Button x:Name="GraphButton" Classes="icon" Command="{Binding OpenGraphCommand}"
-                AutomationProperties.Name="{l:Loc Commands.OpenGraph}" ToolTip.Tip="{l:Loc Commands.OpenGraph}" ><PathIcon Width="18" Height="18" Data="{StaticResource IconGraph}" /></Button>
-        <Button x:Name="ConflictsButton" Classes="icon" Command="{Binding OpenConflictsCommand}"
-                AutomationProperties.Name="{l:Loc Commands.OpenConflicts}" ToolTip.Tip="{l:Loc Commands.OpenConflicts}" ><PathIcon Width="18" Height="18" Data="{StaticResource IconWarning}" /></Button>
-        <Button x:Name="HistoryButton" Classes="icon" Command="{Binding OpenHistoryCommand}"
-                AutomationProperties.Name="{l:Loc Commands.OpenHistory}" ToolTip.Tip="{l:Loc Commands.OpenHistory}" ><PathIcon Width="18" Height="18" Data="{StaticResource IconHistory}" /></Button>
-        <Button x:Name="SettingsButton" Classes="icon" Command="{Binding OpenSettingsCommand}"
-                AutomationProperties.Name="{l:Loc Commands.OpenSettings}" ToolTip.Tip="{l:Loc Commands.OpenSettings}" ><PathIcon Width="18" Height="18" Data="{StaticResource IconSettings}" /></Button>
-        <Button x:Name="ToggleRight" Classes="icon" Command="{Binding RightSidebar.ToggleCommand}"
-                AutomationProperties.Name="{l:Loc Workspace.ToggleRightSidebar}" ToolTip.Tip="{l:Loc Workspace.ToggleRightSidebar}" ><PathIcon Width="18" Height="18" Data="{StaticResource IconSidebarRight}" /></Button>
-      </StackPanel>
+    <!-- Ribbon: the left panels and vault views on top, sync, palette and settings at the bottom. -->
+    <Border DockPanel.Dock="Left" Width="{StaticResource BasaltRibbonWidth}" Background="{DynamicResource BasaltChromeBrush}"
+            BorderBrush="{DynamicResource BasaltBorderBrush}" BorderThickness="0,0,1,0">
+      <DockPanel Margin="0,8">
+        <StackPanel DockPanel.Dock="Bottom" Spacing="4" HorizontalAlignment="Center">
+          <Panel>
+            <Button x:Name="ConflictsButton" Classes="icon" Command="{Binding OpenConflictsCommand}"
+                    AutomationProperties.Name="{l:Loc Commands.OpenConflicts}" ToolTip.Tip="{l:Loc Commands.OpenConflicts}" ><PathIcon Width="18" Height="18" Data="{StaticResource IconWarning}" /></Button>
+            <Border x:Name="ConflictsBadge" IsVisible="{Binding Sync.HasConflicts, FallbackValue=False}" IsHitTestVisible="False"
+                    Background="{DynamicResource BasaltWarningBrush}" CornerRadius="{StaticResource BasaltRadiusPill}"
+                    MinWidth="16" Height="16" Padding="4,0" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,1,1,0">
+              <TextBlock Text="{Binding Sync.Conflicts, FallbackValue=''}" FontSize="10" FontWeight="Bold"
+                         Foreground="{DynamicResource BasaltChromeBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+          </Panel>
+          <Button x:Name="HistoryButton" Classes="icon" Command="{Binding OpenHistoryCommand}"
+                  AutomationProperties.Name="{l:Loc Commands.OpenHistory}" ToolTip.Tip="{l:Loc Commands.OpenHistory}" ><PathIcon Width="18" Height="18" Data="{StaticResource IconHistory}" /></Button>
+          <Button x:Name="PaletteButton" Classes="icon" Command="{Binding ShowCommandPaletteCommand}"
+                  AutomationProperties.Name="{l:Loc Menu.CommandPalette}" ToolTip.Tip="{l:Loc Menu.CommandPalette}" ><PathIcon Width="18" Height="18" Data="{StaticResource IconCommand}" /></Button>
+          <Button x:Name="SettingsButton" Classes="icon" Command="{Binding OpenSettingsCommand}"
+                  AutomationProperties.Name="{l:Loc Commands.OpenSettings}" ToolTip.Tip="{l:Loc Commands.OpenSettings}" ><PathIcon Width="18" Height="18" Data="{StaticResource IconSettings}" /></Button>
+          <Button x:Name="ToggleRight" Classes="icon" Command="{Binding RightSidebar.ToggleCommand}"
+                  Classes.active="{Binding RightSidebar.IsOpen}"
+                  AutomationProperties.Name="{l:Loc Workspace.ToggleRightSidebar}" ToolTip.Tip="{l:Loc Workspace.ToggleRightSidebar}" ><PathIcon Width="18" Height="18" Data="{StaticResource IconSidebarRight}" /></Button>
+        </StackPanel>
+        <StackPanel Spacing="4" HorizontalAlignment="Center">
+          <Button x:Name="ToggleLeft" Classes="icon" Command="{Binding LeftSidebar.ToggleCommand}"
+                  AutomationProperties.Name="{l:Loc Workspace.ToggleLeftSidebar}" ToolTip.Tip="{l:Loc Workspace.ToggleLeftSidebar}" ><PathIcon Width="18" Height="18" Data="{StaticResource IconSidebarLeft}" /></Button>
+          <Button x:Name="FilesPanelButton" Classes="icon" Command="{Binding ShowPanelCommand}" CommandParameter="files"
+                  Classes.active="{Binding LeftSidebar.ActivePanel, Converter={x:Static ui:Converters.EqualsParameter}, ConverterParameter=files}"
+                  AutomationProperties.Name="{l:Loc Panel.files}" ToolTip.Tip="{l:Loc Panel.files}" ><PathIcon Width="18" Height="18" Data="{StaticResource IconFolder}" /></Button>
+          <Button x:Name="SearchPanelButton" Classes="icon" Command="{Binding ShowPanelCommand}" CommandParameter="search"
+                  Classes.active="{Binding LeftSidebar.ActivePanel, Converter={x:Static ui:Converters.EqualsParameter}, ConverterParameter=search}"
+                  AutomationProperties.Name="{l:Loc Panel.search}" ToolTip.Tip="{l:Loc Panel.search}" ><PathIcon Width="18" Height="18" Data="{StaticResource IconSearch}" /></Button>
+          <Button x:Name="BookmarksPanelButton" Classes="icon" Command="{Binding ShowPanelCommand}" CommandParameter="bookmarks"
+                  Classes.active="{Binding LeftSidebar.ActivePanel, Converter={x:Static ui:Converters.EqualsParameter}, ConverterParameter=bookmarks}"
+                  AutomationProperties.Name="{l:Loc Panel.bookmarks}" ToolTip.Tip="{l:Loc Panel.bookmarks}" ><PathIcon Width="18" Height="18" Data="{StaticResource IconBookmark}" /></Button>
+          <Button x:Name="TagsPanelButton" Classes="icon" Command="{Binding ShowPanelCommand}" CommandParameter="tags"
+                  Classes.active="{Binding LeftSidebar.ActivePanel, Converter={x:Static ui:Converters.EqualsParameter}, ConverterParameter=tags}"
+                  AutomationProperties.Name="{l:Loc Panel.tags}" ToolTip.Tip="{l:Loc Panel.tags}" ><PathIcon Width="18" Height="18" Data="{StaticResource IconHash}" /></Button>
+          <Button x:Name="DailyNoteButton" Classes="icon" Command="{Binding OpenDailyNoteCommand}"
+                  AutomationProperties.Name="{l:Loc Commands.OpenDailyNote}" ToolTip.Tip="{l:Loc Commands.OpenDailyNote}" ><PathIcon Width="18" Height="18" Data="{StaticResource IconCalendar}" /></Button>
+          <Button x:Name="GraphButton" Classes="icon" Command="{Binding OpenGraphCommand}"
+                  AutomationProperties.Name="{l:Loc Commands.OpenGraph}" ToolTip.Tip="{l:Loc Commands.OpenGraph}" ><PathIcon Width="18" Height="18" Data="{StaticResource IconGraph}" /></Button>
+        </StackPanel>
+      </DockPanel>
     </Border>
 
     <Panel>
-    <Grid x:Name="Columns" ColumnDefinitions="280,4,*,4,280">
-      <!-- Left sidebar -->
-      <DockPanel Grid.Column="0" x:Name="LeftSidebar" IsVisible="{Binding LeftSidebar.IsOpen}" Background="{DynamicResource BasaltSurfaceBrush}">
-        <ItemsControl DockPanel.Dock="Top" ItemsSource="{Binding LeftSidebar.Panels}" Margin="{StaticResource BasaltSpacingS}">
-          <ItemsControl.ItemsPanel>
-            <ItemsPanelTemplate>
-              <WrapPanel />
-            </ItemsPanelTemplate>
-          </ItemsControl.ItemsPanel>
-          <ItemsControl.ItemTemplate>
-            <DataTemplate x:DataType="x:String">
-              <Button Classes="pill" Content="{Binding Converter={x:Static ui:Converters.PanelTitle}}" Margin="0,0,4,4"
-                      Command="{Binding $parent[UserControl].((vm:WorkspaceViewModel)DataContext).ShowPanelCommand}" CommandParameter="{Binding}" />
-            </DataTemplate>
-          </ItemsControl.ItemTemplate>
-        </ItemsControl>
-        <ContentControl x:Name="LeftContent" Content="{Binding LeftContent}" Margin="8,0,8,8" />
+    <Grid x:Name="Columns" ColumnDefinitions="260,4,*,4,280">
+      <!-- Left sidebar: the vault, the quick switcher and the active panel. -->
+      <DockPanel Grid.Column="0" x:Name="LeftSidebar" IsVisible="{Binding LeftSidebar.IsOpen}" Background="{DynamicResource BasaltSidebarBrush}">
+        <Border DockPanel.Dock="Right" Width="1" Background="{DynamicResource BasaltBorderBrush}" />
+        <StackPanel DockPanel.Dock="Top" Spacing="10" Margin="12,12,12,6">
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <Border Width="26" Height="26" CornerRadius="{StaticResource BasaltRadiusM}"
+                    Background="{DynamicResource BasaltAccentBrush}">
+              <TextBlock Text="{Binding Vault.Name, Converter={x:Static ui:Converters.Initial}}" FontWeight="Bold" FontSize="13"
+                         Foreground="{DynamicResource BasaltOnAccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <TextBlock x:Name="VaultName" Text="{Binding Vault.Name}" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center"
+                       TextTrimming="CharacterEllipsis" />
+          </StackPanel>
+          <Button x:Name="QuickSwitcherButton" Command="{Binding ShowQuickSwitcherCommand}" HorizontalAlignment="Stretch"
+                  HorizontalContentAlignment="Stretch" Padding="10,0" MinHeight="32" FontWeight="Normal"
+                  AutomationProperties.Name="{l:Loc Menu.QuickSwitcher}" ToolTip.Tip="{l:Loc Menu.QuickSwitcher}">
+            <DockPanel>
+              <PathIcon Width="14" Height="14" Data="{StaticResource IconSearch}" Foreground="{DynamicResource BasaltTextMutedBrush}" />
+              <TextBlock Text="{l:Loc QuickSwitcher.Placeholder}" Margin="8,0,0,0" VerticalAlignment="Center"
+                         Foreground="{DynamicResource BasaltTextMutedBrush}" TextTrimming="CharacterEllipsis" />
+            </DockPanel>
+          </Button>
+        </StackPanel>
+        <ContentControl x:Name="LeftContent" Content="{Binding LeftContent}" Margin="6,0,6,8" />
       </DockPanel>
-      <GridSplitter Grid.Column="1" x:Name="LeftSplitter" IsVisible="{Binding LeftSidebar.IsOpen}" Background="{DynamicResource BasaltBorderBrush}" ResizeDirection="Columns" />
+      <GridSplitter Grid.Column="1" x:Name="LeftSplitter" IsVisible="{Binding LeftSidebar.IsOpen}" Background="Transparent" ResizeDirection="Columns" />
 
       <!-- Panes (splits) with their tabs -->
       <ItemsControl Grid.Column="2" x:Name="Panes" ItemsSource="{Binding Layout.Groups}">
@@ -78,51 +112,56 @@
         <ItemsControl.ItemTemplate>
           <DataTemplate x:DataType="vm:TabGroupViewModel">
             <DockPanel>
-              <ListBox DockPanel.Dock="Top" x:Name="Tabs" ItemsSource="{Binding Tabs}" SelectedItem="{Binding ActiveTab}"
-                       Background="{DynamicResource BasaltSurfaceAltBrush}" Classes="tabs" AutomationProperties.Name="{l:Loc Workspace.Tabs}">
-                <ListBox.ItemsPanel>
-                  <ItemsPanelTemplate>
-                    <StackPanel Orientation="Horizontal" />
-                  </ItemsPanelTemplate>
-                </ListBox.ItemsPanel>
-                <ListBox.ItemTemplate>
-                  <DataTemplate x:DataType="vm:TabViewModel">
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                      <TextBlock Text="{Binding Title}" VerticalAlignment="Center" />
-                      <Ellipse Width="6" Height="6" Fill="{DynamicResource BasaltAccentBrush}" IsVisible="{Binding IsDirty}"
+              <Border DockPanel.Dock="Top" Background="{DynamicResource BasaltChromeBrush}"
+                      BorderBrush="{DynamicResource BasaltBorderBrush}" BorderThickness="0,0,0,1" Padding="6,0">
+                <ListBox x:Name="Tabs" ItemsSource="{Binding Tabs}" SelectedItem="{Binding ActiveTab}"
+                         Classes="tabs" AutomationProperties.Name="{l:Loc Workspace.Tabs}">
+                  <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                      <StackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                  </ListBox.ItemsPanel>
+                  <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:TabViewModel">
+                      <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Ellipse Width="6" Height="6" Fill="{DynamicResource BasaltAccentBrush}" IsVisible="{Binding IsDirty}"
                                  VerticalAlignment="Center" ToolTip.Tip="{l:Loc Workspace.Unsaved}" />
-                      <Button Classes="close-tab"
-                              AutomationProperties.Name="{l:Loc Workspace.CloseTab}"
-                              Command="{Binding $parent[ListBox].((vm:TabGroupViewModel)DataContext).CloseTabCommand}" CommandParameter="{Binding}">
-                        <PathIcon Width="10" Height="10" Data="{StaticResource IconClose}" />
-                      </Button>
-                    </StackPanel>
-                  </DataTemplate>
-                </ListBox.ItemTemplate>
-              </ListBox>
+                        <TextBlock Text="{Binding Title}" VerticalAlignment="Center" MaxWidth="220" TextTrimming="CharacterEllipsis" />
+                        <Button Classes="close-tab"
+                                AutomationProperties.Name="{l:Loc Workspace.CloseTab}"
+                                Command="{Binding $parent[ListBox].((vm:TabGroupViewModel)DataContext).CloseTabCommand}" CommandParameter="{Binding}">
+                          <PathIcon Width="10" Height="10" Data="{StaticResource IconClose}" />
+                        </Button>
+                      </StackPanel>
+                    </DataTemplate>
+                  </ListBox.ItemTemplate>
+                </ListBox>
+              </Border>
               <ContentControl Content="{Binding ActiveTab}" />
             </DockPanel>
           </DataTemplate>
         </ItemsControl.ItemTemplate>
       </ItemsControl>
 
-      <GridSplitter Grid.Column="3" x:Name="RightSplitter" IsVisible="{Binding RightSidebar.IsOpen}" Background="{DynamicResource BasaltBorderBrush}" ResizeDirection="Columns" />
-      <!-- Right sidebar -->
-      <DockPanel Grid.Column="4" x:Name="RightSidebar" IsVisible="{Binding RightSidebar.IsOpen}" Background="{DynamicResource BasaltSurfaceBrush}">
-        <ItemsControl DockPanel.Dock="Top" ItemsSource="{Binding RightSidebar.Panels}" Margin="{StaticResource BasaltSpacingS}">
-          <ItemsControl.ItemsPanel>
-            <ItemsPanelTemplate>
-              <WrapPanel />
-            </ItemsPanelTemplate>
-          </ItemsControl.ItemsPanel>
-          <ItemsControl.ItemTemplate>
-            <DataTemplate x:DataType="x:String">
-              <Button Classes="pill" Content="{Binding Converter={x:Static ui:Converters.PanelTitle}}" Margin="0,0,4,4"
-                      Command="{Binding $parent[UserControl].((vm:WorkspaceViewModel)DataContext).ShowPanelCommand}" CommandParameter="{Binding}" />
-            </DataTemplate>
-          </ItemsControl.ItemTemplate>
-        </ItemsControl>
-        <ContentControl x:Name="RightContent" Content="{Binding RightContent}" Margin="8,0,8,8" />
+      <GridSplitter Grid.Column="3" x:Name="RightSplitter" IsVisible="{Binding RightSidebar.IsOpen}" Background="Transparent" ResizeDirection="Columns" />
+      <!-- Right sidebar: underlined tabs over the note's context panels. -->
+      <DockPanel Grid.Column="4" x:Name="RightSidebar" IsVisible="{Binding RightSidebar.IsOpen}" Background="{DynamicResource BasaltSidebarBrush}">
+        <Border DockPanel.Dock="Left" Width="1" Background="{DynamicResource BasaltBorderBrush}" />
+        <Border DockPanel.Dock="Top" BorderBrush="{DynamicResource BasaltBorderBrush}" BorderThickness="0,0,0,1" Margin="10,6,10,8">
+          <WrapPanel>
+            <Button x:Name="BacklinksTab" Classes="tab" Content="{l:Loc Panel.backlinks}" Command="{Binding ShowPanelCommand}" CommandParameter="backlinks"
+                    Classes.active="{Binding RightSidebar.ActivePanel, Converter={x:Static ui:Converters.EqualsParameter}, ConverterParameter=backlinks}" />
+            <Button x:Name="OutgoingTab" Classes="tab" Content="{l:Loc Panel.outgoing}" Command="{Binding ShowPanelCommand}" CommandParameter="outgoing"
+                    Classes.active="{Binding RightSidebar.ActivePanel, Converter={x:Static ui:Converters.EqualsParameter}, ConverterParameter=outgoing}" />
+            <Button x:Name="OutlineTab" Classes="tab" Content="{l:Loc Panel.outline}" Command="{Binding ShowPanelCommand}" CommandParameter="outline"
+                    Classes.active="{Binding RightSidebar.ActivePanel, Converter={x:Static ui:Converters.EqualsParameter}, ConverterParameter=outline}" />
+            <Button x:Name="LocalGraphTab" Classes="tab" Content="{l:Loc Panel.local-graph}" Command="{Binding ShowPanelCommand}" CommandParameter="local-graph"
+                    Classes.active="{Binding RightSidebar.ActivePanel, Converter={x:Static ui:Converters.EqualsParameter}, ConverterParameter=local-graph}" />
+            <Button x:Name="PropertiesTab" Classes="tab" Content="{l:Loc Panel.properties}" Command="{Binding ShowPanelCommand}" CommandParameter="properties"
+                    Classes.active="{Binding RightSidebar.ActivePanel, Converter={x:Static ui:Converters.EqualsParameter}, ConverterParameter=properties}" />
+          </WrapPanel>
+        </Border>
+        <ContentControl x:Name="RightContent" Content="{Binding RightContent}" Margin="10,0,10,10" />
       </DockPanel>
     </Grid>
 

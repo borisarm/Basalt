@@ -2,6 +2,7 @@ using System.Globalization;
 using Avalonia.Controls;
 using Basalt.Application.Abstractions;
 using Basalt.Application.Commands;
+using Basalt.Application.Indexing;
 using Basalt.Application.Vaults;
 using Basalt.Composition;
 using Basalt.Presentation.Common;
@@ -79,6 +80,10 @@ internal sealed class ComposedVault : IAsyncDisposable
         }
 
         var vault = (await provider.GetRequiredService<ICommandHandler<OpenVault, VaultSessionInfo>>().HandleAsync(new OpenVault(created.Value.Id), ct)).Value;
+
+        // Opening a vault starts the initial scan in the background; panels that read the index (tags, search) race
+        // it unless the scan has finished.
+        await provider.GetRequiredService<IVaultSessions>().Get(vault.Id).Value.Get<VaultIndexer>().ScanCompletion;
         var workspace = provider.GetRequiredService<WorkspaceFactory>().Create(vault);
         await workspace.InitializeAsync(ct);
         var window = new Window { Width = 1200, Height = 800, Content = new WorkspaceView { DataContext = workspace } };

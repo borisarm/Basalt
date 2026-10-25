@@ -29,11 +29,43 @@ public static class Headless
         await Gate.WaitAsync(ct);
         try
         {
-            await Session.Value.Dispatch(action, ct);
+            for (var attempt = 0; ; attempt++)
+            {
+                try
+                {
+                    // The session has no Func<Task> overload: a bare Func<Task> binds to Dispatch<TResult>(Func<TResult>)
+                    // with TResult = Task and returns as soon as the body first yields, dropping the rest of it and its
+                    // exceptions. Returning a value selects the Func<Task<TResult>> overload, which pumps the UI thread
+                    // until the body completes.
+                    await Session.Value.Dispatch(
+                        async () =>
+                        {
+                            await action();
+                            return true;
+                        },
+                        ct);
+                    return;
+                }
+                catch (InvalidOperationException exception) when (attempt < 3 && IsDispatcherInitializationRace(exception))
+                {
+                    // Avalonia resets the UI-thread dispatcher before initialising each isolated application; if
+                    // another thread claims it in that window the dispatch fails before the body runs. A fresh
+                    // dispatch wins the race after the next reset (AvaloniaUI/Avalonia#22021).
+                }
+            }
         }
         finally
         {
             Gate.Release();
         }
+    }
+
+    private static bool IsDispatcherInitializationRace(Exception exception)
+    {
+        var stack = exception.StackTrace;
+        return exception is InvalidOperationException
+            && stack is not null
+            && stack.Contains("EnsureIsolatedApplication", StringComparison.Ordinal)
+            && stack.Contains("DefaultRenderLoop.Add", StringComparison.Ordinal);
     }
 }

@@ -81,7 +81,8 @@ public sealed class SettingsViewTests
         var box = list.GetVisualDescendants().OfType<TextBox>().First();
         var row = (HotkeyRow)box.DataContext!;
         box.Text = "Ctrl+Alt+N";
-        list.GetVisualDescendants().OfType<Button>().First(b => b.Content?.ToString() == "Assign")
+        // The language is Spanish by now (set above).
+        list.GetVisualDescendants().OfType<Button>().First(b => b.Content?.ToString() == LocalizationSource.Instance["Settings.Hotkeys.Assign"])
             .RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         await SettleAsync();
         (await store.GetAsync(Ct)).Hotkeys[row.CommandId].Should().Be("Ctrl+Alt+N");

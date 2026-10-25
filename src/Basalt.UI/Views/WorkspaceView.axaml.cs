@@ -20,6 +20,7 @@ public partial class WorkspaceView : UserControl
 
     private readonly Grid _columns;
     private WorkspaceViewModel? _workspace;
+    private TopLevel? _top;
 
     public WorkspaceView()
     {
@@ -28,7 +29,19 @@ public partial class WorkspaceView : UserControl
         this.FindControl<GridSplitter>("LeftSplitter")!.DragCompleted += (_, _) => Remember(LeftColumn);
         this.FindControl<GridSplitter>("RightSplitter")!.DragCompleted += (_, _) => Remember(RightColumn);
         DataContextChanged += (_, _) => Attach(DataContext as WorkspaceViewModel);
-        AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Bubble);
+
+        // Shortcuts are listened for on the window, not on this view: with nothing focused (a vault just opened) key
+        // presses are raised on the window itself and never reach a handler further down.
+        AttachedToVisualTree += (_, _) =>
+        {
+            _top = TopLevel.GetTopLevel(this);
+            _top?.AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Bubble);
+        };
+        DetachedFromVisualTree += (_, _) =>
+        {
+            _top?.RemoveHandler(KeyDownEvent, OnKeyDown);
+            _top = null;
+        };
     }
 
     private void OnKeyDown(object? sender, KeyEventArgs e)

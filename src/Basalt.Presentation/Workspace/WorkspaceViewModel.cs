@@ -643,6 +643,7 @@ public sealed partial class WorkspaceViewModel : ViewModelBase, IWorkspaceNaviga
         if (path != _announced)
         {
             _announced = path;
+            OnPropertyChanged(nameof(ActiveFile));
             Messenger.Send(new ActiveFileChanged(path));
         }
     }

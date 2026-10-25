@@ -2,7 +2,6 @@ using System.ComponentModel;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
-using Avalonia.Markup.Xaml;
 using Basalt.Domain.Accounts;
 using Basalt.Presentation.Panels;
 using Basalt.Presentation.Settings;
@@ -22,7 +21,8 @@ public partial class MobileWorkspaceView : UserControl
 
     public MobileWorkspaceView()
     {
-        AvaloniaXamlLoader.Load(this);
+        // The generated InitializeComponent (not AvaloniaXamlLoader.Load) assigns the x:Name fields used below.
+        InitializeComponent();
         DataContextChanged += (_, _) => Watch();
         AttachedToVisualTree += (_, _) =>
         {

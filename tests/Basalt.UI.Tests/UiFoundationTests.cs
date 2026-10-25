@@ -81,7 +81,7 @@ public sealed class UiFoundationTests
 
         var prompt = DialogWindows.Prompt(new PromptRequest("t", "Nombre", "x"));
         prompt.Window.Show();
-        prompt.Window.FindControl<TextBox>("Input")!.Text = "Nuevo";
+        Named<TextBox>(prompt.Window, "Input").Text = "Nuevo";
         Click(prompt.Window, "Confirm");
         (await prompt.Result).Should().Be("Nuevo");
 
@@ -143,6 +143,10 @@ public sealed class UiFoundationTests
         window.Close();
     });
 
+    // The dialogs are built in code, so their named controls are not in a name scope that FindControl could search.
+    private static T Named<T>(Window window, string name)
+        where T : Control => window.GetVisualDescendants().OfType<T>().First(c => c.Name == name);
+
     private static void Click(Window window, string name) =>
-        ((Avalonia.Automation.Provider.IInvokeProvider)Avalonia.Automation.Peers.ControlAutomationPeer.CreatePeerForElement(window.FindControl<Button>(name)!)).Invoke();
+        ((Avalonia.Automation.Provider.IInvokeProvider)Avalonia.Automation.Peers.ControlAutomationPeer.CreatePeerForElement(Named<Button>(window, name))).Invoke();
 }

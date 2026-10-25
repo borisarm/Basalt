@@ -1,4 +1,6 @@
 using Basalt.Application.Common;
+using Basalt.Application.Sync;
+using Basalt.Domain.Vaults;
 
 namespace Basalt.Application.Tests.Common;
 
@@ -145,4 +147,64 @@ public sealed class AsyncReaderWriterLockTests
 
         (await rw.WriteAsync(Ct)).Dispose();
     }
+    [Fact]
+    public async Task SyncLocks_AllowOneLeasePerVault()
+    {
+        using var locks = new SyncLocks();
+        var vault = new VaultId(Guid.NewGuid());
+
+        var first = await locks.TryAcquireAsync(vault, Ct);
+        var second = await locks.TryAcquireAsync(vault, Ct);
+        first!.Dispose();
+        var third = await locks.TryAcquireAsync(vault, Ct);
+
+        first.Should().NotBeNull();
+        second.Should().BeNull();
+        third.Should().NotBeNull();
+        third!.Dispose();
+    }
+
+    [Fact]
+    public async Task SyncLocks_AreIndependentPerVaultAndDisposeIsSafe()
+    {
+        var locks = new SyncLocks();
+        var vault = new VaultId(Guid.NewGuid());
+        var first = await locks.TryAcquireAsync(vault, Ct);
+        var second = await locks.TryAcquireAsync(new VaultId(Guid.NewGuid()), Ct);
+
+        first.Should().NotBeNull();
+        second.Should().NotBeNull();
+        first!.Dispose();
+        second!.Dispose();
+        locks.Dispose();
+        await FluentActions.Awaiting(() => locks.TryAcquireAsync(vault, Ct)).Should().ThrowAsync<ObjectDisposedException>();
+    }
+
+    [Fact]
+    public async Task SyncLocks_PropagateCancellation()
+    {
+        using var locks = new SyncLocks();
+
+        await FluentActions.Awaiting(() => locks.TryAcquireAsync(new VaultId(Guid.NewGuid()), new CancellationToken(true)))
+            .Should().ThrowAsync<OperationCanceledException>();
+    }
+
+    [Fact]
+    public async Task VaultLocks_SerializeWritesPerVaultAndAllowOtherVaults()
+    {
+        using var locks = new VaultLocks();
+        var vault = new VaultId(Guid.NewGuid());
+        var other = new VaultId(Guid.NewGuid());
+
+        var write = await locks.WriteAsync(vault, Ct);
+        var blocked = locks.WriteAsync(vault, Ct);
+        var otherWrite = await locks.WriteAsync(other, Ct);
+
+        blocked.IsCompleted.Should().BeFalse();
+        otherWrite.Dispose();
+        write.Dispose();
+        (await blocked).Dispose();
+    }
 }
+
+

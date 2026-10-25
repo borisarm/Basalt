@@ -2,7 +2,9 @@ using Basalt.Application.Errors;
 using Basalt.Application.Notes;
 using Basalt.Application.Ports.Markdown;
 using Basalt.Application.Tests.TestSupport;
+using Basalt.Domain.Common;
 using Basalt.Domain.Notes;
+using Basalt.Domain.Vaults;
 using static Basalt.Application.Tests.TestSupport.VaultFixture;
 
 namespace Basalt.Application.Tests.Notes;
@@ -92,4 +94,58 @@ public sealed class ReadingTests
         (await handler.HandleAsync(new ReadAttachment(Id, P("img.png")), Ct)).Value.Should().Equal("PNG"u8.ToArray());
         (await handler.HandleAsync(new ReadAttachment(Id, P("none.png")), Ct)).Error.Code.Should().Be(ErrorCodes.EntryNotFound);
     }
+
+    [Fact]
+    public async Task ReadAttachment_PropagatesOtherReadFailures()
+    {
+        await using var v = await VaultAsync();
+        v.FileSystem.FailNextRead(P("img.png"), new Error(ErrorCodes.FsIo, "disk"));
+
+        var result = await new ReadAttachmentHandler(v.Sessions).HandleAsync(new ReadAttachment(Id, P("img.png")), Ct);
+
+        result.Error.Code.Should().Be(ErrorCodes.FsIo);
+    }
+
+    [Fact]
+    public async Task Embeds_WhenTheTargetNoteWasDeleted_IsMissing()
+    {
+        await using var v = await VaultAsync();
+        await v.FileSystem.DeleteAsync(P("B.md"), Ct);
+
+        var result = await Embeds(v).HandleAsync(new GetEmbed(Id, P("A.md"), "B", null, []), Ct);
+
+        result.Value.Should().Be(new MissingEmbed("B"));
+    }
+
+    [Fact]
+    public async Task Embeds_FindBlockIdsInsideListsAndQuotes()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(
+            ("A.md", "![[B#^blk]] ![[B#^quote]]"),
+            ("B.md", "- item ^blk\n\n> quote ^quote")));
+
+        var list = await Embeds(v).HandleAsync(new GetEmbed(Id, P("A.md"), "B", "^blk", []), Ct);
+        var quote = await Embeds(v).HandleAsync(new GetEmbed(Id, P("A.md"), "B", "^quote", []), Ct);
+
+        list.Value.Should().BeOfType<NoteEmbed>();
+        quote.Value.Should().BeOfType<NoteEmbed>();
+    }
+
+    [Fact]
+    public async Task ReadingHandlers_RejectNullsAndClosedVaults()
+    {
+        await using var v = await VaultAsync();
+        var closed = new VaultId(Guid.Parse("00000000-0000-0000-0000-0000000000ff"));
+
+        await FluentActions.Awaiting(() => new RenderNoteHandler(v.Sessions, v.Renderer).HandleAsync(null!, Ct)).Should().ThrowAsync<ArgumentNullException>();
+        await FluentActions.Awaiting(() => new ResolveLinkHandler(v.Sessions).HandleAsync(null!, Ct)).Should().ThrowAsync<ArgumentNullException>();
+        await FluentActions.Awaiting(() => Embeds(v).HandleAsync(null!, Ct)).Should().ThrowAsync<ArgumentNullException>();
+        await FluentActions.Awaiting(() => new ReadAttachmentHandler(v.Sessions).HandleAsync(null!, Ct)).Should().ThrowAsync<ArgumentNullException>();
+
+        (await new RenderNoteHandler(v.Sessions, v.Renderer).HandleAsync(new RenderNote(closed, P("A.md"), ""), Ct)).Error.Code.Should().Be(ErrorCodes.VaultNotOpen);
+        (await new ResolveLinkHandler(v.Sessions).HandleAsync(new ResolveLink(closed, P("A.md"), "B"), Ct)).Error.Code.Should().Be(ErrorCodes.VaultNotOpen);
+        (await Embeds(v).HandleAsync(new GetEmbed(closed, P("A.md"), "B", null, []), Ct)).Error.Code.Should().Be(ErrorCodes.VaultNotOpen);
+        (await new ReadAttachmentHandler(v.Sessions).HandleAsync(new ReadAttachment(closed, P("img.png")), Ct)).Error.Code.Should().Be(ErrorCodes.VaultNotOpen);
+    }
 }
+

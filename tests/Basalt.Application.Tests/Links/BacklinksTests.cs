@@ -1,3 +1,4 @@
+using System.Text;
 using Basalt.Application.Errors;
 using Basalt.Application.Links;
 using Basalt.Application.Notes;
@@ -36,6 +37,18 @@ public sealed class BacklinksTests
     }
 
     [Fact]
+    [Trait("Spec", "F-005.1")]
+    public async Task Backlinks_WhenTheSourceChangedAfterIndexing_ReadsTheCurrentText()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("A.md", "[[C]]"), ("C.md", "")));
+        await v.FileSystem.WriteAllBytesAsync(P("A.md"), Encoding.UTF8.GetBytes("intro [[C]] y [[C]]"), null, Ct);
+
+        var result = (await Backlinks(v).HandleAsync(new GetBacklinks(Id, P("C.md")), Ct)).Value;
+
+        result.Linked.Single().Links.Should().HaveCount(2);
+    }
+
+    [Fact]
     [Trait("Spec", "F-005.2")]
     public async Task UnlinkedMentions_FindTitleAndAliases_OutsideLinksAndCode()
     {
@@ -52,6 +65,22 @@ public sealed class BacklinksTests
         result.Unlinked[0].Mentions.Single().Context.Text.Should().Be("hablé de proyecto x ayer");
         result.Unlinked[1].Mentions.Single().Name.Should().Be("PX");
         result.Linked.Select(g => g.Source).Should().Equal(P("B.md"));
+    }
+
+    [Fact]
+    [Trait("Spec", "F-005.2")]
+    public async Task UnlinkedMentions_AtTheStartAndEndOfFile_HaveTheWholeLineAsContext()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(
+            ("Proyecto X.md", ""),
+            ("Inicio.md", "Proyecto X al principio"),
+            ("Fin.md", "termina en Proyecto X")));
+
+        var result = (await Backlinks(v).HandleAsync(new GetBacklinks(Id, P("Proyecto X.md")), Ct)).Value;
+
+        result.Unlinked.Select(g => g.Source).Should().Equal(P("Fin.md"), P("Inicio.md"));
+        result.Unlinked.Single(g => g.Source == P("Inicio.md")).Mentions.Single().Context.Text.Should().Be("Proyecto X al principio");
+        result.Unlinked.Single(g => g.Source == P("Fin.md")).Mentions.Single().Context.Text.Should().Be("termina en Proyecto X");
     }
 
     [Fact]

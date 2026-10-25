@@ -1,6 +1,7 @@
 using System.Text;
 using Basalt.Application.Errors;
 using Basalt.Application.Events;
+using Basalt.Application.Ports.FileSystem;
 using Basalt.Application.Ports.Storage;
 using Basalt.Application.Vaults;
 using Basalt.Domain.Common;
@@ -8,6 +9,7 @@ using Basalt.Domain.Notes;
 using Basalt.Domain.Vaults;
 using Basalt.Testing.Fakes;
 using Microsoft.Extensions.Logging.Abstractions;
+using NSubstitute;
 
 namespace Basalt.Application.Tests.Vaults;
 
@@ -279,6 +281,84 @@ public sealed class VaultUseCasesTests : IAsyncDisposable
         listed.Select(i => i.Registration.Name).Should().Equal("A", "B");
     }
 
+    [Fact]
+    public async Task OpenFolder_InvalidConfigReportsTheProblem()
+    {
+        _fileSystems.AddFolder("/roto");
+        _configs.Corrupt(_fileSystems.Get("/roto")!);
+
+        var result = await OpenFolder.HandleAsync(new OpenFolderAsVault("/roto"), Ct);
+
+        result.Error.Code.Should().Be(ErrorCodes.VaultConfigInvalid);
+        result.Error.Message.Should().Be("The vault configuration file cannot be read.");
+        result.Error.Metadata!["problem"].Should().Be("corrupt");
+    }
+
+    [Fact]
+    public async Task OpenFolder_WhenTheMissingConfigCannotBeSaved_ReturnsTheError()
+    {
+        _fileSystems.AddFolder("/nuevo");
+        var failure = new Error(ErrorCodes.StorageIo, "disk");
+        var configs = Substitute.For<IVaultConfigStore>();
+        configs.LoadVaultConfigAsync(Arg.Any<IVaultFileSystem>(), Arg.Any<CancellationToken>())
+            .Returns(new DocumentLoad<VaultConfig?>(null, DocumentLoadStatus.Missing));
+        configs.SaveVaultConfigAsync(Arg.Any<IVaultFileSystem>(), Arg.Any<VaultConfig>(), Arg.Any<CancellationToken>())
+            .Returns(Result<Unit>.Failure(failure));
+        var handler = new OpenFolderAsVaultHandler(_fileSystems, configs, _registry, _ids, _clock);
+
+        var result = await handler.HandleAsync(new OpenFolderAsVault("/nuevo"), Ct);
+
+        result.Error.Should().Be(failure);
+    }
+
+    [Fact]
+    public async Task OpenFolder_WhenTheMovedRegistrationCannotBeUpdated_ReturnsTheError()
+    {
+        var created = (await Create.HandleAsync(new CreateVault("Notas", "/home"), Ct)).Value;
+        var moved = (await _fileSystems.CreateAsync("/movido", Ct)).Value;
+        await _configs.SaveVaultConfigAsync(moved, new VaultConfig(created.Id, VaultSettings.Default), Ct);
+        var failure = new Error(ErrorCodes.StorageIo, "disk");
+        var registry = Substitute.For<IVaultRegistry>();
+        registry.GetAllAsync(Arg.Any<CancellationToken>()).Returns([created]);
+        registry.UpdateAsync(Arg.Any<VaultRegistration>(), Arg.Any<CancellationToken>()).Returns(Result<Unit>.Failure(failure));
+        var handler = new OpenFolderAsVaultHandler(_fileSystems, _configs, registry, _ids, _clock);
+
+        var result = await handler.HandleAsync(new OpenFolderAsVault("/movido"), Ct);
+
+        result.Error.Should().Be(failure);
+    }
+
+    [Fact]
+    public async Task OpenVault_InvalidConfigWithoutAProblem_UsesTheFallbackWarning()
+    {
+        var created = (await Create.HandleAsync(new CreateVault("Notas", "/home"), Ct)).Value;
+        var configs = Substitute.For<IVaultConfigStore>();
+        configs.LoadVaultConfigAsync(Arg.Any<IVaultFileSystem>(), Arg.Any<CancellationToken>())
+            .Returns(new DocumentLoad<VaultConfig?>(null, DocumentLoadStatus.Invalid));
+        var handler = new OpenVaultHandler(_registry, _fileSystems, configs, _sessions, [], _events, _clock);
+
+        var result = await handler.HandleAsync(new OpenVault(created.Id), Ct);
+
+        result.Value.ConfigWarning.Should().Be("invalid");
+    }
+
+    [Fact]
+    public async Task OpenVault_PropagatesOtherFileSystemFailuresAndPublishesOpened()
+    {
+        var created = (await Create.HandleAsync(new CreateVault("Notas", "/home"), Ct)).Value;
+        var failure = new Error(ErrorCodes.FsAccessDenied, "denied");
+        var fileSystems = Substitute.For<IVaultFileSystemFactory>();
+        fileSystems.OpenAsync("/home/Notas", Arg.Any<CancellationToken>())
+            .Returns(Result<IVaultFileSystem>.Failure(failure));
+        var handler = new OpenVaultHandler(_registry, fileSystems, _configs, _sessions, [], _events, _clock);
+
+        var result = await handler.HandleAsync(new OpenVault(created.Id), Ct);
+
+        result.Error.Should().Be(failure);
+        await FluentActions.Awaiting(() => handler.HandleAsync(null!, Ct)).Should().ThrowAsync<ArgumentNullException>();
+        await FluentActions.Awaiting(() => OpenFolder.HandleAsync(null!, Ct)).Should().ThrowAsync<ArgumentNullException>();
+    }
+
     private sealed class FailingInitializer : IVaultSessionInitializer
     {
         public Task<Result<Unit>> InitializeAsync(VaultSession session, CancellationToken ct) =>
@@ -314,4 +394,83 @@ public sealed class VaultUseCasesTests : IAsyncDisposable
         (await Relocate.HandleAsync(new RelocateVault(new VaultId(Guid.Parse("88888888-0000-4000-8000-000000000000")), "/sin-config"), Ct)).Error.Code.Should().Be(ErrorCodes.VaultNotRegistered);
         (await Relocate.HandleAsync(new RelocateVault(created.Id, "/sin-config"), Ct)).IsSuccess.Should().BeTrue();
     }
+    [Fact]
+    public async Task ListVaults_BreaksTiesByName()
+    {
+        await Create.HandleAsync(new CreateVault("beta", "/v"), Ct);
+        await Create.HandleAsync(new CreateVault("Alpha", "/v"), Ct);
+
+        var listed = (await new ListVaultsHandler(_registry, _sessions).HandleAsync(new ListVaults(), Ct)).Value;
+
+        listed.Select(i => i.Registration.Name).Should().Equal("Alpha", "beta");
+    }
+
+    [Fact]
+    public async Task CloseVault_NotOpen_IsANoOpAndPublishesNothing()
+    {
+        var closed = new List<VaultClosed>();
+        using var subscription = _events.Subscribe<VaultClosed>((e, _) => { closed.Add(e); return ValueTask.CompletedTask; });
+        var handler = new CloseVaultHandler(_sessions, _events);
+
+        var result = await handler.HandleAsync(new CloseVault(new VaultId(Guid.NewGuid())), Ct);
+        await _events.WaitForIdleAsync(Ct);
+
+        result.IsSuccess.Should().BeTrue();
+        closed.Should().BeEmpty();
+        await FluentActions.Awaiting(() => handler.HandleAsync(null!, Ct)).Should().ThrowAsync<ArgumentNullException>();
+    }
+
+    [Fact]
+    public async Task RemoveVault_PropagatesLocalDataFailuresAndRejectsNull()
+    {
+        var failure = new Error(ErrorCodes.StorageIo, "disk");
+        var registry = Substitute.For<IVaultRegistry>();
+        registry.RemoveAsync(Arg.Any<VaultId>(), Arg.Any<CancellationToken>()).Returns(Result.Success());
+        var localData = Substitute.For<IVaultLocalDataStore>();
+        localData.DeleteAsync(Arg.Any<VaultId>(), Arg.Any<CancellationToken>()).Returns(Result<Unit>.Failure(failure));
+        var handler = new RemoveVaultFromListHandler(registry, _sessions, localData, _events);
+
+        var result = await handler.HandleAsync(new RemoveVaultFromList(new VaultId(Guid.NewGuid())), Ct);
+
+        result.Error.Should().Be(failure);
+        await FluentActions.Awaiting(() => handler.HandleAsync(null!, Ct)).Should().ThrowAsync<ArgumentNullException>();
+    }
+
+    [Fact]
+    public async Task UpdateVaultSettings_WhenTheConfigCannotBeSaved_ReturnsTheError()
+    {
+        var created = (await Create.HandleAsync(new CreateVault("Notas", "/home"), Ct)).Value;
+        await Open().HandleAsync(new OpenVault(created.Id), Ct);
+        var failure = new Error(ErrorCodes.StorageIo, "disk");
+        var configs = Substitute.For<IVaultConfigStore>();
+        configs.SaveVaultConfigAsync(Arg.Any<IVaultFileSystem>(), Arg.Any<VaultConfig>(), Arg.Any<CancellationToken>())
+            .Returns(Result<Unit>.Failure(failure));
+        var handler = new UpdateVaultSettingsHandler(_sessions, configs, _events);
+
+        var result = await handler.HandleAsync(new UpdateVaultSettings(created.Id, VaultSettings.Default), Ct);
+
+        result.Error.Should().Be(failure);
+        await FluentActions.Awaiting(() => handler.HandleAsync(null!, Ct)).Should().ThrowAsync<ArgumentNullException>();
+    }
+
+    [Fact]
+    public async Task Relocate_WhenTheRegistryCannotBeSaved_Fails()
+    {
+        var created = (await Create.HandleAsync(new CreateVault("Notas", "/home"), Ct)).Value;
+        await _fileSystems.CreateAsync("/destino", Ct);
+        var failure = new Error(ErrorCodes.StorageIo, "disk");
+        var registry = Substitute.For<IVaultRegistry>();
+        registry.GetAllAsync(Arg.Any<CancellationToken>()).Returns([created]);
+        registry.UpdateAsync(Arg.Any<VaultRegistration>(), Arg.Any<CancellationToken>())
+            .Returns(Result<Unit>.Failure(failure));
+        var handler = new RelocateVaultHandler(registry, _fileSystems, _configs);
+
+        var result = await handler.HandleAsync(new RelocateVault(created.Id, "/destino"), Ct);
+
+        result.Error.Should().Be(failure);
+        await FluentActions.Awaiting(() => handler.HandleAsync(null!, Ct)).Should().ThrowAsync<ArgumentNullException>();
+    }
 }
+
+
+

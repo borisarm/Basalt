@@ -1,5 +1,3 @@
-using System.Globalization;
-
 namespace Basalt.Adapters.Markdown;
 
 /// <summary>
@@ -14,23 +12,24 @@ internal static class WordCounter
         foreach (var fragment in fragments)
         {
             var inWord = false;
-            var enumerator = StringInfo.GetTextElementEnumerator(fragment);
-            while (enumerator.MoveNext())
+            foreach (var rune in fragment.EnumerateRunes())
             {
-                var element = (string)enumerator.Current;
-                var rune = System.Text.Rune.GetRuneAt(element, 0);
                 if (IsCjk(rune.Value))
                 {
                     count++;
                     inWord = false;
                 }
-                else if (System.Text.Rune.IsLetterOrDigit(rune) || (inWord && element is "'" or "’"))
+                else if (System.Text.Rune.IsLetterOrDigit(rune))
                 {
                     if (!inWord)
                     {
                         count++;
                         inWord = true;
                     }
+                }
+                else if (rune.Value is '\'' or '\u2019' || IsCombiningMark(rune))
+                {
+                    // An apostrophe inside a word and combining marks do not split it.
                 }
                 else
                 {
@@ -41,6 +40,11 @@ internal static class WordCounter
 
         return count;
     }
+
+    private static bool IsCombiningMark(System.Text.Rune rune) =>
+        System.Text.Rune.GetUnicodeCategory(rune) is System.Globalization.UnicodeCategory.NonSpacingMark
+            or System.Globalization.UnicodeCategory.SpacingCombiningMark
+            or System.Globalization.UnicodeCategory.EnclosingMark;
 
     private static bool IsCjk(int codePoint) =>
         codePoint is (>= 0x4E00 and <= 0x9FFF) or (>= 0x3400 and <= 0x4DBF) or (>= 0x20000 and <= 0x2A6DF)

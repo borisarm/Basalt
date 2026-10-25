@@ -143,4 +143,42 @@ public sealed class ConflictUseCaseTests : IAsyncLifetime
 
         result.Error.Code.Should().Be(Basalt.Application.Errors.ErrorCodes.VaultNotOpen);
     }
+    [Fact]
+    public async Task ListConflicts_RequiresBothMarkersAndIgnoresNonMarkdownAndDirectories()
+    {
+        var afterALine = VaultPath.Create("Notes/D.md").Value;
+        var noClosing = VaultPath.Create("Notes/E.md").Value;
+        var text = VaultPath.Create("Notes/F.txt").Value;
+        await _files.WriteAllBytesAsync(afterALine, "intro\n<<<<<<< local\na\n=======\nb\n>>>>>>> remote\n"u8.ToArray(), null, Ct);
+        await _files.WriteAllBytesAsync(noClosing, "<<<<<<< local\na\n=======\nb\n"u8.ToArray(), null, Ct);
+        await _files.WriteAllBytesAsync(text, "<<<<<<< local\na\n>>>>>>> remote\n"u8.ToArray(), null, Ct);
+        await _files.CreateDirectoryAsync(VaultPath.Create("Notes/Dir (conflict x)").Value, Ct);
+
+        var result = await new ListConflictsHandler(_sessions).HandleAsync(new ListConflicts(Vault), Ct);
+
+        result.Value.Should().ContainSingle().Which.Path.Should().Be(afterALine);
+    }
+
+    [Fact]
+    public async Task ConflictCopies_AreRecognisedWithAndWithoutAnExtension()
+    {
+        var without = VaultPath.Create("Notes/A (conflict 2026-10-21 120000 Device)").Value;
+        var upper = VaultPath.Create("Notes/B (conflict 2026-10-21 120000 Device).MD").Value;
+        await _files.WriteAllBytesAsync(without, "x"u8.ToArray(), null, Ct);
+        await _files.WriteAllBytesAsync(upper, "x"u8.ToArray(), null, Ct);
+
+        var result = await new ListConflictsHandler(_sessions).HandleAsync(new ListConflicts(Vault), Ct);
+
+        result.Value.Select(entry => (entry.Path, entry.IsConflictCopy, entry.HasMarkers))
+            .Should().Equal((without, true, false), (upper, true, false));
+    }
+
+    [Fact]
+    public async Task ConflictHandlers_RejectNulls()
+    {
+        await FluentActions.Awaiting(() => new ListConflictsHandler(_sessions).HandleAsync(null!, Ct))
+            .Should().ThrowAsync<ArgumentNullException>();
+        await FluentActions.Awaiting(() => new ResolveConflictHandler(_sessions).HandleAsync(null!, Ct))
+            .Should().ThrowAsync<ArgumentNullException>();
+    }
 }

@@ -41,11 +41,9 @@ public sealed class PanelViewsTests
         Dispatcher.UIThread.RunJobs();
     }
 
-    private static void Press(ComposedVault v, Key key, RawInputModifiers modifiers)
-    {
-        v.Window.GetVisualDescendants().OfType<TreeView>().First().Focus();
+    // Pressed with nothing focused, as right after a vault opens: the shortcuts must still reach the workspace.
+    private static void Press(ComposedVault v, Key key, RawInputModifiers modifiers) =>
         v.Window.KeyPress(key, modifiers, PhysicalKey.None, null);
-    }
 
     public static TheoryData<Key, KeyModifiers, string?> Keys => new()
     {
@@ -122,7 +120,12 @@ public sealed class PanelViewsTests
 
         var palette = v.Window.GetVisualDescendants().OfType<CommandPaletteView>().Single();
         palette.IsVisible.Should().BeTrue();
-        Texts(palette).Should().Contain(["New note", "Ctrl+N", "Quick switcher…", "Ctrl+O"]);
+        Texts(palette).Should().Contain(["New note", "Ctrl+N"]);
+
+        // The list is virtualized: filter to bring a command beyond the first rows into view.
+        v.Workspace.Panels!.CommandPalette.Text = "Quick";
+        await SettleAsync();
+        Texts(palette).Should().Contain(["Quick switcher…", "Ctrl+O"]);
 
         palette.FindControl<TextBox>("Input")!.Focus();
         v.Window.KeyPress(Key.Escape, RawInputModifiers.None, PhysicalKey.Escape, null);

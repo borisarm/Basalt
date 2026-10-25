@@ -65,14 +65,7 @@ public sealed class MarkdownTextBoxEditor : UserControl, IEditorBridge
         }
     }
 
-    public void Insert(string text)
-    {
-        var start = _text.CaretIndex;
-        var value = GetText();
-        _text.Text = value[..start] + text + value[start..];
-        _text.CaretIndex = start + text.Length;
-        _tab?.OnTextChanged();
-    }
+    public void Insert(string text) => Replace(_text.CaretIndex, 0, text);
 
     public void Undo() => _text.Undo();
 
@@ -114,12 +107,14 @@ public sealed class MarkdownTextBoxEditor : UserControl, IEditorBridge
         return (start, end);
     }
 
+    // Edits go through the selection so that the TextBox records them on its undo stack (assigning Text does not);
+    // TextChanged then tells the tab.
     private void Replace(int start, int length, string text)
     {
-        var value = GetText();
-        _text.Text = value[..start] + text + value[(start + length)..];
+        _text.SelectionStart = start;
+        _text.SelectionEnd = start + length;
+        _text.SelectedText = text;
         _text.CaretIndex = start + text.Length;
-        _tab?.OnTextChanged();
     }
 
     private void Attach()

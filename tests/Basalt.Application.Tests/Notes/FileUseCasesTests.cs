@@ -1,11 +1,15 @@
+using System.Text;
 using Basalt.Application.Errors;
 using Basalt.Application.Notes;
+using Basalt.Application.Ports.Platform;
 using Basalt.Application.Tests.TestSupport;
+using Basalt.Application.Vaults;
 using Basalt.Domain.Common;
 using Basalt.Domain.Notes;
 using Basalt.Domain.Sync;
 using Basalt.Domain.Vaults;
 using Basalt.Testing.Fakes;
+using NSubstitute;
 using static Basalt.Application.Tests.TestSupport.VaultFixture;
 
 namespace Basalt.Application.Tests.Notes;
@@ -143,6 +147,18 @@ public sealed class FileUseCasesTests
     }
 
     [Fact]
+    [Trait("Spec", "F-004.4")]
+    public async Task Rename_WhenTheSourceChangedAfterIndexing_UsesTheCurrentText()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("A.md", "[[B]]"), ("B.md", "")));
+        await v.FileSystem.WriteAllBytesAsync(P("A.md"), Encoding.UTF8.GetBytes("[[B]] y [[B]]"), null, Ct);
+
+        await new RenameEntryHandler(v.Sessions, new EntryMover(v.Analyzer, v.Events)).HandleAsync(new RenameEntry(Id, P("B.md"), "C"), Ct);
+
+        (await v.ReadAsync("A.md")).Should().Be("[[C]] y [[C]]");
+    }
+
+    [Fact]
     [Trait("Spec", "F-004.5")]
     public async Task RenameFolder_UpdatesExplicitPaths()
     {
@@ -188,6 +204,88 @@ public sealed class FileUseCasesTests
 
         moved.Value.Should().Equal(P("Archivo/A.md"));
         (await v.ReadAsync("B.md")).Should().Be("[[./Archivo/A]]");
+    }
+
+    [Fact]
+    public async Task Move_WhenTheFileSystemMoveReportsAlreadyExists_MapsItAndRollsBack()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("A.md", "a")));
+        v.FileSystem.FailNextWrite(P("A.md"), new Error(ErrorCodes.FsAlreadyExists, "race"));
+
+        var result = await new EntryMover(v.Analyzer, v.Events).MoveAsync(v.Session, [(P("A.md"), P("Z.md"))], Ct);
+
+        result.Error.Code.Should().Be(ErrorCodes.PathAlreadyExists);
+        (await v.ExistsAsync("A.md")).Should().BeTrue();
+        (await v.ExistsAsync("Z.md")).Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task Move_WhenTheFileSystemMoveFails_ReturnsTheErrorAndRollsBack()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("A.md", "a")));
+        v.FileSystem.FailNextWrite(P("A.md"), new Error(ErrorCodes.FsIo, "disk"));
+
+        var result = await new EntryMover(v.Analyzer, v.Events).MoveAsync(v.Session, [(P("A.md"), P("Z.md"))], Ct);
+
+        result.Error.Code.Should().Be(ErrorCodes.FsIo);
+        (await v.ExistsAsync("A.md")).Should().BeTrue();
+        (await v.ExistsAsync("Z.md")).Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task Move_WhenALaterMoveFails_UndoesTheEarlierOnes()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("A.md", "a"), ("C.md", "c")));
+        v.FileSystem.FailNextWrite(P("C.md"), new Error(ErrorCodes.FsIo, "disk"));
+
+        var result = await new EntryMover(v.Analyzer, v.Events).MoveAsync(
+            v.Session, [(P("A.md"), P("B.md")), (P("C.md"), P("D.md"))], Ct);
+
+        result.Error.Code.Should().Be(ErrorCodes.FsIo);
+        (await v.ExistsAsync("A.md")).Should().BeTrue();
+        (await v.ExistsAsync("B.md")).Should().BeFalse();
+        (await v.ExistsAsync("C.md")).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Move_PublishesTheRenameAndTheRewrittenNotes()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("A.md", "[[B]]"), ("B.md", "")));
+        var renames = new List<EntryRenamed>();
+        var saves = new List<NoteSaved>();
+        using var renamed = v.Events.Subscribe<EntryRenamed>((e, _) => { renames.Add(e); return ValueTask.CompletedTask; });
+        using var saved = v.Events.Subscribe<NoteSaved>((e, _) => { saves.Add(e); return ValueTask.CompletedTask; });
+
+        await new EntryMover(v.Analyzer, v.Events).MoveAsync(v.Session, [(P("B.md"), P("C.md"))], Ct);
+
+        renames.Select(e => (e.From, e.To)).Should().Equal((P("B.md"), P("C.md")));
+        saves.Select(e => e.Path).Should().Equal(P("A.md"));
+    }
+
+    [Fact]
+    public async Task Move_WithoutAnIndex_StillMovesTheFile()
+    {
+        await using var v = await VaultFixture.CreateAsync();
+        var fs = new InMemoryVaultFileSystem(time: v.Clock.Time);
+        await fs.WriteAllBytesAsync(P("A.md"), Encoding.UTF8.GetBytes("a"), null, Ct);
+        await using var session = new VaultSession(Id, "Test", fs, VaultSettings.Default);
+
+        var result = await new EntryMover(v.Analyzer, v.Events).MoveAsync(session, [(P("A.md"), P("B.md"))], Ct);
+
+        result.IsSuccess.Should().BeTrue();
+        (await fs.ExistsAsync(P("B.md"), Ct)).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Move_RejectsNullArguments()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("A.md", "")));
+        var mover = new EntryMover(v.Analyzer, v.Events);
+
+        await FluentActions.Awaiting(() => mover.MoveAsync(null!, [(P("A.md"), P("B.md"))], Ct))
+            .Should().ThrowAsync<ArgumentNullException>();
+        await FluentActions.Awaiting(() => mover.MoveAsync(v.Session, null!, Ct))
+            .Should().ThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
@@ -383,6 +481,180 @@ public sealed class FileUseCasesTests
     }
 
     [Fact]
+    public async Task ToggleTask_WithAnOutOfRangeLine_ReportsThatItIsNotATask()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("t.md", "# T\n- [ ] uno")));
+        var handler = new ToggleTaskHandler(v.Sessions, v.Events);
+
+        var negative = await handler.HandleAsync(new ToggleTask(Id, P("t.md"), -1), Ct);
+        var past = await handler.HandleAsync(new ToggleTask(Id, P("t.md"), 2), Ct);
+
+        negative.Error.Code.Should().Be(ErrorCodes.NoteNotATask);
+        past.Error.Code.Should().Be(ErrorCodes.NoteNotATask);
+        negative.Error.Message.Should().Be("The line is not a task.");
+    }
+
+    [Fact]
+    public async Task ToggleTask_WhenTheFileChangedConcurrently_ReportsItAndLeavesTheFile()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("t.md", "- [ ] uno")));
+        v.FileSystem.FailNextWrite(P("t.md"), new Error(ErrorCodes.FsConcurrentModification, "changed"));
+
+        var result = await new ToggleTaskHandler(v.Sessions, v.Events).HandleAsync(new ToggleTask(Id, P("t.md"), 0), Ct);
+
+        result.Error.Code.Should().Be(ErrorCodes.NoteModifiedExternally);
+        result.Error.Message.Should().Be("The note changed on disk; try again.");
+        (await v.ReadAsync("t.md")).Should().Be("- [ ] uno");
+    }
+
+    [Fact]
+    public async Task ToggleTask_WhenTheWriteFails_ReturnsTheRawError()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("t.md", "- [ ] uno")));
+        v.FileSystem.FailNextWrite(P("t.md"), new Error(ErrorCodes.FsIo, "disk"));
+
+        var result = await new ToggleTaskHandler(v.Sessions, v.Events).HandleAsync(new ToggleTask(Id, P("t.md"), 0), Ct);
+
+        result.Error.Code.Should().Be(ErrorCodes.FsIo);
+    }
+
+    [Fact]
+    public async Task ToggleTask_OnAMissingNote_Fails()
+    {
+        await using var v = await VaultFixture.CreateAsync();
+
+        var result = await new ToggleTaskHandler(v.Sessions, v.Events).HandleAsync(new ToggleTask(Id, P("none.md"), 0), Ct);
+
+        result.Error.Code.Should().Be(ErrorCodes.EntryNotFound);
+    }
+
+    [Fact]
+    public async Task ToggleTask_PublishesNoteSaved()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("t.md", "- [ ] uno")));
+        var saved = new List<NoteSaved>();
+        using var subscription = v.Events.Subscribe<NoteSaved>((e, _) => { saved.Add(e); return ValueTask.CompletedTask; });
+
+        await new ToggleTaskHandler(v.Sessions, v.Events).HandleAsync(new ToggleTask(Id, P("t.md"), 0), Ct);
+        await v.Events.WaitForIdleAsync(Ct);
+
+        saved.Select(e => e.Path).Should().Equal(P("t.md"));
+    }
+
+    [Fact]
+    public async Task EditHandlers_RejectNullCommandsAndClosedVaults()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("t.md", "- [ ] uno")));
+        var closed = new VaultId(Guid.Parse("00000000-0000-0000-0000-0000000000ff"));
+        var toggle = new ToggleTaskHandler(v.Sessions, v.Events);
+        var set = new SetFrontmatterPropertyHandler(v.Sessions, v.FrontmatterEditor, v.Analyzer, v.Events);
+        var remove = new RemoveFrontmatterPropertyHandler(v.Sessions, v.FrontmatterEditor, v.Analyzer, v.Events);
+
+        await FluentActions.Awaiting(() => toggle.HandleAsync(null!, Ct)).Should().ThrowAsync<ArgumentNullException>();
+        await FluentActions.Awaiting(() => set.HandleAsync(null!, Ct)).Should().ThrowAsync<ArgumentNullException>();
+        await FluentActions.Awaiting(() => remove.HandleAsync(null!, Ct)).Should().ThrowAsync<ArgumentNullException>();
+
+        (await toggle.HandleAsync(new ToggleTask(closed, P("t.md"), 0), Ct)).Error.Code.Should().Be(ErrorCodes.VaultNotOpen);
+        (await set.HandleAsync(new SetFrontmatterProperty(closed, P("t.md"), "a", new StructuredValue.TextValue("b")), Ct)).Error.Code.Should().Be(ErrorCodes.VaultNotOpen);
+        (await remove.HandleAsync(new RemoveFrontmatterProperty(closed, P("t.md"), "a"), Ct)).Error.Code.Should().Be(ErrorCodes.VaultNotOpen);
+    }
+
+    [Fact]
+    public async Task ImportAttachment_RejectsNestedAndInvalidNames()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("Notas/n.md", "")));
+        var handler = new ImportAttachmentHandler(v.Sessions, v.Events);
+
+        var nested = await handler.HandleAsync(new ImportAttachment(Id, P("Notas/n.md"), "sub/a.png", [1]), Ct);
+        var invalid = await handler.HandleAsync(new ImportAttachment(Id, P("Notas/n.md"), "bad?.png", [1]), Ct);
+
+        nested.Error.Code.Should().Be(ErrorCodes.PathAlreadyExists);
+        invalid.IsFailure.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task ImportAttachment_PublishesEntriesCreated()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("Notas/n.md", "")));
+        var created = new List<EntriesCreated>();
+        using var subscription = v.Events.Subscribe<EntriesCreated>((e, _) => { created.Add(e); return ValueTask.CompletedTask; });
+
+        await new ImportAttachmentHandler(v.Sessions, v.Events)
+            .HandleAsync(new ImportAttachment(Id, P("Notas/n.md"), "a.png", [1]), Ct);
+        await v.Events.WaitForIdleAsync(Ct);
+
+        created.Single().Paths.Should().Equal(P("a.png"));
+    }
+
+    [Fact]
+    public async Task ImportAttachment_RejectsNullCommandsAndClosedVaults()
+    {
+        await using var v = await VaultFixture.CreateAsync();
+        var handler = new ImportAttachmentHandler(v.Sessions, v.Events);
+        var closed = new VaultId(Guid.Parse("00000000-0000-0000-0000-0000000000ff"));
+
+        await FluentActions.Awaiting(() => handler.HandleAsync(null!, Ct)).Should().ThrowAsync<ArgumentNullException>();
+        (await handler.HandleAsync(new ImportAttachment(closed, P("n.md"), "a.png", [1]), Ct)).Error.Code.Should().Be(ErrorCodes.VaultNotOpen);
+    }
+
+    [Fact]
+    public async Task CreateNote_UsesTheRootWhenTheDefaultFolderIsInvalid()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(), VaultSettings.Default with { NewNoteFolder = "bad?" });
+        var handler = new CreateNoteHandler(v.Sessions, v.Events, v.Clock, v.Culture);
+
+        var created = await handler.HandleAsync(new CreateNote(Id), Ct);
+
+        created.Value.Should().Be(P("Untitled.md"));
+    }
+
+    [Fact]
+    public async Task CreateNote_WhenTheFileAppearsWhileCreating_ReportsAlreadyExists()
+    {
+        await using var v = await VaultFixture.CreateAsync();
+        v.FileSystem.FailNextWrite(P("Untitled.md"), new Error(ErrorCodes.FsAlreadyExists, "race"));
+
+        var result = await new CreateNoteHandler(v.Sessions, v.Events, v.Clock, v.Culture).HandleAsync(new CreateNote(Id), Ct);
+
+        result.Error.Code.Should().Be(ErrorCodes.PathAlreadyExists);
+    }
+
+    [Fact]
+    public async Task CreateNote_PropagatesOtherCreateErrorsAndPublishesTheEntry()
+    {
+        await using var v = await VaultFixture.CreateAsync();
+        var created = new List<EntriesCreated>();
+        using var subscription = v.Events.Subscribe<EntriesCreated>((e, _) => { created.Add(e); return ValueTask.CompletedTask; });
+        var handler = new CreateNoteHandler(v.Sessions, v.Events, v.Clock, v.Culture);
+
+        (await handler.HandleAsync(new CreateNote(Id, Title: "A"), Ct)).IsSuccess.Should().BeTrue();
+        await v.Events.WaitForIdleAsync(Ct);
+        v.FileSystem.FailNextWrite(P("B.md"), new Error(ErrorCodes.FsIo, "disk"));
+        var failed = await handler.HandleAsync(new CreateNote(Id, Title: "B"), Ct);
+
+        created.SelectMany(e => e.Paths).Should().Equal(P("A.md"));
+        failed.Error.Code.Should().Be(ErrorCodes.FsIo);
+        await FluentActions.Awaiting(() => handler.HandleAsync(null!, Ct)).Should().ThrowAsync<ArgumentNullException>();
+    }
+
+    [Fact]
+    public async Task CreateFolder_CreatesAndPublishesOrFails()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("A.md", "")));
+        var created = new List<EntriesCreated>();
+        using var subscription = v.Events.Subscribe<EntriesCreated>((e, _) => { created.Add(e); return ValueTask.CompletedTask; });
+        var handler = new CreateFolderHandler(v.Sessions, v.Events);
+
+        (await handler.HandleAsync(new CreateFolder(Id, P("Nueva")), Ct)).Value.Should().Be(P("Nueva"));
+        (await handler.HandleAsync(new CreateFolder(Id, P("Nueva")), Ct)).Error.Code.Should().Be(ErrorCodes.PathAlreadyExists);
+        (await handler.HandleAsync(new CreateFolder(Id, VaultPath.Root), Ct)).Error.Code.Should().Be(ErrorCodes.PathAlreadyExists);
+        await v.Events.WaitForIdleAsync(Ct);
+        (await handler.HandleAsync(new CreateFolder(new VaultId(Guid.Parse("00000000-0000-0000-0000-0000000000ff")), P("X")), Ct)).Error.Code.Should().Be(ErrorCodes.VaultNotOpen);
+        await FluentActions.Awaiting(() => handler.HandleAsync(null!, Ct)).Should().ThrowAsync<ArgumentNullException>();
+        created.SelectMany(e => e.Paths).Should().Equal(P("Nueva"));
+    }
+
+    [Fact]
     [Trait("Spec", "F-002.7")]
     public async Task ExternalCreation_AppearsInTheTreeAndIsIndexed()
     {
@@ -414,6 +686,140 @@ public sealed class FileUseCasesTests
 
         (await handler.HandleAsync(new GetFileTree(Id, FileTreeSort.ModifiedNewest), Ct)).Value.Children.Select(c => c.Path.ToString()).Should().Equal("new.md", "old.md");
         (await handler.HandleAsync(new GetFileTree(Id, FileTreeSort.ModifiedOldest), Ct)).Value.Children.Select(c => c.Path.ToString()).Should().Equal("old.md", "new.md");
+    }
+
+    [Fact]
+    public async Task ReadNote_PropagatesNonNotFoundReadFailuresAndDescribesMissingFiles()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("A.md", "a")));
+        var missing = await new ReadNoteHandler(v.Sessions, v.Analyzer).HandleAsync(new ReadNote(Id, P("none.md")), Ct);
+        v.FileSystem.FailNextRead(P("A.md"), new Error(ErrorCodes.FsIo, "disk"));
+        var failed = await new ReadNoteHandler(v.Sessions, v.Analyzer).HandleAsync(new ReadNote(Id, P("A.md")), Ct);
+
+        missing.Error.Code.Should().Be(ErrorCodes.EntryNotFound);
+        missing.Error.Message.Should().Be("The file or folder does not exist.");
+        missing.Error.Metadata!["path"].Should().Be("none.md");
+        failed.Error.Code.Should().Be(ErrorCodes.FsIo);
+    }
+
+    [Fact]
+    public async Task CreateNote_Duplicate_DescribesTheExistingPath()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("A.md", "")));
+        var handler = new CreateNoteHandler(v.Sessions, v.Events, v.Clock, v.Culture);
+
+        var result = await handler.HandleAsync(new CreateNote(Id, Title: "A"), Ct);
+
+        result.Error.Code.Should().Be(ErrorCodes.PathAlreadyExists);
+        result.Error.Message.Should().Be("A file or folder with that name already exists.");
+        result.Error.Metadata!["path"].Should().Be("A.md");
+    }
+
+    [Fact]
+    public async Task Delete_WhenTheTrashNameHasMultipleExtensions_KeepsTheLastOne()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("A.tar.gz", "x"), (".trash/A.tar.gz", "old")));
+
+        var result = await new DeleteEntriesHandler(v.Sessions, v.Events)
+            .HandleAsync(new DeleteEntries(Id, [P("A.tar.gz")]), Ct);
+
+        result.IsSuccess.Should().BeTrue();
+        (await v.ExistsAsync(".trash/A.tar 2.gz")).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Delete_Missing_DescribesThePath()
+    {
+        await using var v = await VaultFixture.CreateAsync();
+
+        var result = await new DeleteEntriesHandler(v.Sessions, v.Events)
+            .HandleAsync(new DeleteEntries(Id, [P("none.md")]), Ct);
+
+        result.Error.Code.Should().Be(ErrorCodes.EntryNotFound);
+        result.Error.Message.Should().Be("The file or folder does not exist.");
+        result.Error.Metadata!["path"].Should().Be("none.md");
+    }
+
+    [Fact]
+    public async Task Delete_WithNoPaths_DoesNothingAndPublishesNothing()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("A.md", "")));
+        var deleted = new List<EntriesDeleted>();
+        using var subscription = v.Events.Subscribe<EntriesDeleted>((e, _) => { deleted.Add(e); return ValueTask.CompletedTask; });
+
+        var result = await new DeleteEntriesHandler(v.Sessions, v.Events).HandleAsync(new DeleteEntries(Id, []), Ct);
+        await v.Events.WaitForIdleAsync(Ct);
+
+        result.IsSuccess.Should().BeTrue();
+        deleted.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Delete_WhenOneMoveFails_PublishesTheOnesAlreadyDeleted()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("A.md", "a"), ("B.md", "b")));
+        var deleted = new List<EntriesDeleted>();
+        using var subscription = v.Events.Subscribe<EntriesDeleted>((e, _) => { deleted.Add(e); return ValueTask.CompletedTask; });
+        v.FileSystem.FailNextWrite(P("A.md"), new Error(ErrorCodes.FsIo, "disk"));
+
+        var result = await new DeleteEntriesHandler(v.Sessions, v.Events)
+            .HandleAsync(new DeleteEntries(Id, [P("B.md"), P("A.md")]), Ct);
+        await v.Events.WaitForIdleAsync(Ct);
+
+        result.Error.Code.Should().Be(ErrorCodes.FsIo);
+        deleted.SelectMany(e => e.Paths).Should().Equal(P("B.md"));
+        (await v.ExistsAsync("B.md")).Should().BeFalse();
+        (await v.ExistsAsync("A.md")).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Delete_ToAnUnavailableSystemTrash_FallsBackToTheVaultTrash()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("A.md", "")));
+        var trash = Substitute.For<ISystemTrash>();
+        trash.IsAvailable.Returns(false);
+
+        await new DeleteEntriesHandler(v.Sessions, v.Events, trash)
+            .HandleAsync(new DeleteEntries(Id, [P("A.md")], DeleteMode.SystemTrash), Ct);
+
+        (await v.ExistsAsync(".trash/A.md")).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task DeleteAndMove_RejectNullsAndClosedVaults()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("A.md", "")));
+        var closed = new VaultId(Guid.Parse("00000000-0000-0000-0000-0000000000ff"));
+        var delete = new DeleteEntriesHandler(v.Sessions, v.Events);
+        var move = new MoveEntriesHandler(v.Sessions, new EntryMover(v.Analyzer, v.Events));
+
+        await FluentActions.Awaiting(() => delete.HandleAsync(null!, Ct)).Should().ThrowAsync<ArgumentNullException>();
+        await FluentActions.Awaiting(() => move.HandleAsync(null!, Ct)).Should().ThrowAsync<ArgumentNullException>();
+        (await delete.HandleAsync(new DeleteEntries(closed, [P("A.md")]), Ct)).Error.Code.Should().Be(ErrorCodes.VaultNotOpen);
+        (await move.HandleAsync(new MoveEntries(closed, [P("A.md")], P("X")), Ct)).Error.Code.Should().Be(ErrorCodes.VaultNotOpen);
+    }
+
+    [Fact]
+    public async Task Move_WhenEveryPathIsAlreadyInTheTarget_ReturnsThemUnchanged()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("X/A.md", "")));
+
+        var result = await new MoveEntriesHandler(v.Sessions, new EntryMover(v.Analyzer, v.Events))
+            .HandleAsync(new MoveEntries(Id, [P("X/A.md")], P("X")), Ct);
+
+        result.Value.Should().Equal(P("X/A.md"));
+    }
+
+    [Fact]
+    public async Task Rename_ADirectoryKeepsItWithoutAnExtension()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("Dir.old/A.md", "")));
+
+        var result = await new RenameEntryHandler(v.Sessions, new EntryMover(v.Analyzer, v.Events))
+            .HandleAsync(new RenameEntry(Id, P("Dir.old"), "Dir.new"), Ct);
+
+        result.Value.Should().Be(P("Dir.new"));
+        (await v.ExistsAsync("Dir.new/A.md")).Should().BeTrue();
     }
 
     [Fact]
@@ -510,3 +916,7 @@ public sealed class FileUseCasesTests
         return result;
     }
 }
+
+
+
+

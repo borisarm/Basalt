@@ -51,6 +51,12 @@ jobs:
           dotnet-version: 10.0.x
       - run: dotnet build tests/Basalt.UI.Tests -c Release
       - run: dotnet test --project tests/Basalt.UI.Tests --no-build -c Release
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: ui-snapshots-${{ matrix.os }}
+          path: tests/Basalt.UI.Tests/Snapshots/*.received.png
+          if-no-files-found: ignore
 
   sync-simulation:
     runs-on: ubuntu-latest

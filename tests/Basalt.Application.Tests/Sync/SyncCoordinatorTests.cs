@@ -139,6 +139,153 @@ public sealed class SyncCoordinatorTests
         coordinator.GetStatus(vault).NextAttempt.Should().BeNull();
     }
 
+    [Fact]
+    public async Task NotifyAppBackground_WhenDisabled_DoesNothing()
+    {
+        var runner = new Runner((_, _) => Task.FromResult(Result()));
+        var vault = new VaultId(Guid.NewGuid());
+        await using var coordinator = Coordinator(_ => runner, Time());
+        await coordinator.StartAsync(Profile(vault, new SyncTriggers(OnVaultOpen: false, OnAppBackground: false)));
+
+        coordinator.NotifyAppBackground(vault);
+        await Task.Delay(50, Ct);
+
+        runner.Calls.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task NotifyEdit_WithoutAnIdleDelay_DoesNothing()
+    {
+        var runner = new Runner((_, _) => Task.FromResult(Result()));
+        var vault = new VaultId(Guid.NewGuid());
+        await using var coordinator = Coordinator(_ => runner, Time());
+        await coordinator.StartAsync(Profile(vault, new SyncTriggers(OnVaultOpen: false)));
+
+        coordinator.NotifyEdit(vault);
+        await Task.Delay(50, Ct);
+
+        runner.Calls.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task NotifyEdit_RestartsTheDebounce()
+    {
+        var runner = new Runner((_, _) => Task.FromResult(Result()));
+        var time = Time();
+        var vault = new VaultId(Guid.NewGuid());
+        await using var coordinator = Coordinator(_ => runner, time);
+        await coordinator.StartAsync(Profile(vault, new SyncTriggers(OnVaultOpen: false, AfterEditIdle: TimeSpan.FromSeconds(30))));
+
+        coordinator.NotifyEdit(vault);
+        time.Advance(TimeSpan.FromSeconds(20));
+        coordinator.NotifyEdit(vault);
+        time.Advance(TimeSpan.FromSeconds(20));
+        await Task.Delay(50, Ct);
+        runner.Calls.Should().Be(0);
+
+        time.Advance(TimeSpan.FromSeconds(15));
+        await runner.WaitForCallAsync(Ct).WaitAsync(TimeSpan.FromSeconds(5), Ct);
+        runner.Calls.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task RunAppBackgroundAndRefresh_SyncOnlyTheEnabledProfiles()
+    {
+        var background = new Runner((_, _) => Task.FromResult(Result()));
+        var refresh = new Runner((_, _) => Task.FromResult(Result()));
+        var none = new Runner((_, _) => Task.FromResult(Result()));
+        var vaultBackground = new VaultId(Guid.NewGuid());
+        var vaultRefresh = new VaultId(Guid.NewGuid());
+        var vaultNone = new VaultId(Guid.NewGuid());
+        await using var coordinator = Coordinator(
+            profile => profile.VaultId == vaultBackground ? background : profile.VaultId == vaultRefresh ? refresh : none,
+            Time());
+        await coordinator.StartAsync(Profile(vaultBackground, new SyncTriggers(OnVaultOpen: false, OnAppBackground: true, BackgroundRefresh: false)));
+        await coordinator.StartAsync(Profile(vaultRefresh, new SyncTriggers(OnVaultOpen: false, OnAppBackground: false, BackgroundRefresh: true)));
+        await coordinator.StartAsync(Profile(vaultNone, new SyncTriggers(OnVaultOpen: false, OnAppBackground: false, BackgroundRefresh: false)));
+
+        await coordinator.RunAppBackgroundAsync(Ct);
+        await coordinator.RunBackgroundRefreshAsync(Ct);
+
+        background.Calls.Should().Be(1);
+        refresh.Calls.Should().Be(1);
+        none.Calls.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task Stop_RemovesTheVaultAndIsIdempotent()
+    {
+        var runner = new Runner((_, _) => Task.FromResult(Result()));
+        var vault = new VaultId(Guid.NewGuid());
+        await using var coordinator = Coordinator(_ => runner, Time());
+        await coordinator.StartAsync(Profile(vault));
+
+        await coordinator.StopAsync(vault);
+        var act = () => coordinator.GetStatus(vault);
+        await coordinator.StopAsync(vault);
+
+        act.Should().Throw<InvalidOperationException>().WithMessage($"*{vault}*");
+    }
+
+    [Fact]
+    public async Task UpdateContext_IsUsedByTheNextCycle()
+    {
+        var runner = new Runner((_, _) => Task.FromResult(Result()));
+        var vault = new VaultId(Guid.NewGuid());
+        await using var coordinator = Coordinator(_ => runner, Time());
+        await coordinator.StartAsync(Profile(vault, new SyncTriggers(OnVaultOpen: false)));
+        var context = new SyncCycleContext(true, true, new CommitAuthor("Other", "other@example.test"), "Notes");
+
+        coordinator.UpdateContext(vault, context);
+        await coordinator.RequestAsync(Profile(vault), SyncTriggerReason.Manual, null, Ct);
+
+        runner.Calls.Should().Be(1);
+        coordinator.GetStatus(vault).LastResult.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task StatusChanged_IsRaisedAfterACycle()
+    {
+        var runner = new Runner((_, _) => Task.FromResult(Result()));
+        var vault = new VaultId(Guid.NewGuid());
+        await using var coordinator = Coordinator(_ => runner, Time());
+        var statuses = new List<SyncStatus>();
+        var raised = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        coordinator.StatusChanged += status =>
+        {
+            statuses.Add(status);
+            raised.TrySetResult();
+        };
+
+        await coordinator.RequestAsync(Profile(vault), SyncTriggerReason.Manual, null, Ct);
+        await raised.Task.WaitAsync(TimeSpan.FromSeconds(5), Ct);
+
+        statuses.Should().ContainSingle().Which.LastResult!.Status.Should().Be(SyncCycleStatus.UpToDate);
+    }
+
+    [Fact]
+    public async Task NotifyEdit_ForAnUnknownVault_Throws()
+    {
+        var runner = new Runner((_, _) => Task.FromResult(Result()));
+        await using var coordinator = Coordinator(_ => runner, Time());
+
+        FluentActions.Invoking(() => coordinator.NotifyEdit(new VaultId(Guid.NewGuid())))
+            .Should().Throw<InvalidOperationException>();
+    }
+
+    [Fact]
+    public async Task DisposedCoordinator_RejectsRequestsAndDisposesTwice()
+    {
+        var runner = new Runner((_, _) => Task.FromResult(Result()));
+        var coordinator = Coordinator(_ => runner, Time());
+
+        await coordinator.DisposeAsync();
+        await coordinator.DisposeAsync();
+
+        await FluentActions.Awaiting(() => coordinator.RequestAsync(Profile(new VaultId(Guid.NewGuid())), SyncTriggerReason.Manual, null, Ct))
+            .Should().ThrowAsync<ObjectDisposedException>();
+    }
+
     private static async Task EventuallyAsync(Func<bool> condition, CancellationToken ct)
     {
         for (var attempt = 0; attempt < 200; attempt++)

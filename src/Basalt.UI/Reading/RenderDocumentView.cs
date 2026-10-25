@@ -33,7 +33,16 @@ public sealed class RenderDocumentView : UserControl
             ItemsPanel = new FuncTemplate<Panel?>(() => new VirtualizingStackPanel()),
             ItemTemplate = new FuncDataTemplate<RenderBlock>((block, _) => block is null || Tab is null ? null : new BlockRenderer(Tab, Ancestors).Block(block)),
         };
-        Content = new ScrollViewer { Content = new Border { Padding = new Thickness(32, 16), MaxWidth = 900, Child = _blocks } };
+        Content = new ScrollViewer
+        {
+            Content = new Border
+            {
+                Padding = new Thickness(56, 40, 56, 72),
+                MaxWidth = 840,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Child = _blocks,
+            },
+        };
     }
 
     public RenderDocument? Document
@@ -72,7 +81,7 @@ internal sealed class BlockRenderer(NoteTabViewModel tab, IReadOnlyList<VaultPat
     public Control Block(RenderBlock block) => block switch
     {
         HeadingBlock heading => Text(heading.Inlines, HeadingSizes[Math.Clamp(heading.Level, 1, 6) - 1], FontWeight.SemiBold, new Thickness(0, 16, 0, 6)),
-        ParagraphBlock paragraph => Text(paragraph.Inlines, 15, FontWeight.Normal, new Thickness(0, 0, 0, 10)),
+        ParagraphBlock paragraph => Text(paragraph.Inlines, 15.5, FontWeight.Normal, new Thickness(0, 0, 0, 12), lineHeight: 25),
         ListBlock list => List(list),
         QuoteBlock quote => Quote(quote.Blocks, null),
         CalloutBlock callout => Quote(callout.Blocks, callout),
@@ -85,9 +94,19 @@ internal sealed class BlockRenderer(NoteTabViewModel tab, IReadOnlyList<VaultPat
         _ => new TextBlock { Text = string.Empty },
     };
 
-    private SelectableTextBlock Text(IReadOnlyList<RenderInline> inlines, double size, FontWeight weight, Thickness margin)
+    private SelectableTextBlock Text(
+        IReadOnlyList<RenderInline> inlines,
+        double size,
+        FontWeight weight,
+        Thickness margin,
+        double lineHeight = double.NaN)
     {
         var text = new SelectableTextBlock { TextWrapping = TextWrapping.Wrap, FontSize = size, FontWeight = weight, Margin = margin, Foreground = Brush("BasaltTextPrimaryBrush") };
+        if (!double.IsNaN(lineHeight))
+        {
+            text.LineHeight = lineHeight;
+        }
+
         text.Inlines = [.. inlines.Select(Inline)];
         return text;
     }
@@ -197,8 +216,9 @@ internal sealed class BlockRenderer(NoteTabViewModel tab, IReadOnlyList<VaultPat
         {
             BorderBrush = Brush(callout is null ? "BasaltBorderBrush" : "BasaltAccentBrush"),
             BorderThickness = new Thickness(3, 0, 0, 0),
-            Background = callout is null ? null : Brush("BasaltSurfaceAltBrush"),
-            Padding = new Thickness(12, 6),
+            Background = callout is null ? null : Brush("BasaltAccentSoftBrush"),
+            CornerRadius = callout is null ? new CornerRadius(0, 6, 6, 0) : new CornerRadius(8),
+            Padding = new Thickness(16, 10),
             Margin = new Thickness(0, 0, 0, 10),
             Child = callout?.Folding == CalloutFolding.Collapsed ? new Expander { Header = content.Children[0], Content = content } : content,
         };
@@ -206,7 +226,19 @@ internal sealed class BlockRenderer(NoteTabViewModel tab, IReadOnlyList<VaultPat
 
     private static Border Code(CodeBlock code)
     {
-        var copy = new Button { Content = "⧉", HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Top };
+        var copy = new Button
+        {
+            Content = new PathIcon
+            {
+                Width = 14,
+                Height = 14,
+                Data = (Geometry)Avalonia.Application.Current!.FindResource("IconCopy")!,
+            },
+            Padding = new Thickness(6),
+            MinHeight = 26,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Top,
+        };
         Avalonia.Automation.AutomationProperties.SetName(copy, "Copy");
         copy.Click += (_, _) => _ = TopLevel.GetTopLevel(copy)?.Clipboard?.SetTextAsync(code.Code);
         return new Border

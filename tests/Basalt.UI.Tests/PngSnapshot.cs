@@ -79,24 +79,38 @@ internal static class PngSnapshot
         var actualPixels = ReadPixels(actualBuffer);
         var expectedPixels = ReadPixels(expectedBuffer);
         var differing = 0;
+        var minX = width;
+        var minY = height;
+        var maxX = -1;
+        var maxY = -1;
+        var maxDelta = 0;
         for (var y = 0; y < height; y++)
         {
             var row = y * actualBuffer.RowBytes;
             for (var x = 0; x < width; x++)
             {
                 var i = row + (x * 4);
-                if (Math.Abs(actualPixels[i] - expectedPixels[i]) > ChannelTolerance
-                    || Math.Abs(actualPixels[i + 1] - expectedPixels[i + 1]) > ChannelTolerance
-                    || Math.Abs(actualPixels[i + 2] - expectedPixels[i + 2]) > ChannelTolerance
-                    || Math.Abs(actualPixels[i + 3] - expectedPixels[i + 3]) > ChannelTolerance)
+                var delta = Math.Max(
+                    Math.Abs(actualPixels[i] - expectedPixels[i]),
+                    Math.Max(
+                        Math.Abs(actualPixels[i + 1] - expectedPixels[i + 1]),
+                        Math.Max(
+                            Math.Abs(actualPixels[i + 2] - expectedPixels[i + 2]),
+                            Math.Abs(actualPixels[i + 3] - expectedPixels[i + 3]))));
+                if (delta > ChannelTolerance)
                 {
                     differing++;
+                    minX = Math.Min(minX, x);
+                    minY = Math.Min(minY, y);
+                    maxX = Math.Max(maxX, x);
+                    maxY = Math.Max(maxY, y);
+                    maxDelta = Math.Max(maxDelta, delta);
                 }
             }
         }
 
         var fraction = differing / (double)(width * height);
-        reason = $"{fraction:P2} of pixels differ (limit {MaxDifferingFraction:P2})";
+        reason = $"{fraction:P2} of pixels differ (limit {MaxDifferingFraction:P2}; region {minX},{minY}-{maxX},{maxY}; max delta {maxDelta})";
         return fraction <= MaxDifferingFraction;
     }
 

@@ -1,13 +1,17 @@
 using Basalt.Application.Bookmarks;
 using Basalt.Application.Errors;
 using Basalt.Application.Notes;
+using Basalt.Application.Ports.FileSystem;
+using Basalt.Application.Ports.Storage;
 using Basalt.Application.Search;
 using Basalt.Application.Templates;
 using Basalt.Application.Tests.TestSupport;
 using Basalt.Application.Workspace;
+using Basalt.Domain.Common;
 using Basalt.Domain.Notes;
 using Basalt.Domain.Vaults;
 using Basalt.Testing.Fakes;
+using NSubstitute;
 using static Basalt.Application.Tests.TestSupport.VaultFixture;
 
 namespace Basalt.Application.Tests.Notes;
@@ -110,6 +114,80 @@ public sealed class ProductivityTests
 
         v.Session.UpdateSettings(VaultSettings.Default);
         (await new ListTemplatesHandler(v.Sessions).HandleAsync(new ListTemplates(Id), Ct)).Value.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task DailyNote_WhenTheFileAppearsWhileCreating_ReturnsNotCreated()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("Plantillas/Diario.md", "x")), DailySettings);
+        v.FileSystem.FailNextWrite(P("Diario/2026-10-19.md"), new Error(ErrorCodes.FsAlreadyExists, "race"));
+
+        var result = await Daily(v).HandleAsync(new OpenDailyNote(Id), Ct);
+
+        result.Value.Created.Should().BeFalse();
+        (await v.ExistsAsync("Diario/2026-10-19.md")).Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task DailyNote_PublishesEntriesCreatedAndRejectsNullAndClosedVaults()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(), VaultSettings.Default with { DailyNotes = new DailyNotesSettings() });
+        var created = new List<EntriesCreated>();
+        using var subscription = v.Events.Subscribe<EntriesCreated>((e, _) => { created.Add(e); return ValueTask.CompletedTask; });
+        var handler = Daily(v);
+
+        await handler.HandleAsync(new OpenDailyNote(Id), Ct);
+        await v.Events.WaitForIdleAsync(Ct);
+
+        created.SelectMany(e => e.Paths).Should().ContainSingle();
+        (await handler.HandleAsync(new OpenDailyNote(new VaultId(Guid.Parse("00000000-0000-0000-0000-0000000000ff"))), Ct)).Error.Code.Should().Be(ErrorCodes.VaultNotOpen);
+        await FluentActions.Awaiting(() => handler.HandleAsync(null!, Ct)).Should().ThrowAsync<ArgumentNullException>();
+    }
+
+    [Fact]
+    public async Task ListTemplates_ClosedAndInvalidFolder()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("Plantillas/A.md", "")), DailySettings);
+        v.Session.UpdateSettings(DailySettings with { TemplatesFolder = "bad?" });
+        var handler = new ListTemplatesHandler(v.Sessions);
+
+        (await handler.HandleAsync(new ListTemplates(Id), Ct)).Value.Should().BeEmpty();
+        (await handler.HandleAsync(new ListTemplates(new VaultId(Guid.Parse("00000000-0000-0000-0000-0000000000ff"))), Ct)).Error.Code.Should().Be(ErrorCodes.VaultNotOpen);
+        await FluentActions.Awaiting(() => handler.HandleAsync(null!, Ct)).Should().ThrowAsync<ArgumentNullException>();
+    }
+
+    [Fact]
+    public async Task InsertTemplate_LeavesAnInvalidNoteFrontmatterAlone()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("Plantillas/T.md", "---\ntipo: idea\n---\nTexto")), DailySettings);
+        const string Current = "---\nbad: [\n---\nBody";
+
+        var result = await new InsertTemplateHandler(v.Sessions, v.Analyzer, v.FrontmatterEditor, v.Clock, v.Culture)
+            .HandleAsync(new InsertTemplate(Id, P("Plantillas/T.md"), P("N.md"), Current, Current.Length), Ct);
+
+        result.Value.Text.Should().Be(Current + "Texto");
+    }
+
+    [Fact]
+    public async Task InsertTemplate_WithInvalidTemplateFrontmatter_InsertsTheWholeText()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("Plantillas/T.md", "---\nbad: [\n---\nTexto")), DailySettings);
+
+        var result = await new InsertTemplateHandler(v.Sessions, v.Analyzer, v.FrontmatterEditor, v.Clock, v.Culture)
+            .HandleAsync(new InsertTemplate(Id, P("Plantillas/T.md"), P("N.md"), "", 0), Ct);
+
+        result.Value.Text.Should().Be("---\nbad: [\n---\nTexto");
+    }
+
+    [Fact]
+    public async Task InsertTemplate_RejectsNullClosedAndInvalidTemplatePaths()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("Plantillas/T.md", "x")), DailySettings);
+        var closed = new VaultId(Guid.Parse("00000000-0000-0000-0000-0000000000ff"));
+        var handler = new InsertTemplateHandler(v.Sessions, v.Analyzer, v.FrontmatterEditor, v.Clock, v.Culture);
+
+        (await handler.HandleAsync(new InsertTemplate(closed, P("Plantillas/T.md"), P("N.md"), "", 0), Ct)).Error.Code.Should().Be(ErrorCodes.VaultNotOpen);
+        await FluentActions.Awaiting(() => handler.HandleAsync(null!, Ct)).Should().ThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
@@ -223,6 +301,99 @@ public sealed class ProductivityTests
         (await new LoadWorkspaceHandler(v.Sessions, v.Session.Get<BookmarkList>().Store, device).HandleAsync(new LoadWorkspace(Id), Ct)).Value.Should().BeEquivalentTo(state);
     }
 
+    [Fact]
+    public async Task RecentFiles_RemoveChecksEveryRemovedPath()
+    {
+        var store = NSubstitute.Substitute.For<IRecentFilesStore>();
+        store.LoadAsync(Id, Arg.Any<CancellationToken>()).Returns([P("Dir/X.md"), P("A.md")]);
+        store.SaveAsync(Id, Arg.Any<IReadOnlyList<VaultPath>>(), Arg.Any<CancellationToken>()).Returns(Result.Success());
+        var recents = new RecentFiles(Id, store);
+
+        await recents.RemoveAsync([P("Dir"), P("Nada")], Ct);
+
+        await store.Received(1).SaveAsync(Id, Arg.Is<IReadOnlyList<VaultPath>>(files => files.SequenceEqual(new[] { P("A.md") })), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task RecentFiles_RecordingTheFirstEntryAgain_DoesNotSave()
+    {
+        var store = NSubstitute.Substitute.For<IRecentFilesStore>();
+        store.LoadAsync(Id, Arg.Any<CancellationToken>()).Returns([P("A.md"), P("B.md")]);
+        var recents = new RecentFiles(Id, store);
+
+        await recents.RecordAsync(P("A.md"), Ct);
+
+        await store.DidNotReceive().SaveAsync(Id, Arg.Any<IReadOnlyList<VaultPath>>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task RecentFiles_RenameFollowsFoldersAndSkipsNoOps()
+    {
+        var store = NSubstitute.Substitute.For<IRecentFilesStore>();
+        store.LoadAsync(Id, Arg.Any<CancellationToken>()).Returns([P("A.md"), P("Dir/X.md"), P("B.md")]);
+        store.SaveAsync(Id, Arg.Any<IReadOnlyList<VaultPath>>(), Arg.Any<CancellationToken>()).Returns(Result.Success());
+        var recents = new RecentFiles(Id, store);
+
+        await recents.RenameAsync(P("Dir"), P("Other"), Ct);
+        await recents.RenameAsync(P("Nada"), P("Otro"), Ct);
+
+        await store.Received(1).SaveAsync(Id, Arg.Is<IReadOnlyList<VaultPath>>(files => files.SequenceEqual(new[] { P("A.md"), P("Other/X.md"), P("B.md") })), Arg.Any<CancellationToken>());
+        await store.Received(1).SaveAsync(Id, Arg.Any<IReadOnlyList<VaultPath>>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task RecentFiles_RemoveDropsFoldersAndSkipsNoOps()
+    {
+        var store = NSubstitute.Substitute.For<IRecentFilesStore>();
+        store.LoadAsync(Id, Arg.Any<CancellationToken>()).Returns([P("A.md"), P("Dir/X.md")]);
+        store.SaveAsync(Id, Arg.Any<IReadOnlyList<VaultPath>>(), Arg.Any<CancellationToken>()).Returns(Result.Success());
+        var recents = new RecentFiles(Id, store);
+
+        await recents.RemoveAsync([P("Dir")], Ct);
+        await recents.RemoveAsync([P("Nada")], Ct);
+
+        await store.Received(1).SaveAsync(Id, Arg.Is<IReadOnlyList<VaultPath>>(files => files.SequenceEqual(new[] { P("A.md") })), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task RecentFileHandlers_RejectNullsAndClosedVaults()
+    {
+        await using var v = await WithProductivityAsync(Files(("A.md", "")));
+        var closed = new VaultId(Guid.Parse("00000000-0000-0000-0000-0000000000ff"));
+        var record = new RecordRecentFileHandler(v.Sessions);
+        var list = new ListRecentFilesHandler(v.Sessions);
+
+        await FluentActions.Awaiting(() => record.HandleAsync(null!, Ct)).Should().ThrowAsync<ArgumentNullException>();
+        await FluentActions.Awaiting(() => list.HandleAsync(null!, Ct)).Should().ThrowAsync<ArgumentNullException>();
+        (await record.HandleAsync(new RecordRecentFile(closed, P("A.md")), Ct)).Error.Code.Should().Be(ErrorCodes.VaultNotOpen);
+        (await list.HandleAsync(new ListRecentFiles(closed), Ct)).Error.Code.Should().Be(ErrorCodes.VaultNotOpen);
+    }
+
+    [Fact]
+    public async Task WorkspaceHandlers_HandleClosedVaultsUnreadableStateAndFailures()
+    {
+        await using var v = await WithProductivityAsync(Files());
+        var device = new FakeDeviceInfo();
+        var closed = new VaultId(Guid.Parse("00000000-0000-0000-0000-0000000000ff"));
+        var state = new WorkspaceState([new WorkspacePane([new WorkspaceTab("note", "A.md")])]);
+
+        (await new LoadWorkspaceHandler(v.Sessions, v.Session.Get<BookmarkList>().Store, device).HandleAsync(new LoadWorkspace(closed), Ct)).Error.Code.Should().Be(ErrorCodes.VaultNotOpen);
+        (await new SaveWorkspaceHandler(v.Sessions, v.Session.Get<BookmarkList>().Store, device).HandleAsync(new SaveWorkspace(closed, state), Ct)).Error.Code.Should().Be(ErrorCodes.VaultNotOpen);
+
+        var failure = new Error(ErrorCodes.StorageIo, "disk");
+        var store = NSubstitute.Substitute.For<IVaultConfigStore>();
+        store.LoadWorkspaceAsync(Arg.Any<IVaultFileSystem>(), Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+            .Returns(new DocumentLoad<WorkspaceState?>(null, DocumentLoadStatus.Invalid, "corrupt"));
+        store.SaveWorkspaceAsync(Arg.Any<IVaultFileSystem>(), Arg.Any<Guid>(), Arg.Any<WorkspaceState>(), Arg.Any<CancellationToken>())
+            .Returns(Result<Unit>.Failure(failure));
+
+        (await new LoadWorkspaceHandler(v.Sessions, store, device).HandleAsync(new LoadWorkspace(Id), Ct)).Value.Should().BeNull();
+        (await new SaveWorkspaceHandler(v.Sessions, store, device).HandleAsync(new SaveWorkspace(Id, state), Ct)).Error.Should().Be(failure);
+
+        await FluentActions.Awaiting(() => new LoadWorkspaceHandler(v.Sessions, store, device).HandleAsync(null!, Ct)).Should().ThrowAsync<ArgumentNullException>();
+        await FluentActions.Awaiting(() => new SaveWorkspaceHandler(v.Sessions, store, device).HandleAsync(null!, Ct)).Should().ThrowAsync<ArgumentNullException>();
+    }
+
     private static async Task<VaultFixture> WithProductivityAsync(Dictionary<string, string> files)
     {
         var v = await VaultFixture.CreateAsync(files);
@@ -230,3 +401,7 @@ public sealed class ProductivityTests
         return v;
     }
 }
+
+
+
+

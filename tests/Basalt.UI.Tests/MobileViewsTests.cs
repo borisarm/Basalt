@@ -67,6 +67,7 @@ public sealed class MobileViewsTests
         var editor = note.GetVisualDescendants().OfType<MarkdownTextBoxEditor>().Single();
         editor.GetText().Should().Be("# A");
 
+        editor.TextBox.CaretIndex = editor.GetText().Length;
         editor.Insert("[[");
         editor.GetText().Should().Be("# A[[");
         editor.Undo();

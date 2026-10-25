@@ -4,6 +4,7 @@ using Basalt.Application.Search;
 using Basalt.Application.Tags;
 using Basalt.Application.Tests.TestSupport;
 using Basalt.Domain.Notes;
+using Basalt.Domain.Vaults;
 using Basalt.Testing.Fakes;
 using static Basalt.Application.Tests.TestSupport.VaultFixture;
 
@@ -164,5 +165,51 @@ public sealed class SuggestionsTests
         (await handler.HandleAsync(new QuickSwitch(Id, "px"), Ct)).Value.Should().Contain(i => i.Kind == QuickSwitchKind.Alias && i.Display == "PX" && i.Path == P("Proyectos/Proyecto X.md"));
         (await handler.HandleAsync(new QuickSwitch(Id, "proy/x"), Ct)).Value.Should().Contain(i => i.Kind == QuickSwitchKind.Note && i.Display == "Proyectos/Proyecto X");
         (await handler.HandleAsync(new QuickSwitch(Id, ""), Ct)).Value[0].Path.Should().Be(P("Reciente.md"));
+    }
+    [Fact]
+    public async Task TagHandlers_RejectNullsAndClosedVaults()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("a.md", "#tag")));
+        var closed = new VaultId(Guid.Parse("00000000-0000-0000-0000-0000000000ff"));
+        var get = new GetTagsHandler(v.Sessions);
+        var suggest = new SuggestTagsHandler(v.Sessions);
+
+        await FluentActions.Awaiting(() => get.HandleAsync(null!, Ct)).Should().ThrowAsync<ArgumentNullException>();
+        await FluentActions.Awaiting(() => suggest.HandleAsync(null!, Ct)).Should().ThrowAsync<ArgumentNullException>();
+        (await get.HandleAsync(new GetTags(closed), Ct)).Error.Code.Should().Be(ErrorCodes.VaultNotOpen);
+        (await suggest.HandleAsync(new SuggestTags(closed, "t"), Ct)).Error.Code.Should().Be(ErrorCodes.VaultNotOpen);
+    }
+
+    [Fact]
+    public async Task SuggestTags_RespectsTheLimit()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("a.md", "#a #b #c")));
+
+        var suggestions = (await new SuggestTagsHandler(v.Sessions).HandleAsync(new SuggestTags(Id, "", 2), Ct)).Value;
+
+        suggestions.Should().HaveCount(2);
+    }
+    [Fact]
+    public async Task SuggestLinkTargets_ReadsBlockIdsFromParagraphsAndCodeBlocks()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(
+            ("n.md", "# T\n\n```\ncode\n```\n^abc\n\npara ^def\n")));
+        var handler = new SuggestLinkTargetsHandler(v.Sessions, v.Analyzer);
+
+        var suggestions = (await handler.HandleAsync(new SuggestLinkTargets(Id, P("n.md"), "n#^"), Ct)).Value;
+
+        suggestions.Select(s => s.Subpath).Should().Contain(["^abc", "^def"]);
+        suggestions.Should().OnlyContain(s => s.Kind == LinkSuggestionKind.Block);
+    }
+
+    [Fact]
+    public async Task SuggestLinkTargets_WithAnEmptyPartialAfterTheHash_ListsHeadings()
+    {
+        await using var v = await VaultFixture.CreateAsync(Files(("n.md", "# Uno\n## Dos")));
+
+        var suggestions = (await new SuggestLinkTargetsHandler(v.Sessions, v.Analyzer)
+            .HandleAsync(new SuggestLinkTargets(Id, P("n.md"), "n#"), Ct)).Value;
+
+        suggestions.Select(s => s.Display).Should().Equal("Uno", "Dos");
     }
 }

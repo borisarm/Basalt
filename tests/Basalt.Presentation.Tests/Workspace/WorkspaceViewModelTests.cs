@@ -239,6 +239,25 @@ public sealed class WorkspaceViewModelTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task ActiveFileChanges_RaisePropertyChanged()
+    {
+        var notified = new List<VaultPath?>();
+        _workspace.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(WorkspaceViewModel.ActiveFile))
+            {
+                notified.Add(_workspace.ActiveFile);
+            }
+        };
+
+        await _workspace.OpenAsync(new OpenRequest(P("A.md")), Ct);
+        await _workspace.OpenAsync(new OpenRequest(P("A.md")), Ct);
+        await _workspace.Layout.ActiveGroup.CloseTabCommand.ExecuteAsync(_workspace.Layout.ActiveGroup.Tabs[0]);
+
+        notified.Select(p => p?.ToString()).Should().Equal("A.md", null);
+    }
+
+    [Fact]
     [Trait("Spec", "F-013")]
     public async Task Sidebars_ToggleShowPanels_AndArePersisted()
     {

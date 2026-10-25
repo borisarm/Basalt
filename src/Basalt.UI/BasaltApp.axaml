@@ -6,10 +6,12 @@
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
         <ResourceInclude Source="avares://Basalt.UI/Themes/Tokens.axaml" />
+        <ResourceInclude Source="avares://Basalt.UI/Themes/Icons.axaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Application.Resources>
   <Application.Styles>
     <FluentTheme />
+    <StyleInclude Source="avares://Basalt.UI/Themes/Styles.axaml" />
   </Application.Styles>
 </Application>

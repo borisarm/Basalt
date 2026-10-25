@@ -156,12 +156,19 @@ public partial class SettingsView : UserControl
             return;
         }
 
-        _ = _settings.General.SetLanguageAsync(_language.SelectedIndex switch
+        // While the DataContext is being set a ComboBox defers the index set by SyncGeneral and raises SelectionChanged
+        // after _syncing is cleared; only a value that differs from the ViewModel is a user change worth saving. The
+        // other selectors below do the same.
+        var language = _language.SelectedIndex switch
         {
             1 => "en",
             2 => "es",
             _ => null,
-        });
+        };
+        if (language != _settings.General.Language)
+        {
+            _ = _settings.General.SetLanguageAsync(language);
+        }
     }
 
     private void OnOpenLastVaultChanged(object? sender, RoutedEventArgs e)
@@ -229,7 +236,10 @@ public partial class SettingsView : UserControl
         }
 
         var format = _linkFormat.SelectedIndex == 1 ? LinkFormat.Markdown : LinkFormat.Wikilink;
-        _ = section.UpdateAsync(s => s with { LinkFormat = format });
+        if (format != section.Settings.LinkFormat)
+        {
+            _ = section.UpdateAsync(s => s with { LinkFormat = format });
+        }
     }
 
     private void OnLinkPathStyleChanged(object? sender, SelectionChangedEventArgs e)
@@ -245,7 +255,10 @@ public partial class SettingsView : UserControl
             2 => LinkPathStyle.Absolute,
             _ => LinkPathStyle.Shortest,
         };
-        _ = section.UpdateAsync(s => s with { LinkPathStyle = style });
+        if (style != section.Settings.LinkPathStyle)
+        {
+            _ = section.UpdateAsync(s => s with { LinkPathStyle = style });
+        }
     }
 
     private void OnAutoUpdateLinksChanged(object? sender, RoutedEventArgs e)
@@ -269,7 +282,10 @@ public partial class SettingsView : UserControl
             2 => ThemeMode.Dark,
             _ => ThemeMode.System,
         };
-        _ = _settings.Appearance.UpdateAsync(theme, _settings.Appearance.AccentColor, _settings.Appearance.InterfaceFontSize);
+        if (theme != _settings.Appearance.Theme)
+        {
+            _ = _settings.Appearance.UpdateAsync(theme, _settings.Appearance.AccentColor, _settings.Appearance.InterfaceFontSize);
+        }
     }
 
     private void OnAppearanceLostFocus(object? sender, RoutedEventArgs e)

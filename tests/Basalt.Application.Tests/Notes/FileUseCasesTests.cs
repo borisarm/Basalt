@@ -1,6 +1,7 @@
 using System.Text;
 using Basalt.Application.Errors;
 using Basalt.Application.Notes;
+using Basalt.Application.Ports.Platform;
 using Basalt.Application.Vaults;
 using Basalt.Application.Tests.TestSupport;
 using Basalt.Domain.Common;
@@ -8,6 +9,7 @@ using Basalt.Domain.Notes;
 using Basalt.Domain.Sync;
 using Basalt.Domain.Vaults;
 using Basalt.Testing.Fakes;
+using NSubstitute;
 using static Basalt.Application.Tests.TestSupport.VaultFixture;
 
 namespace Basalt.Application.Tests.Notes;
@@ -862,6 +864,7 @@ public sealed class FileUseCasesTests
         return result;
     }
 }
+
 
 
 

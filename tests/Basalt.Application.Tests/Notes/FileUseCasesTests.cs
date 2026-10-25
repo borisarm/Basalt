@@ -257,6 +257,7 @@ public sealed class FileUseCasesTests
         using var saved = v.Events.Subscribe<NoteSaved>((e, _) => { saves.Add(e); return ValueTask.CompletedTask; });
 
         await new EntryMover(v.Analyzer, v.Events).MoveAsync(v.Session, [(P("B.md"), P("C.md"))], Ct);
+        await v.Events.WaitForIdleAsync(Ct);
 
         renames.Select(e => (e.From, e.To)).Should().Equal((P("B.md"), P("C.md")));
         saves.Select(e => e.Path).Should().Equal(P("A.md"));

@@ -5,47 +5,117 @@
              xmlns:l="clr-namespace:Basalt.UI.Localization"
              x:Class="Basalt.UI.Views.ConflictCenterView"
              x:DataType="sync:ConflictCenterViewModel">
-  <!-- Spec 04 F-015.6: conflict copies and marker files with the four resolutions. -->
-  <Grid ColumnDefinitions="320,*" Margin="{StaticResource BasaltSpacingM}">
-    <DockPanel Grid.Column="0" Margin="0,0,12,0">
-      <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="6" Margin="0,0,0,8">
-        <Button x:Name="RefreshButton" Content="{l:Loc Sync.Refresh}" Command="{Binding ReloadCommand}" />
-      </StackPanel>
-      <TextBlock DockPanel.Dock="Top" Text="{l:Loc Sync.ConflictsTitle}" FontWeight="SemiBold"
-                 Foreground="{DynamicResource BasaltTextPrimaryBrush}" Margin="0,0,0,8" />
-      <ListBox x:Name="ConflictsList" ItemsSource="{Binding Conflicts}" SelectedItem="{Binding Selected}" Background="Transparent"
-               AutomationProperties.Name="{l:Loc Sync.ConflictsTitle}">
-        <ListBox.ItemTemplate>
-          <DataTemplate x:DataType="s:SyncConflictEntry">
-            <StackPanel Spacing="2">
-              <TextBlock Text="{Binding Path}" Foreground="{DynamicResource BasaltTextPrimaryBrush}" />
-              <TextBlock Text="{l:Loc Sync.ConflictCopy}" IsVisible="{Binding IsConflictCopy}"
-                         FontSize="{StaticResource BasaltFontSizeSmall}" Foreground="{DynamicResource BasaltWarningBrush}" />
-              <TextBlock Text="{l:Loc Sync.ConflictMarkers}" IsVisible="{Binding HasMarkers}"
-                         FontSize="{StaticResource BasaltFontSizeSmall}" Foreground="{DynamicResource BasaltWarningBrush}" />
-            </StackPanel>
-          </DataTemplate>
-        </ListBox.ItemTemplate>
-      </ListBox>
-    </DockPanel>
-    <DockPanel Grid.Column="1">
-      <StackPanel DockPanel.Dock="Top" Spacing="8">
-        <StackPanel Orientation="Horizontal" Spacing="8">
-          <TextBlock Text="{l:Loc Sync.Resolution}" VerticalAlignment="Center" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
-          <ComboBox x:Name="ResolutionBox" SelectionChanged="OnResolutionChanged"
-                    AutomationProperties.Name="{l:Loc Sync.Resolution}">
-            <ComboBoxItem Content="{l:Loc Sync.Resolution.KeepLocal}" />
-            <ComboBoxItem Content="{l:Loc Sync.Resolution.KeepRemote}" />
-            <ComboBoxItem Content="{l:Loc Sync.Resolution.KeepBoth}" />
-            <ComboBoxItem Content="{l:Loc Sync.Resolution.Merged}" />
-          </ComboBox>
-          <Button x:Name="ResolveButton" Content="{l:Loc Sync.Resolve}" Command="{Binding ResolveCommand}" />
-        </StackPanel>
-        <TextBlock Text="{l:Loc Sync.MergedText}" Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
-      </StackPanel>
-      <TextBox x:Name="MergedText" Text="{Binding MergedText}" AcceptsReturn="True" TextWrapping="NoWrap"
-               AutomationProperties.Name="{l:Loc Sync.MergedText}"
-               FontFamily="Consolas, Menlo, monospace" VerticalContentAlignment="Top" />
+  <!-- Spec 04 F-015.6: conflict copies and marker files with the four resolutions (docs/design "Sync conflicts"). -->
+  <UserControl.Styles>
+    <Style Selector="RadioButton.option">
+      <Setter Property="Background" Value="{DynamicResource BasaltBackgroundBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource BasaltBorderBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="{StaticResource BasaltRadiusL}" />
+      <Setter Property="Padding" Value="10,10,14,10" />
+      <Setter Property="Margin" Value="0,0,10,0" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="VerticalAlignment" Value="Stretch" />
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}"
+                  Padding="{TemplateBinding Padding}">
+            <DockPanel>
+              <Panel DockPanel.Dock="Left" Width="16" Height="16" Margin="2,2,10,0" VerticalAlignment="Top">
+                <Ellipse Stroke="{DynamicResource BasaltTextMutedBrush}" StrokeThickness="1.5" />
+                <Ellipse Name="Mark" Width="8" Height="8" Fill="{DynamicResource BasaltAccentBrush}" IsVisible="False" />
+              </Panel>
+              <ContentPresenter Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" />
+            </DockPanel>
+          </Border>
+        </ControlTemplate>
+      </Setter>
+    </Style>
+    <Style Selector="RadioButton.option:pointerover">
+      <Setter Property="BorderBrush" Value="{DynamicResource BasaltAccentBrush}" />
+    </Style>
+    <Style Selector="RadioButton.option:checked">
+      <Setter Property="Background" Value="{DynamicResource BasaltAccentSoftBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource BasaltAccentBrush}" />
+      <Setter Property="BorderThickness" Value="2" />
+    </Style>
+    <Style Selector="RadioButton.option:checked /template/ Ellipse#Mark">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+  </UserControl.Styles>
+  <Grid ColumnDefinitions="320,*">
+    <Border Grid.Column="0" Background="{DynamicResource BasaltSidebarBrush}" BorderBrush="{DynamicResource BasaltBorderBrush}" BorderThickness="0,0,1,0">
+      <DockPanel Margin="16,20,16,16">
+        <DockPanel DockPanel.Dock="Top">
+          <Button DockPanel.Dock="Right" x:Name="RefreshButton" Classes="icon small" Command="{Binding ReloadCommand}" VerticalAlignment="Top"
+                  AutomationProperties.Name="{l:Loc Sync.Refresh}" ToolTip.Tip="{l:Loc Sync.Refresh}">
+            <PathIcon Width="14" Height="14" Data="{StaticResource IconRefresh}" />
+          </Button>
+          <TextBlock Classes="page-title" Text="{l:Loc Sync.ConflictsTitle}" />
+        </DockPanel>
+        <TextBlock DockPanel.Dock="Top" Text="{l:Loc Sync.ConflictsSafe}" TextWrapping="Wrap" Margin="0,4,0,16"
+                   Foreground="{DynamicResource BasaltTextSecondaryBrush}" />
+        <ListBox x:Name="ConflictsList" ItemsSource="{Binding Conflicts}" SelectedItem="{Binding Selected}"
+                 AutomationProperties.Name="{l:Loc Sync.ConflictsTitle}">
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="s:SyncConflictEntry">
+              <StackPanel Spacing="6">
+                <TextBlock Text="{Binding Path}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                  <Border Classes="badge" IsVisible="{Binding IsConflictCopy}">
+                    <TextBlock Text="{l:Loc Sync.ConflictCopy}" />
+                  </Border>
+                  <Border Classes="badge" IsVisible="{Binding HasMarkers}">
+                    <TextBlock Text="{l:Loc Sync.ConflictMarkers}" />
+                  </Border>
+                </StackPanel>
+              </StackPanel>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </DockPanel>
+    </Border>
+    <DockPanel Grid.Column="1" Margin="28,20,28,20">
+      <DockPanel DockPanel.Dock="Top" Margin="0,0,0,16">
+        <Button DockPanel.Dock="Right" x:Name="ResolveButton" Classes="accent" Content="{l:Loc Sync.Resolve}" Command="{Binding ResolveCommand}"
+                VerticalAlignment="Top" MinHeight="38" Padding="18,6" />
+        <TextBlock Classes="page-title" Text="{Binding Selected.Path, FallbackValue=''}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+      </DockPanel>
+      <UniformGrid DockPanel.Dock="Top" Columns="4" Margin="0,0,-10,20">
+        <RadioButton x:Name="KeepLocalOption" Classes="option" GroupName="Resolution" IsChecked="True" IsCheckedChanged="OnResolutionChanged"
+                     AutomationProperties.Name="{l:Loc Sync.Resolution.KeepLocal}">
+          <StackPanel Spacing="2">
+            <TextBlock Text="{l:Loc Sync.Resolution.KeepLocal}" FontWeight="SemiBold" TextWrapping="Wrap" />
+            <TextBlock Text="{l:Loc Sync.Resolution.KeepLocal.Hint}" Classes="muted" TextWrapping="Wrap" />
+          </StackPanel>
+        </RadioButton>
+        <RadioButton x:Name="KeepRemoteOption" Classes="option" GroupName="Resolution" IsCheckedChanged="OnResolutionChanged"
+                     AutomationProperties.Name="{l:Loc Sync.Resolution.KeepRemote}">
+          <StackPanel Spacing="2">
+            <TextBlock Text="{l:Loc Sync.Resolution.KeepRemote}" FontWeight="SemiBold" TextWrapping="Wrap" />
+            <TextBlock Text="{l:Loc Sync.Resolution.KeepRemote.Hint}" Classes="muted" TextWrapping="Wrap" />
+          </StackPanel>
+        </RadioButton>
+        <RadioButton x:Name="KeepBothOption" Classes="option" GroupName="Resolution" IsCheckedChanged="OnResolutionChanged"
+                     AutomationProperties.Name="{l:Loc Sync.Resolution.KeepBoth}">
+          <StackPanel Spacing="2">
+            <TextBlock Text="{l:Loc Sync.Resolution.KeepBoth}" FontWeight="SemiBold" TextWrapping="Wrap" />
+            <TextBlock Text="{l:Loc Sync.Resolution.KeepBoth.Hint}" Classes="muted" TextWrapping="Wrap" />
+          </StackPanel>
+        </RadioButton>
+        <RadioButton x:Name="MergedOption" Classes="option" GroupName="Resolution" IsCheckedChanged="OnResolutionChanged"
+                     AutomationProperties.Name="{l:Loc Sync.Resolution.Merged}">
+          <StackPanel Spacing="2">
+            <TextBlock Text="{l:Loc Sync.Resolution.Merged}" FontWeight="SemiBold" TextWrapping="Wrap" />
+            <TextBlock Text="{l:Loc Sync.Resolution.Merged.Hint}" Classes="muted" TextWrapping="Wrap" />
+          </StackPanel>
+        </RadioButton>
+      </UniformGrid>
+      <TextBlock DockPanel.Dock="Top" Classes="caption" Text="{l:Loc Sync.MergedText}" Margin="0,0,0,8" />
+      <TextBox x:Name="MergedText" Classes="mono" Text="{Binding MergedText}" AcceptsReturn="True" TextWrapping="NoWrap"
+               AutomationProperties.Name="{l:Loc Sync.MergedText}" VerticalContentAlignment="Top"
+               CornerRadius="{StaticResource BasaltRadiusL}" Padding="14,12" />
     </DockPanel>
   </Grid>
 </UserControl>

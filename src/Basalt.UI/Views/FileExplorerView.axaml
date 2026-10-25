@@ -7,14 +7,17 @@
              x:Class="Basalt.UI.Views.FileExplorerView"
              x:DataType="p:FileExplorerViewModel">
   <DockPanel>
-    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="4" Margin="{StaticResource BasaltSpacingS}">
-      <Button x:Name="NewNote" Classes="icon" Width="32" Height="32" Command="{Binding NewNoteCommand}" CommandParameter="{Binding Selected}"
-              AutomationProperties.Name="{l:Loc Commands.NewNote}" ToolTip.Tip="{l:Loc Commands.NewNote}" ><PathIcon Width="15" Height="15" Data="{StaticResource IconAdd}" /></Button>
-      <Button x:Name="NewFolder" Classes="icon" Width="32" Height="32" Command="{Binding NewFolderCommand}" CommandParameter="{Binding Selected}"
-              AutomationProperties.Name="{l:Loc Explorer.NewFolder}" ToolTip.Tip="{l:Loc Explorer.NewFolder}" ><PathIcon Width="15" Height="15" Data="{StaticResource IconFolderAdd}" /></Button>
-      <Button x:Name="Refresh" Classes="icon" Width="32" Height="32" Command="{Binding RefreshCommand}"
-              AutomationProperties.Name="{l:Loc Panel.Refresh}" ToolTip.Tip="{l:Loc Panel.Refresh}" ><PathIcon Width="15" Height="15" Data="{StaticResource IconRefresh}" /></Button>
-    </StackPanel>
+    <DockPanel DockPanel.Dock="Top" Margin="8,4,2,2">
+      <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="2">
+        <Button x:Name="NewNote" Classes="icon small" Command="{Binding NewNoteCommand}" CommandParameter="{Binding Selected}"
+                AutomationProperties.Name="{l:Loc Commands.NewNote}" ToolTip.Tip="{l:Loc Commands.NewNote}" ><PathIcon Width="14" Height="14" Data="{StaticResource IconAdd}" /></Button>
+        <Button x:Name="NewFolder" Classes="icon small" Command="{Binding NewFolderCommand}" CommandParameter="{Binding Selected}"
+                AutomationProperties.Name="{l:Loc Explorer.NewFolder}" ToolTip.Tip="{l:Loc Explorer.NewFolder}" ><PathIcon Width="14" Height="14" Data="{StaticResource IconFolderAdd}" /></Button>
+        <Button x:Name="Refresh" Classes="icon small" Command="{Binding RefreshCommand}"
+                AutomationProperties.Name="{l:Loc Panel.Refresh}" ToolTip.Tip="{l:Loc Panel.Refresh}" ><PathIcon Width="14" Height="14" Data="{StaticResource IconRefresh}" /></Button>
+      </StackPanel>
+      <TextBlock Classes="caption" Text="{l:Loc Panel.files}" VerticalAlignment="Center" />
+    </DockPanel>
     <TreeView x:Name="Tree" ItemsSource="{Binding Roots}" SelectedItem="{Binding Selected}"
               AutomationProperties.Name="{l:Loc Panel.files}">
       <TreeView.Styles>

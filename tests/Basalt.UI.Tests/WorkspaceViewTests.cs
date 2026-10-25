@@ -97,6 +97,8 @@ public sealed class WorkspaceViewTests
         status.DataContext.Should().BeSameAs(v.Workspace.Sync);
         status.GetVisualDescendants().OfType<Avalonia.Controls.TextBlock>().First(t => t.Name == "SummaryText").Text
             .Should().Be("Not syncing");
+        status.GetVisualDescendants().OfType<Border>().First(b => b.Name == "StatePill").Classes
+            .Should().Contain("sync-pill").And.NotContain(["success", "accent", "danger"], "an unconfigured vault shows a neutral pill");
     });
 
     [Fact]
@@ -113,9 +115,18 @@ public sealed class WorkspaceViewTests
         Named<DockPanel>(window, "LeftSidebar").IsVisible.Should().BeFalse();
         Named<Grid>(window, "Columns").ColumnDefinitions[0].Width.Value.Should().Be(0);
 
-        var search = window.GetVisualDescendants().OfType<Button>().First(b => Equals(b.Content, "Search"));
+        var search = Named<Button>(window, "SearchPanelButton");
         Click(search);
+        Dispatcher.UIThread.RunJobs();
         workspace.LeftSidebar.ActivePanel.Should().Be("search");
+        workspace.LeftSidebar.IsOpen.Should().BeTrue("showing a panel opens its sidebar");
+        search.Classes.Should().Contain("active", "the ribbon marks the panel on show");
+        Named<Button>(window, "FilesPanelButton").Classes.Should().NotContain("active");
+
+        Click(Named<Button>(window, "OutlineTab"));
+        Dispatcher.UIThread.RunJobs();
+        workspace.RightSidebar.ActivePanel.Should().Be("outline");
+        Named<Button>(window, "OutlineTab").Classes.Should().Contain("active");
         window.Close();
     });
 

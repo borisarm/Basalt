@@ -29,7 +29,11 @@ public abstract partial class TabViewModel(ViewModelServices services) : ViewMod
     public partial bool IsDirty { get; protected set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Folders))]
     public partial VaultPath? Path { get; protected set; }
+
+    /// <summary>The folders of <see cref="Path"/> from the vault root, for the breadcrumb above the content.</summary>
+    public IReadOnlyList<string> Folders => Path?.Parent.Segments ?? [];
 
     /// <summary>What the tab shows now (the request it was last shown with).</summary>
     public OpenRequest? Current { get; private set; }

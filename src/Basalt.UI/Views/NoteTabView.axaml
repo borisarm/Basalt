@@ -8,6 +8,37 @@
              x:DataType="vm:NoteTabViewModel"
              Background="{DynamicResource BasaltBackgroundBrush}">
   <DockPanel>
+    <!-- Breadcrumb of the note and the Source / Read switch (UI-6). -->
+    <Grid DockPanel.Dock="Top" x:Name="NoteHeader" ColumnDefinitions="*,Auto" Margin="20,8,12,0" MinHeight="36">
+      <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+        <ItemsControl ItemsSource="{Binding Folders}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <StackPanel Orientation="Horizontal" />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="x:String">
+              <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{Binding}" Foreground="{DynamicResource BasaltTextMutedBrush}" VerticalAlignment="Center" />
+                <PathIcon Width="10" Height="10" Margin="8,0" Data="{StaticResource IconChevronRight}"
+                          Foreground="{DynamicResource BasaltTextMutedBrush}" VerticalAlignment="Center" />
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <TextBlock Text="{Binding Title}" Foreground="{DynamicResource BasaltTextSecondaryBrush}" VerticalAlignment="Center"
+                   TextTrimming="CharacterEllipsis" />
+      </StackPanel>
+      <Border Grid.Column="1" Classes="segmented" VerticalAlignment="Center">
+        <StackPanel Orientation="Horizontal">
+          <Button x:Name="SourceModeButton" Content="{l:Loc Workspace.Source}" Command="{Binding ShowSourceCommand}"
+                  Classes.checked="{Binding !IsReadingMode}" AutomationProperties.Name="{l:Loc Workspace.Source}" />
+          <Button x:Name="ReadModeButton" Content="{l:Loc Workspace.Read}" Command="{Binding ShowReadingCommand}"
+                  Classes.checked="{Binding IsReadingMode}" AutomationProperties.Name="{l:Loc Workspace.Read}" />
+        </StackPanel>
+      </Border>
+    </Grid>
     <!-- F-003.3: a conflicting external change waits for the user's decision. -->
     <Border DockPanel.Dock="Top" x:Name="ConflictBanner" IsVisible="{Binding Conflict, Converter={x:Static ObjectConverters.IsNotNull}}"
             Background="{DynamicResource BasaltSurfaceAltBrush}" BorderBrush="{DynamicResource BasaltWarningBrush}" BorderThickness="0,0,0,2"

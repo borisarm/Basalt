@@ -114,11 +114,21 @@ public sealed partial class AccessibilityTests
             "BasaltDangerColor", "BasaltWarningColor", "BasaltSuccessColor", "BasaltLinkColor",
             "BasaltUnresolvedLinkColor", "BasaltTagColor",
         ];
-        string[] backgrounds = ["BasaltBackgroundColor", "BasaltSurfaceColor", "BasaltSurfaceAltColor"];
+        string[] backgrounds =
+        [
+            "BasaltBackgroundColor", "BasaltSurfaceColor", "BasaltSurfaceAltColor", "BasaltChromeColor", "BasaltSidebarColor",
+        ];
         string[] textSurfaces =
         [
             "BasaltHighlightColor", "BasaltCodeBackgroundColor", "BasaltDiffAddedColor",
-            "BasaltDiffRemovedColor", "BasaltDiffChangedColor",
+            "BasaltDiffRemovedColor", "BasaltDiffChangedColor", "BasaltCalloutColor", "BasaltAccentSoftColor",
+        ];
+
+        // Coloured text on its own soft surface: tag chips and the sync pill states.
+        (string Foreground, string Background)[] tinted =
+        [
+            ("BasaltTagColor", "BasaltTagSoftColor"), ("BasaltAccentColor", "BasaltAccentSoftColor"),
+            ("BasaltWarningColor", "BasaltWarningSoftColor"), ("BasaltDangerColor", "BasaltDangerSoftColor"),
         ];
         var failures = new List<string>();
         foreach (var (theme, colors) in themes)
@@ -150,6 +160,15 @@ public sealed partial class AccessibilityTests
                 if (ratio < 4.5)
                 {
                     failures.Add($"{theme}: BasaltTextMutedColor on {background} = {ratio:F2}");
+                }
+            }
+
+            foreach (var (foreground, background) in tinted)
+            {
+                var ratio = Contrast(colors[foreground], colors[background]);
+                if (ratio < 4.5)
+                {
+                    failures.Add($"{theme}: {foreground} on {background} = {ratio:F2}");
                 }
             }
 

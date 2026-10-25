@@ -1,68 +1,191 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!--
+    Basalt design system (docs/design): violet accent, neutral greys, Inter for the interface, Literata for reading.
+    Fluent resource keys are remapped to the tokens so stock control states follow the palette; the classes below
+    are the components of the design (Primary/Secondary/Quiet/Destructive buttons, chips, the sync pill…).
+  -->
+  <Styles.Resources>
+    <SolidColorBrush x:Key="ButtonBackground" Color="{DynamicResource BasaltBackgroundColor}" />
+    <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="{DynamicResource BasaltSurfaceAltColor}" />
+    <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="{DynamicResource BasaltAccentSoftColor}" />
+    <SolidColorBrush x:Key="ButtonForeground" Color="{DynamicResource BasaltTextPrimaryColor}" />
+    <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="{DynamicResource BasaltTextPrimaryColor}" />
+    <SolidColorBrush x:Key="ButtonForegroundPressed" Color="{DynamicResource BasaltTextPrimaryColor}" />
+    <SolidColorBrush x:Key="ButtonBorderBrush" Color="{DynamicResource BasaltBorderColor}" />
+    <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="{DynamicResource BasaltBorderColor}" />
+    <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="{DynamicResource BasaltAccentColor}" />
+    <SolidColorBrush x:Key="TreeViewItemBackgroundPointerOver" Color="{DynamicResource BasaltSurfaceAltColor}" />
+    <SolidColorBrush x:Key="TreeViewItemBackgroundPressed" Color="{DynamicResource BasaltAccentSoftColor}" />
+    <SolidColorBrush x:Key="TreeViewItemBackgroundSelected" Color="{DynamicResource BasaltAccentSoftColor}" />
+    <SolidColorBrush x:Key="TreeViewItemBackgroundSelectedPointerOver" Color="{DynamicResource BasaltAccentSoftColor}" />
+    <SolidColorBrush x:Key="TreeViewItemBackgroundSelectedPressed" Color="{DynamicResource BasaltAccentSoftColor}" />
+    <SolidColorBrush x:Key="TreeViewItemForeground" Color="{DynamicResource BasaltTextSecondaryColor}" />
+    <SolidColorBrush x:Key="TreeViewItemForegroundPointerOver" Color="{DynamicResource BasaltTextPrimaryColor}" />
+    <SolidColorBrush x:Key="TreeViewItemForegroundSelected" Color="{DynamicResource BasaltTextPrimaryColor}" />
+    <SolidColorBrush x:Key="TreeViewItemForegroundSelectedPointerOver" Color="{DynamicResource BasaltTextPrimaryColor}" />
+    <SolidColorBrush x:Key="TextControlBackground" Color="{DynamicResource BasaltBackgroundColor}" />
+    <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="{DynamicResource BasaltBackgroundColor}" />
+    <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="{DynamicResource BasaltBackgroundColor}" />
+    <SolidColorBrush x:Key="TextControlBorderBrush" Color="{DynamicResource BasaltBorderColor}" />
+    <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="{DynamicResource BasaltBorderColor}" />
+    <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="{DynamicResource BasaltAccentColor}" />
+    <SolidColorBrush x:Key="TextControlForeground" Color="{DynamicResource BasaltTextPrimaryColor}" />
+    <SolidColorBrush x:Key="TextControlForegroundPointerOver" Color="{DynamicResource BasaltTextPrimaryColor}" />
+    <SolidColorBrush x:Key="TextControlForegroundFocused" Color="{DynamicResource BasaltTextPrimaryColor}" />
+    <SolidColorBrush x:Key="TextControlPlaceholderForeground" Color="{DynamicResource BasaltTextMutedColor}" />
+    <SolidColorBrush x:Key="TextControlPlaceholderForegroundPointerOver" Color="{DynamicResource BasaltTextMutedColor}" />
+    <SolidColorBrush x:Key="TextControlPlaceholderForegroundFocused" Color="{DynamicResource BasaltTextMutedColor}" />
+    <SolidColorBrush x:Key="AccentButtonBackground" Color="{DynamicResource BasaltAccentColor}" />
+    <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="{DynamicResource BasaltAccentHoverColor}" />
+    <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="{DynamicResource BasaltAccentColor}" />
+    <SolidColorBrush x:Key="AccentButtonBackgroundDisabled" Color="{DynamicResource BasaltAccentColor}" />
+    <SolidColorBrush x:Key="AccentButtonForeground" Color="{DynamicResource BasaltOnAccentColor}" />
+    <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="{DynamicResource BasaltOnAccentColor}" />
+    <SolidColorBrush x:Key="AccentButtonForegroundPressed" Color="{DynamicResource BasaltOnAccentColor}" />
+    <SolidColorBrush x:Key="AccentButtonForegroundDisabled" Color="{DynamicResource BasaltOnAccentColor}" />
+    <SolidColorBrush x:Key="AccentButtonBorderBrush" Color="{DynamicResource BasaltAccentColor}" />
+    <SolidColorBrush x:Key="AccentButtonBorderBrushPointerOver" Color="{DynamicResource BasaltAccentHoverColor}" />
+    <SolidColorBrush x:Key="AccentButtonBorderBrushPressed" Color="{DynamicResource BasaltAccentColor}" />
+    <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillChecked" Color="{DynamicResource BasaltAccentColor}" />
+    <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPointerOver" Color="{DynamicResource BasaltAccentHoverColor}" />
+    <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPressed" Color="{DynamicResource BasaltAccentColor}" />
+    <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeChecked" Color="{DynamicResource BasaltAccentColor}" />
+    <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeCheckedPointerOver" Color="{DynamicResource BasaltAccentHoverColor}" />
+    <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeCheckedPressed" Color="{DynamicResource BasaltAccentColor}" />
+    <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundChecked" Color="{DynamicResource BasaltOnAccentColor}" />
+    <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundCheckedPointerOver" Color="{DynamicResource BasaltOnAccentColor}" />
+    <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundCheckedPressed" Color="{DynamicResource BasaltOnAccentColor}" />
+    <SolidColorBrush x:Key="SystemControlHighlightListAccentLowBrush" Color="{DynamicResource BasaltAccentSoftColor}" />
+    <SolidColorBrush x:Key="SystemControlHighlightListAccentMediumBrush" Color="{DynamicResource BasaltAccentSoftColor}" />
+    <SolidColorBrush x:Key="SystemControlHighlightListLowBrush" Color="{DynamicResource BasaltSurfaceAltColor}" />
+  </Styles.Resources>
+
   <!-- Resting typography of the app; views override it only where the reading surface needs it. -->
   <Style Selector="Window">
-    <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI, SF Pro Text, Helvetica Neue, Arial" />
-    <Setter Property="FontSize" Value="14" />
+    <Setter Property="FontFamily" Value="{StaticResource BasaltFontUi}" />
+    <Setter Property="FontSize" Value="{DynamicResource BasaltFontSizeBody}" />
     <Setter Property="Foreground" Value="{DynamicResource BasaltTextPrimaryBrush}" />
     <Setter Property="Background" Value="{DynamicResource BasaltBackgroundBrush}" />
   </Style>
+  <Style Selector="TopLevel">
+    <Setter Property="FontFamily" Value="{StaticResource BasaltFontUi}" />
+  </Style>
 
+  <!-- Section labels ("LINKED MENTIONS · 3", "PINNED"). -->
+  <Style Selector="TextBlock.caption">
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="LetterSpacing" Value="0.6" />
+    <Setter Property="Foreground" Value="{DynamicResource BasaltTextMutedBrush}" />
+  </Style>
+  <Style Selector="TextBlock.muted">
+    <Setter Property="FontSize" Value="{StaticResource BasaltFontSizeSmall}" />
+    <Setter Property="Foreground" Value="{DynamicResource BasaltTextMutedBrush}" />
+  </Style>
+  <Style Selector="TextBlock.page-title">
+    <Setter Property="FontSize" Value="22" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="Foreground" Value="{DynamicResource BasaltTextPrimaryBrush}" />
+  </Style>
+  <Style Selector="TextBlock.mono">
+    <Setter Property="FontFamily" Value="{StaticResource BasaltFontMono}" />
+  </Style>
+  <Style Selector="TextBox.mono">
+    <Setter Property="FontFamily" Value="{StaticResource BasaltFontMono}" />
+  </Style>
+
+  <!-- Buttons: Secondary (default), Primary (accent), Quiet and Destructive. -->
   <Style Selector="Button">
-    <Setter Property="Background" Value="{DynamicResource BasaltSurfaceBrush}" />
+    <Setter Property="Background" Value="{DynamicResource BasaltBackgroundBrush}" />
     <Setter Property="BorderBrush" Value="{DynamicResource BasaltBorderBrush}" />
     <Setter Property="BorderThickness" Value="1" />
     <Setter Property="CornerRadius" Value="{StaticResource BasaltRadiusM}" />
-    <Setter Property="Padding" Value="12,6" />
+    <Setter Property="Padding" Value="14,6" />
     <Setter Property="MinHeight" Value="34" />
-    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="FontWeight" Value="Medium" />
     <Setter Property="Foreground" Value="{DynamicResource BasaltTextPrimaryBrush}" />
-  </Style>
-  <Style Selector="Button:pointerover">
-    <Setter Property="Background" Value="{DynamicResource BasaltSurfaceAltBrush}" />
-    <Setter Property="BorderBrush" Value="{DynamicResource BasaltBorderBrush}" />
-  </Style>
-  <Style Selector="Button:pressed">
-    <Setter Property="Background" Value="{DynamicResource BasaltAccentSoftBrush}" />
-    <Setter Property="BorderBrush" Value="{DynamicResource BasaltAccentBrush}" />
   </Style>
   <Style Selector="Button:disabled">
     <Setter Property="Opacity" Value="0.45" />
+  </Style>
+  <Style Selector="Button:disabled /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{Binding $parent[Button].Background}" />
+    <Setter Property="Foreground" Value="{Binding $parent[Button].Foreground}" />
+    <Setter Property="BorderBrush" Value="{Binding $parent[Button].BorderBrush}" />
   </Style>
 
   <Style Selector="Button.accent">
     <Setter Property="Background" Value="{DynamicResource BasaltAccentBrush}" />
     <Setter Property="BorderBrush" Value="{DynamicResource BasaltAccentBrush}" />
     <Setter Property="Foreground" Value="{DynamicResource BasaltOnAccentBrush}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
   </Style>
-  <Style Selector="Button.accent:pointerover">
+  <Style Selector="Button.accent:pointerover /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="{DynamicResource BasaltAccentHoverBrush}" />
     <Setter Property="BorderBrush" Value="{DynamicResource BasaltAccentHoverBrush}" />
     <Setter Property="Foreground" Value="{DynamicResource BasaltOnAccentBrush}" />
   </Style>
-  <Style Selector="Button.accent:pressed">
+  <Style Selector="Button.accent:pressed /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="{DynamicResource BasaltAccentBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource BasaltOnAccentBrush}" />
   </Style>
 
+  <Style Selector="Button.quiet">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Foreground" Value="{DynamicResource BasaltAccentBrush}" />
+  </Style>
+  <Style Selector="Button.quiet:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource BasaltAccentSoftBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource BasaltAccentBrush}" />
+  </Style>
+
+  <Style Selector="Button.danger">
+    <Setter Property="Background" Value="{DynamicResource BasaltDangerBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BasaltDangerBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource BasaltOnAccentBrush}" />
+  </Style>
+  <Style Selector="Button.danger:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource BasaltDangerBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BasaltDangerBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource BasaltOnAccentBrush}" />
+    <Setter Property="Opacity" Value="0.9" />
+  </Style>
+
+  <!-- Ribbon and toolbar icons; .active marks the panel on show. -->
   <Style Selector="Button.icon">
-    <Setter Property="Width" Value="40" />
-    <Setter Property="Height" Value="40" />
+    <Setter Property="Width" Value="36" />
+    <Setter Property="Height" Value="36" />
     <Setter Property="Padding" Value="0" />
     <Setter Property="MinHeight" Value="0" />
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="BorderThickness" Value="0" />
-    <Setter Property="CornerRadius" Value="10" />
+    <Setter Property="CornerRadius" Value="8" />
     <Setter Property="HorizontalContentAlignment" Value="Center" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
     <Setter Property="Foreground" Value="{DynamicResource BasaltTextSecondaryBrush}" />
   </Style>
-  <Style Selector="Button.icon:pointerover">
+  <Style Selector="Button.icon:pointerover /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="{DynamicResource BasaltSurfaceAltBrush}" />
     <Setter Property="Foreground" Value="{DynamicResource BasaltTextPrimaryBrush}" />
+  </Style>
+  <Style Selector="Button.icon.active">
+    <Setter Property="Background" Value="{DynamicResource BasaltAccentSoftBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource BasaltAccentBrush}" />
+  </Style>
+  <Style Selector="Button.icon.active:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource BasaltAccentSoftBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource BasaltAccentBrush}" />
   </Style>
   <Style Selector="Button.icon.accent">
     <Setter Property="Background" Value="{DynamicResource BasaltAccentBrush}" />
     <Setter Property="Foreground" Value="{DynamicResource BasaltOnAccentBrush}" />
+  </Style>
+  <Style Selector="Button.small">
+    <Setter Property="Width" Value="28" />
+    <Setter Property="Height" Value="28" />
+    <Setter Property="CornerRadius" Value="{StaticResource BasaltRadiusM}" />
   </Style>
 
   <Style Selector="Button.pill">
@@ -75,7 +198,7 @@
     <Setter Property="FontWeight" Value="Normal" />
     <Setter Property="Foreground" Value="{DynamicResource BasaltTextSecondaryBrush}" />
   </Style>
-  <Style Selector="Button.pill:pointerover">
+  <Style Selector="Button.pill:pointerover /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="{DynamicResource BasaltSurfaceAltBrush}" />
     <Setter Property="Foreground" Value="{DynamicResource BasaltTextPrimaryBrush}" />
   </Style>
@@ -89,9 +212,63 @@
     <Setter Property="FontWeight" Value="Normal" />
     <Setter Property="Foreground" Value="{DynamicResource BasaltTextSecondaryBrush}" />
   </Style>
-  <Style Selector="Button.subtle:pointerover">
+  <Style Selector="Button.subtle:pointerover /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="{DynamicResource BasaltSurfaceAltBrush}" />
     <Setter Property="Foreground" Value="{DynamicResource BasaltTextPrimaryBrush}" />
+  </Style>
+
+  <!-- Underlined tabs of the right sidebar ("Links · Outline · History"). -->
+  <Style Selector="Button.tab">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0,0,0,2" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="CornerRadius" Value="0" />
+    <Setter Property="MinHeight" Value="36" />
+    <Setter Property="Padding" Value="8,6" />
+    <Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="Foreground" Value="{DynamicResource BasaltTextSecondaryBrush}" />
+  </Style>
+  <Style Selector="Button.tab:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BasaltBorderBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource BasaltTextPrimaryBrush}" />
+  </Style>
+  <Style Selector="Button.tab.active">
+    <Setter Property="BorderBrush" Value="{DynamicResource BasaltAccentBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource BasaltTextPrimaryBrush}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+  <Style Selector="Button.tab.active:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="BorderBrush" Value="{DynamicResource BasaltAccentBrush}" />
+  </Style>
+
+  <!-- Segmented switch ("Source · Read", "Keep · Drop"). -->
+  <Style Selector="Border.segmented">
+    <Setter Property="Background" Value="{DynamicResource BasaltSurfaceAltBrush}" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="Padding" Value="3" />
+  </Style>
+  <Style Selector="Border.segmented Button">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="MinHeight" Value="26" />
+    <Setter Property="Padding" Value="12,3" />
+    <Setter Property="CornerRadius" Value="6" />
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="Foreground" Value="{DynamicResource BasaltTextSecondaryBrush}" />
+  </Style>
+  <Style Selector="Border.segmented Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource BasaltTextPrimaryBrush}" />
+  </Style>
+  <Style Selector="Border.segmented Button.checked">
+    <Setter Property="Background" Value="{DynamicResource BasaltBackgroundBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource BasaltTextPrimaryBrush}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+  <Style Selector="Border.segmented Button.checked:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource BasaltBackgroundBrush}" />
   </Style>
 
   <Style Selector="Button.close-tab">
@@ -105,13 +282,114 @@
     <Setter Property="FontSize" Value="12" />
     <Setter Property="Foreground" Value="{DynamicResource BasaltTextMutedBrush}" />
   </Style>
-  <Style Selector="Button.close-tab:pointerover">
+  <Style Selector="Button.close-tab:pointerover /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="{DynamicResource BasaltSurfaceAltBrush}" />
     <Setter Property="Foreground" Value="{DynamicResource BasaltTextPrimaryBrush}" />
   </Style>
 
-  <Style Selector="TextBox">
+  <!-- Cards, chips and key hints. -->
+  <Style Selector="Border.card">
     <Setter Property="Background" Value="{DynamicResource BasaltSurfaceBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BasaltBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{StaticResource BasaltRadiusL}" />
+    <Setter Property="Padding" Value="14,12" />
+  </Style>
+  <Style Selector="Border.chip">
+    <Setter Property="Background" Value="{DynamicResource BasaltSurfaceAltBrush}" />
+    <Setter Property="CornerRadius" Value="{StaticResource BasaltRadiusPill}" />
+    <Setter Property="Padding" Value="10,3" />
+  </Style>
+  <Style Selector="Border.chip TextBlock">
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="Foreground" Value="{DynamicResource BasaltTextSecondaryBrush}" />
+  </Style>
+  <Style Selector="Border.chip.tag">
+    <Setter Property="Background" Value="{DynamicResource BasaltTagSoftBrush}" />
+  </Style>
+  <Style Selector="Border.chip.tag TextBlock">
+    <Setter Property="Foreground" Value="{DynamicResource BasaltTagBrush}" />
+  </Style>
+  <Style Selector="Border.badge">
+    <Setter Property="Background" Value="{DynamicResource BasaltWarningSoftBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BasaltWarningBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{StaticResource BasaltRadiusS}" />
+    <Setter Property="Padding" Value="5,0" />
+  </Style>
+  <Style Selector="Border.badge TextBlock">
+    <Setter Property="FontSize" Value="10" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="LetterSpacing" Value="0.4" />
+    <Setter Property="Foreground" Value="{DynamicResource BasaltWarningBrush}" />
+  </Style>
+  <Style Selector="Border.kbd">
+    <Setter Property="BorderBrush" Value="{DynamicResource BasaltBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{StaticResource BasaltRadiusS}" />
+    <Setter Property="Padding" Value="6,1" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Border.kbd TextBlock">
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="Foreground" Value="{DynamicResource BasaltTextMutedBrush}" />
+  </Style>
+  <Style Selector="Border.overlay">
+    <Setter Property="Background" Value="{DynamicResource BasaltSurfaceBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BasaltBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="14" />
+    <Setter Property="BoxShadow" Value="0 24 64 0 #40000000" />
+  </Style>
+
+  <!-- Sync states: one pill, always visible (F-015.4). The tone class follows SyncStatusViewModel.Tone. -->
+  <Style Selector="Border.sync-pill">
+    <Setter Property="BorderBrush" Value="{DynamicResource BasaltBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{StaticResource BasaltRadiusPill}" />
+    <Setter Property="Padding" Value="10,2" />
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="Border.sync-pill TextBlock">
+    <Setter Property="Foreground" Value="{DynamicResource BasaltTextSecondaryBrush}" />
+  </Style>
+  <Style Selector="Border.sync-pill Ellipse#Dot">
+    <Setter Property="Fill" Value="{DynamicResource BasaltTextMutedBrush}" />
+  </Style>
+  <Style Selector="Border.sync-pill.success Ellipse#Dot">
+    <Setter Property="Fill" Value="{DynamicResource BasaltSuccessBrush}" />
+  </Style>
+  <Style Selector="Border.sync-pill.accent">
+    <Setter Property="Background" Value="{DynamicResource BasaltAccentSoftBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BasaltAccentSoftBrush}" />
+  </Style>
+  <Style Selector="Border.sync-pill.accent Ellipse#Dot">
+    <Setter Property="Fill" Value="{DynamicResource BasaltAccentBrush}" />
+  </Style>
+  <Style Selector="Border.sync-pill.accent TextBlock">
+    <Setter Property="Foreground" Value="{DynamicResource BasaltAccentBrush}" />
+  </Style>
+  <Style Selector="Border.sync-pill.warning">
+    <Setter Property="Background" Value="{DynamicResource BasaltWarningSoftBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BasaltWarningSoftBrush}" />
+  </Style>
+  <Style Selector="Border.sync-pill.warning TextBlock">
+    <Setter Property="Foreground" Value="{DynamicResource BasaltWarningBrush}" />
+  </Style>
+  <Style Selector="Border.sync-pill.danger">
+    <Setter Property="Background" Value="{DynamicResource BasaltDangerSoftBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BasaltDangerSoftBrush}" />
+  </Style>
+  <Style Selector="Border.sync-pill.danger Ellipse#Dot">
+    <Setter Property="Fill" Value="{DynamicResource BasaltDangerBrush}" />
+  </Style>
+  <Style Selector="Border.sync-pill.danger TextBlock">
+    <Setter Property="Foreground" Value="{DynamicResource BasaltDangerBrush}" />
+  </Style>
+
+  <!-- Inputs. -->
+  <Style Selector="TextBox">
+    <Setter Property="Background" Value="{DynamicResource BasaltBackgroundBrush}" />
     <Setter Property="BorderBrush" Value="{DynamicResource BasaltBorderBrush}" />
     <Setter Property="BorderThickness" Value="1" />
     <Setter Property="CornerRadius" Value="{StaticResource BasaltRadiusM}" />
@@ -119,16 +397,25 @@
     <Setter Property="MinHeight" Value="36" />
     <Setter Property="Foreground" Value="{DynamicResource BasaltTextPrimaryBrush}" />
     <Setter Property="SelectionBrush" Value="{DynamicResource BasaltAccentBrush}" />
+    <Setter Property="SelectionForegroundBrush" Value="{DynamicResource BasaltOnAccentBrush}" />
   </Style>
   <Style Selector="TextBox:focus">
     <Setter Property="BorderBrush" Value="{DynamicResource BasaltAccentBrush}" />
   </Style>
-  <Style Selector="TextBox:pointerover">
-    <Setter Property="BorderBrush" Value="{DynamicResource BasaltBorderBrush}" />
+  <!-- A borderless input that sits inside its own frame (the palette and quick switcher search). -->
+  <Style Selector="TextBox.bare">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="0,6" />
+    <Setter Property="FontSize" Value="17" />
+  </Style>
+  <Style Selector="TextBox.bare /template/ Border#PART_BorderElement">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
   </Style>
 
   <Style Selector="ComboBox">
-    <Setter Property="Background" Value="{DynamicResource BasaltSurfaceBrush}" />
+    <Setter Property="Background" Value="{DynamicResource BasaltBackgroundBrush}" />
     <Setter Property="BorderBrush" Value="{DynamicResource BasaltBorderBrush}" />
     <Setter Property="BorderThickness" Value="1" />
     <Setter Property="CornerRadius" Value="{StaticResource BasaltRadiusM}" />
@@ -136,23 +423,27 @@
     <Setter Property="MinHeight" Value="36" />
     <Setter Property="Foreground" Value="{DynamicResource BasaltTextPrimaryBrush}" />
   </Style>
-  <Style Selector="ComboBox:pointerover">
-    <Setter Property="Background" Value="{DynamicResource BasaltSurfaceAltBrush}" />
-  </Style>
 
   <Style Selector="CheckBox">
     <Setter Property="Foreground" Value="{DynamicResource BasaltTextPrimaryBrush}" />
     <Setter Property="MinHeight" Value="28" />
   </Style>
+  <Style Selector="RadioButton">
+    <Setter Property="Foreground" Value="{DynamicResource BasaltTextPrimaryBrush}" />
+  </Style>
 
+  <!-- Lists and trees. -->
   <Style Selector="ListBox">
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="BorderThickness" Value="0" />
   </Style>
   <Style Selector="ListBoxItem">
-    <Setter Property="Padding" Value="8,6" />
-    <Setter Property="Margin" Value="1,1" />
+    <Setter Property="Padding" Value="10,7" />
+    <Setter Property="Margin" Value="0,1" />
     <Setter Property="CornerRadius" Value="{StaticResource BasaltRadiusM}" />
+  </Style>
+  <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource BasaltSurfaceAltBrush}" />
   </Style>
   <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="{DynamicResource BasaltAccentSoftBrush}" />
@@ -167,24 +458,32 @@
     <Setter Property="BorderThickness" Value="0" />
   </Style>
   <Style Selector="TreeViewItem">
-    <Setter Property="Padding" Value="4,2" />
-    <Setter Property="CornerRadius" Value="{StaticResource BasaltRadiusS}" />
+    <Setter Property="Padding" Value="4,0" />
+    <Setter Property="MinHeight" Value="30" />
+    <Setter Property="CornerRadius" Value="{StaticResource BasaltRadiusM}" />
+    <Setter Property="Foreground" Value="{DynamicResource BasaltTextSecondaryBrush}" />
+  </Style>
+  <Style Selector="TreeViewItem:selected">
+    <Setter Property="Foreground" Value="{DynamicResource BasaltTextPrimaryBrush}" />
   </Style>
 
+  <!-- Document tabs: quiet labels on the chrome, the active one bright. -->
   <Style Selector="ListBox.tabs">
     <Setter Property="Background" Value="Transparent" />
   </Style>
   <Style Selector="ListBox.tabs ListBoxItem">
-    <Setter Property="Padding" Value="12,7" />
-    <Setter Property="Margin" Value="2,4,2,0" />
-    <Setter Property="CornerRadius" Value="8,8,0,0" />
-    <Setter Property="MinHeight" Value="36" />
+    <Setter Property="Padding" Value="12,6" />
+    <Setter Property="Margin" Value="2,5,0,5" />
+    <Setter Property="CornerRadius" Value="{StaticResource BasaltRadiusM}" />
+    <Setter Property="MinHeight" Value="30" />
+    <Setter Property="Foreground" Value="{DynamicResource BasaltTextSecondaryBrush}" />
   </Style>
   <Style Selector="ListBox.tabs ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{DynamicResource BasaltBackgroundBrush}" />
-    <Setter Property="BorderBrush" Value="{DynamicResource BasaltBorderBrush}" />
-    <Setter Property="BorderThickness" Value="1,1,1,0" />
-    <Setter Property="CornerRadius" Value="8,8,0,0" />
+    <Setter Property="Background" Value="{DynamicResource BasaltSurfaceAltBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource BasaltTextPrimaryBrush}" />
+  </Style>
+  <Style Selector="ListBox.tabs ListBoxItem:selected">
+    <Setter Property="FontWeight" Value="SemiBold" />
   </Style>
 
   <Style Selector="GridSplitter">

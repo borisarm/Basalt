@@ -58,7 +58,8 @@ jobs:
         run: |
           export BASALT_SIM_SEED=$RANDOM$RANDOM
           echo "Seed: $BASALT_SIM_SEED" >> "$GITHUB_STEP_SUMMARY"
-          dotnet test --project tests/Basalt.Sync.IntegrationTests --no-build -c Release
+          # Wall-clock tests run in performance-tests; here they would only measure the noisy shared runner.
+          dotnet test --project tests/Basalt.Sync.IntegrationTests --no-build -c Release -- --filter-not-trait Category=Performance
           dotnet test --project tests/Basalt.Domain.Tests --no-build -c Release
 
   live-github:

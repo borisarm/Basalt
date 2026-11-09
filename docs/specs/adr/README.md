@@ -30,3 +30,4 @@ Formato de cada ADR (`NNNN-titulo-en-kebab-case.md`):
 | [0014](0014-json-invalido-se-aparta.md) | Un JSON compartido inválido se aparta antes de sobrescribirlo | Aceptado |
 | [0015](0015-registro-de-casos-de-uso-por-reflexion.md) | Registro de casos de uso por reflexión en la composición | Aceptado |
 | [0016](0016-gramatica-markdown-textmate-mas-colorizador.md) | Resaltado: gramática Markdown de TextMateSharp más colorizador de sintaxis Obsidian | Aceptado |
+| [0018](0018-mutantes-equivalentes-configureawait.md) | Mutantes equivalentes de `ConfigureAwait` excluidos de Stryker | Aceptado |

@@ -3,6 +3,7 @@
     "project": "Basalt.Application.csproj",
     "test-runner": "mtp",
     "thresholds": { "high": 90, "low": 70, "break": 70 },
+    "ignore-methods": [ "ConfigureAwait" ],
     "reporters": [ "cleartext", "html", "json" ]
   }
 }

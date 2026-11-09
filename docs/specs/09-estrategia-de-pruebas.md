@@ -42,7 +42,7 @@ Los tests se escriben **contra el contrato** (puerto o API pública del componen
 - **Avalonia.Headless** para UI con el helper `Headless.RunAsync` sobre xUnit v3 (ADR-0007: `Avalonia.Headless.XUnit` no es compatible con xUnit v3 4.x).
 - **ArchUnitNET** (o NetArchTest) para arquitectura.
 - **Cobertura**: `Microsoft.Testing.Extensions.CodeCoverage` (formato Cobertura) + ReportGenerator.
-- **Stryker.NET** para mutación.
+- **Stryker.NET** para mutación. Los mutantes equivalentes de `ConfigureAwait` no se cuentan (ADR [0018](adr/0018-mutantes-equivalentes-configureawait.md)).
 
 ## 4. Utilidades compartidas (`Basalt.Testing`)
 

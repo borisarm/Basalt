@@ -3,7 +3,6 @@ using System.Text;
 using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Basalt.Application.Abstractions;
 using Basalt.Application.Events;
@@ -110,11 +109,9 @@ public sealed class ReadingViewTests
         window.Show();
 
         await tab.ToggleReadingModeCommand.ExecuteAsync(null);
-        Dispatcher.UIThread.RunJobs();
-        await Task.Delay(50, TestContext.Current.CancellationToken);
-        Dispatcher.UIThread.RunJobs();
-
         var reading = view.FindControl<RenderDocumentView>("ReadingView")!;
+        await Headless.WaitUntilAsync(() => reading.IsVisible && reading.GetVisualDescendants().OfType<Image>().Any(i => i.Source is not null));
+
         reading.IsVisible.Should().BeTrue();
         var texts = reading.GetVisualDescendants().OfType<SelectableTextBlock>().Select(t => t.Inlines!.Count > 0 ? string.Concat(t.Inlines.OfType<Avalonia.Controls.Documents.Run>().Select(r => r.Text)) : t.Text).ToList();
         texts.Should().Contain(["Título", "tarea"]);
@@ -123,8 +120,7 @@ public sealed class ReadingViewTests
         image.Source.Should().NotBeNull();
 
         reading.GetVisualDescendants().OfType<CheckBox>().Single().IsChecked = true;
-        await Task.Delay(50, TestContext.Current.CancellationToken);
-        Dispatcher.UIThread.RunJobs();
+        await Headless.WaitUntilAsync(() => toggle.ReceivedCalls().Any());
 
         await toggle.Received(1).HandleAsync(new ToggleTask(Vault, Note, 1), Arg.Any<CancellationToken>());
         reading.GetVisualDescendants().OfType<CheckBox>().Single().IsChecked.Should().BeTrue();
@@ -132,8 +128,7 @@ public sealed class ReadingViewTests
         view.FindControl<Button>("ReadModeButton")!.Classes.Should().Contain("checked");
         var source = view.FindControl<Button>("SourceModeButton")!;
         source.Command!.Execute(source.CommandParameter);
-        await Task.Delay(50, TestContext.Current.CancellationToken);
-        Dispatcher.UIThread.RunJobs();
+        await Headless.WaitUntilAsync(() => !tab.IsReadingMode);
         tab.IsReadingMode.Should().BeFalse("the Source side of the header switch leaves reading mode");
         source.Classes.Should().Contain("checked");
         window.Close();

@@ -72,8 +72,7 @@ public sealed class ShellViewsTests
 
         var openButton = window.GetVisualDescendants().OfType<Button>().First(b => Equals(b.Content, "Open"));
         Click(openButton);
-        await Task.Delay(50, TestContext.Current.CancellationToken);
-        Dispatcher.UIThread.RunJobs();
+        await Headless.WaitUntilAsync(() => window.GetVisualDescendants().OfType<WorkspaceView>().Any());
 
         await open.Received(1).HandleAsync(new OpenVault(Id), Arg.Any<CancellationToken>());
         window.GetVisualDescendants().OfType<WorkspaceView>().Should().ContainSingle();

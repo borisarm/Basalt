@@ -1,4 +1,5 @@
 using Avalonia.Headless;
+using Avalonia.Threading;
 
 namespace Basalt.UI.Tests;
 
@@ -22,6 +23,22 @@ public static class Headless
     });
 
     public static Task RunAsync(Func<Task> action) => DispatchAsync(action);
+
+    /// <summary>
+    /// Pumps the UI thread until <paramref name="condition"/> holds or 10 s pass, for effects of asynchronous
+    /// commands. A fixed delay before asserting is flaky on slow CI runners; the caller still asserts afterwards.
+    /// </summary>
+    public static async Task WaitUntilAsync(Func<bool> condition)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(10);
+        while (!condition() && DateTime.UtcNow < deadline)
+        {
+            Dispatcher.UIThread.RunJobs();
+            await Task.Delay(20, TestContext.Current.CancellationToken);
+        }
+
+        Dispatcher.UIThread.RunJobs();
+    }
 
     private static async Task DispatchAsync(Func<Task> action)
     {

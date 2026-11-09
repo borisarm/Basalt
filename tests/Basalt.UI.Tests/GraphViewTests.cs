@@ -263,13 +263,7 @@ public sealed class GraphViewTests
             v.Window.MouseDown(InWindow(canvas, point), MouseButton.Left);
             v.Window.MouseUp(InWindow(canvas, point), MouseButton.Left);
 
-            var deadline = DateTime.UtcNow.AddSeconds(10);
-            while (v.Workspace.ActiveFile != P("A.md") && DateTime.UtcNow < deadline)
-            {
-                await Task.Delay(20);
-                await SettleAsync();
-            }
-
+            await Headless.WaitUntilAsync(() => v.Workspace.ActiveFile == P("A.md"));
             v.Workspace.ActiveFile.Should().Be(P("A.md"));
         });
     }

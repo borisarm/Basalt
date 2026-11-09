@@ -135,7 +135,7 @@ public sealed class PanelViewsTests
         var input = overlay.FindControl<TextBox>("Input")!;
         input.Focus();
         v.Window.KeyPress(Key.Enter, RawInputModifiers.None, PhysicalKey.Enter, null);
-        await SettleAsync();
+        await Headless.WaitUntilAsync(() => v.Workspace.ActiveFile == P("B.md"));
         overlay.IsVisible.Should().BeFalse();
         v.Workspace.ActiveFile.Should().Be(P("B.md"));
     });
@@ -242,15 +242,7 @@ public sealed class PanelViewsTests
         var view = v.Window.GetVisualDescendants().OfType<FileExplorerView>().Single();
         var newNote = view.GetVisualDescendants().OfType<Button>().Single(b => b.Name == "NewNote");
         ((IInvokeProvider)ControlAutomationPeer.CreatePeerForElement(newNote)).Invoke();
-
-        // The command creates the file and opens it asynchronously; a fixed delay was flaky on slow runners.
-        var deadline = DateTime.UtcNow.AddSeconds(10);
-        while (v.Workspace.ActiveFile != P("Untitled.md") && DateTime.UtcNow < deadline)
-        {
-            await Task.Delay(20, TestContext.Current.CancellationToken);
-            await SettleAsync();
-        }
-
+        await Headless.WaitUntilAsync(() => v.Workspace.ActiveFile == P("Untitled.md"));
         v.Workspace.ActiveFile.Should().Be(P("Untitled.md"));
         File.Exists(Path.Combine(v.RootLocation, "Untitled.md")).Should().BeTrue();
     });

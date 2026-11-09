@@ -3,5 +3,10 @@
   <PropertyGroup>
     <IsTestProject>true</IsTestProject>
     <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+    <!-- MTP test projects are executables. OutputType must be set here (before the SDK targets),
+         not in Directory.Build.targets: otherwise restore does not download the apphost pack and
+         a clean build fails on Linux with MSB3030 (obj/.../apphost not found). Helper libraries
+         under tests/ override it with <OutputType>Library</OutputType>. -->
+    <OutputType>Exe</OutputType>
   </PropertyGroup>
 </Project>
